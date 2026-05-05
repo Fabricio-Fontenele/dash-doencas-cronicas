@@ -143,6 +143,37 @@ function formatConditionLabel(condition: "DIABETES" | "HYPERTENSION"): string {
   return condition === "DIABETES" ? "Diabetes" : "Hipertensao";
 }
 
+function getConditionPresence(view: DashboardViewDTO) {
+  const diabetesCount =
+    view.conditionDistribution.find((item) => item.label === "Diabetes")?.value ?? 0;
+  const hypertensionCount =
+    view.conditionDistribution.find((item) => item.label === "Hipertensao")?.value ?? 0;
+
+  return {
+    hasDiabetes: diabetesCount > 0,
+    hasHypertension: hypertensionCount > 0,
+    hasMixedConditions: diabetesCount > 0 && hypertensionCount > 0,
+  };
+}
+
+function getConditionContextLabel(view: DashboardViewDTO): string {
+  const { hasDiabetes, hasHypertension, hasMixedConditions } = getConditionPresence(view);
+
+  if (hasMixedConditions) {
+    return "diabetes e hipertensao";
+  }
+
+  if (hasDiabetes) {
+    return "diabetes";
+  }
+
+  if (hasHypertension) {
+    return "hipertensao";
+  }
+
+  return "condicoes cronicas";
+}
+
 function removeFilterValue(
   filters: DashboardFiltersDTO,
   key: keyof DashboardFiltersDTO,
@@ -435,12 +466,23 @@ function CoverageDeck({ items }: { items: DashboardCoverageItemDTO[] }) {
   );
 }
 
+function getVisibleCoverageItems(view: DashboardViewDTO): DashboardCoverageItemDTO[] {
+  const { hasDiabetes } = getConditionPresence(view);
+
+  return view.careCoverage.filter((item) => hasDiabetes || item.label !== "HbA1c recente");
+}
+
 export default async function Home({ searchParams }: HomePageProps) {
   const params = (await searchParams) ?? {};
   const filters = parseFilters(params);
   const dashboardData = await loadDashboardData(filters);
   const summaryCards = getSummaryCards(dashboardData.view.summary);
   const activeChips = getActiveFilterChips(dashboardData.view.appliedFilters);
+  const { hasMixedConditions, hasDiabetes, hasHypertension } = getConditionPresence(
+    dashboardData.view,
+  );
+  const conditionContextLabel = getConditionContextLabel(dashboardData.view);
+  const visibleCoverageItems = getVisibleCoverageItems(dashboardData.view);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#eff4df_0%,#f6f0e4_36%,#eadfc9_100%)]">
@@ -453,11 +495,11 @@ export default async function Home({ searchParams }: HomePageProps) {
                 Sala de situacao cronica
               </span>
               <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-tight text-accent-strong sm:text-5xl">
-                Dashboard quantitativa com filtros facetados e leitura comparativa do territorio.
+                Dashboard quantitativa com filtros facetados e leitura territorial do recorte importado.
               </h1>
               <p className="mt-4 max-w-3xl text-base leading-7 text-muted">
-                Os CSVs sao convertidos em recortes anonimizados. Aqui o foco e volume, distribuicao,
-                concorrencia entre grupos e lacunas assistenciais, sem qualquer dado nominal.
+                Os CSVs sao convertidos em recortes anonimizados. Aqui o foco e volume,
+                distribuicao e lacunas assistenciais em {conditionContextLabel}, sem qualquer dado nominal.
               </p>
             </div>
 
@@ -638,28 +680,32 @@ export default async function Home({ searchParams }: HomePageProps) {
               ))}
             </section>
 
-            <section className="grid gap-4 2xl:grid-cols-[1.1fr_0.9fr]">
+            <section
+              className={`grid gap-4 ${hasMixedConditions ? "2xl:grid-cols-[1.1fr_0.9fr]" : "2xl:grid-cols-1"}`}
+            >
               <HorizontalBars
                 title="Territorio"
-                subtitle="Bairros com maior concentracao"
+                subtitle="Bairros com mais pessoas acompanhadas"
                 items={dashboardData.view.topNeighborhoods}
               />
-              <ComparisonColumns
-                title="Condicao"
-                subtitle="Diabetes e hipertensao em confronto"
-                items={dashboardData.view.conditionDistribution}
-              />
+              {hasMixedConditions ? (
+                <ComparisonColumns
+                  title="Condicao"
+                  subtitle="Distribuicao entre diabetes e hipertensao"
+                  items={dashboardData.view.conditionDistribution}
+                />
+              ) : null}
             </section>
 
             <section className="grid gap-4 2xl:grid-cols-[0.9fr_1.1fr]">
               <ComparisonColumns
                 title="Sexo"
-                subtitle="Homens e mulheres em concorrencia direta"
+                subtitle="Distribuicao por sexo no recorte atual"
                 items={dashboardData.view.sexDistribution}
               />
               <HorizontalBars
                 title="Faixa etaria"
-                subtitle="Onde o volume se acumula"
+                subtitle="Distribuicao por faixa etaria"
                 items={dashboardData.view.ageGroupDistribution}
                 tone="bg-[#b35c2e]"
               />
@@ -668,10 +714,34 @@ export default async function Home({ searchParams }: HomePageProps) {
             <section className="grid gap-4 2xl:grid-cols-[1fr_1fr]">
               <ComparisonColumns
                 title="Raca/cor"
-                subtitle="Distribuicao declarada no recorte"
+                subtitle="Distribuicao por raca/cor"
                 items={dashboardData.view.raceColorDistribution}
               />
-              <CoverageDeck items={dashboardData.view.careCoverage} />
+              <CoverageDeck items={visibleCoverageItems} />
+            </section>
+
+            <section className={SECTION_CLASS_NAME}>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
+                Leitura do recorte
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold text-accent-strong">
+                {hasMixedConditions
+                  ? "Panorama integrado das duas linhas de cuidado"
+                  : hasDiabetes
+                    ? "Panorama especifico da linha de cuidado em diabetes"
+                    : hasHypertension
+                      ? "Panorama especifico da linha de cuidado em hipertensao"
+                      : "Panorama do recorte importado"}
+              </h2>
+              <p className="mt-3 max-w-4xl text-sm leading-7 text-muted">
+                {hasMixedConditions
+                  ? "O recorte atual combina pessoas de diabetes e hipertensao. Por isso a dashboard destaca comparacoes entre condicoes e mantem todos os indicadores compartilhados e especificos."
+                  : hasDiabetes
+                    ? "Como o recorte atual traz apenas diabetes, a dashboard prioriza distribuicoes demograficas, bairros com maior volume e indicadores clinicos relevantes para essa linha, incluindo HbA1c."
+                    : hasHypertension
+                      ? "Como o recorte atual traz apenas hipertensao, a dashboard remove comparacoes desnecessarias entre condicoes e concentra a leitura em pressao arterial, acompanhamento e distribuicoes do territorio."
+                      : "Quando houver dados no recorte, a narrativa da dashboard se ajusta automaticamente ao perfil importado."}
+              </p>
             </section>
           </div>
         </div>
