@@ -13,6 +13,7 @@ import {
 import { type UploadHistoryDTO } from "@/application/dtos/UploadHistoryDTO";
 import { GenerateDashboardViewUseCase } from "@/application/use-cases/dashboard/GenerateDashboardViewUseCase";
 import { ListRecentUploadsUseCase } from "@/application/use-cases/upload/ListRecentUploadsUseCase";
+import { InteractivePieChart } from "@/components/dashboard/interactive-pie-chart";
 import { AGE_GROUPS } from "@/domain/value-objects/AgeGroup";
 import { PrismaAggregateBucketRepository } from "@/infrastructure/database/repositories/PrismaAggregateBucketRepository";
 import { PrismaUploadRepository } from "@/infrastructure/database/repositories/PrismaUploadRepository";
@@ -980,14 +981,15 @@ export default async function Home({ searchParams }: HomePageProps) {
             </section>
 
             <section className="grid gap-4 2xl:grid-cols-[0.9fr_1.1fr]">
-              <PieChart
+              <InteractivePieChart
                 title="Sexo"
                 subtitle="Composicao do recorte por sexo"
                 items={dashboardData.view.sexDistribution.map((item) => ({
-                  ...item,
                   label: normalizeSexLabel(item.label),
+                  value: item.value,
+                  color: getSexColor(normalizeSexLabel(item.label)),
                 }))}
-                getColor={(label) => getSexColor(normalizeSexLabel(label))}
+                totalLabel="Total"
               />
               <HorizontalBars
                 title="Faixa etaria"
