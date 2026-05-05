@@ -414,11 +414,13 @@ function PieChart({
   subtitle,
   items,
   getColor,
+  donut = false,
 }: {
   title: string;
   subtitle: string;
   items: DashboardBarChartItemDTO[];
   getColor: (label: string) => string;
+  donut?: boolean;
 }) {
   const total = items.reduce((sum, item) => sum + item.value, 0);
 
@@ -464,7 +466,11 @@ function PieChart({
             style={{
               background: `conic-gradient(${gradientStops})`,
             }}
-          />
+          >
+            {donut ? (
+              <div className="absolute inset-5 rounded-full bg-surface shadow-[inset_0_0_0_1px_rgba(95,109,95,0.12)]" />
+            ) : null}
+          </div>
           <div className="mt-4 text-center">
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
               Total
@@ -526,6 +532,16 @@ function getSexColor(label: string): string {
   if (normalized.includes("nao inform")) return "#a8a29e";
 
   return "#8b3d45";
+}
+
+function normalizeSexLabel(label: string): string {
+  const normalized = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+  if (normalized === "m" || normalized.includes("mascul")) return "Masculino";
+  if (normalized === "f" || normalized.includes("femin")) return "Feminino";
+  if (normalized.includes("nao inform")) return "Nao informado";
+
+  return label;
 }
 
 function CoverageDeck({ items }: { items: DashboardCoverageItemDTO[] }) {
@@ -910,8 +926,11 @@ export default async function Home({ searchParams }: HomePageProps) {
               <PieChart
                 title="Sexo"
                 subtitle="Composicao do recorte por sexo"
-                items={dashboardData.view.sexDistribution}
-                getColor={getSexColor}
+                items={dashboardData.view.sexDistribution.map((item) => ({
+                  ...item,
+                  label: normalizeSexLabel(item.label),
+                }))}
+                getColor={(label) => getSexColor(normalizeSexLabel(label))}
               />
               <HorizontalBars
                 title="Faixa etaria"
@@ -927,6 +946,7 @@ export default async function Home({ searchParams }: HomePageProps) {
                 subtitle="Composicao do recorte por raca/cor"
                 items={dashboardData.view.raceColorDistribution}
                 getColor={getRaceColor}
+                donut
               />
               <CoverageDeck items={visibleCoverageItems} />
             </section>
