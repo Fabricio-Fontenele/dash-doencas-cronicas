@@ -409,7 +409,7 @@ function ComparisonColumns({
   );
 }
 
-function DonutChart({
+function PieChart({
   title,
   subtitle,
   items,
@@ -464,16 +464,14 @@ function DonutChart({
             style={{
               background: `conic-gradient(${gradientStops})`,
             }}
-          >
-            <div className="absolute inset-5 rounded-full bg-surface shadow-[inset_0_0_0_1px_rgba(95,109,95,0.12)]" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
-                Total
-              </span>
-              <span className="mt-1 text-4xl font-semibold tracking-tight text-accent-strong">
-                {total}
-              </span>
-            </div>
+          />
+          <div className="mt-4 text-center">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+              Total
+            </span>
+            <p className="mt-1 text-3xl font-semibold tracking-tight text-accent-strong">
+              {total}
+            </p>
           </div>
         </div>
 
@@ -487,14 +485,14 @@ function DonutChart({
                 key={item.label}
                 className="flex items-center justify-between gap-4 rounded-[1.15rem] border border-border/70 bg-white/80 px-4 py-3"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                   <span
-                    className="block size-3 rounded-full"
+                    className="block size-3 shrink-0 rounded-full"
                     style={{ backgroundColor: color }}
                   />
-                  <span className="text-sm font-medium text-accent-strong">{item.label}</span>
+                  <span className="truncate text-sm font-medium text-accent-strong">{item.label}</span>
                 </div>
-                <div className="text-right">
+                <div className="shrink-0 text-right">
                   <p className="text-sm font-semibold text-accent-strong">{percentage}%</p>
                   <p className="text-xs text-muted">{item.value} pessoas</p>
                 </div>
@@ -909,7 +907,7 @@ export default async function Home({ searchParams }: HomePageProps) {
             </section>
 
             <section className="grid gap-4 2xl:grid-cols-[0.9fr_1.1fr]">
-              <DonutChart
+              <PieChart
                 title="Sexo"
                 subtitle="Composicao do recorte por sexo"
                 items={dashboardData.view.sexDistribution}
@@ -924,7 +922,7 @@ export default async function Home({ searchParams }: HomePageProps) {
             </section>
 
             <section className="grid gap-4 2xl:grid-cols-[1fr_1fr]">
-              <DonutChart
+              <PieChart
                 title="Raca/cor"
                 subtitle="Composicao do recorte por raca/cor"
                 items={dashboardData.view.raceColorDistribution}
