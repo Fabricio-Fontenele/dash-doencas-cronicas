@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dashboard de Acompanhamento Crônico
 
-## Getting Started
+Sistema web para importar relatórios de diabetes e hipertensão, persistir os dados em PostgreSQL e apresentar um dashboard com filtros, gráficos e tabela de pacientes.
 
-First, run the development server:
+## Estado atual
+
+O projeto já possui:
+
+- upload funcional de arquivos `.csv`, `.xls` e `.xlsx`
+- parsing server-side com detecção de diabetes/hipertensão
+- persistência em PostgreSQL via Prisma
+- datasets fictícios robustos para demo
+- dashboard inicial com:
+  - cards de resumo
+  - filtros reais
+  - gráficos de apresentação
+  - tabela paginada
+
+Resumo mais completo em [docs/progresso_dashboard_cronico.md](/home/fabricio/Documentos/uespi/prototipo-pet/docs/progresso_dashboard_cronico.md).
+
+## Como rodar
+
+1. Suba o banco:
+
+```bash
+npm run db:up
+```
+
+2. Aplique o schema:
+
+```bash
+npm run db:push
+```
+
+3. Rode a aplicação:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Acesse:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Arquivos de demo
 
-## Learn More
+Os datasets fictícios para teste ficam em [datasets](/home/fabricio/Documentos/uespi/prototipo-pet/datasets).
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts úteis
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run db:up
+npm run db:down
+npm run db:logs
+npm run db:push
+npm run lint
+npm run test
+npm run build
+```
