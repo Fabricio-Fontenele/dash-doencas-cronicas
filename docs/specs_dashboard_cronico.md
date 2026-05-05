@@ -1,14 +1,16 @@
-# 📊 Dashboard de Acompanhamento — Diabetes & Hipertensão
+# 📊 Dashboard Quantitativo de Acompanhamento — Diabetes & Hipertensão
 **Especificação Técnica e Funcional do Projeto**
-> Versão 1.2 · Next.js 15 · Clean Architecture · SOLID · PostgreSQL
+> Versão 1.3 · Next.js 15 · Clean Architecture · SOLID · PostgreSQL
 
 ---
 
 ## 1. Visão Geral do Produto
 
-Sistema web que permite equipes de saúde da Atenção Básica carregar relatórios de acompanhamento exportados do prontuário (CSV/XLS) e visualizar dashboards interativos com indicadores de qualidade do cuidado para pacientes diabéticos e hipertensos.
+Sistema web que permite equipes de saúde da Atenção Básica carregar relatórios de acompanhamento exportados do prontuário (CSV/XLS) e visualizar dashboards quantitativos com indicadores de qualidade do cuidado para pacientes diabéticos e hipertensos.
 
-**Objetivo central:** transformar dados brutos em informação acionável — quem está sem atendimento, quem está com exames em atraso, e como está a cobertura geral da equipe.
+**Objetivo central:** transformar dados brutos em informação acionável agregada — quantas pessoas estão sem atendimento, como se distribuem os atrasos por sexo, faixa etária, bairro e condição, e como está a cobertura geral da equipe.
+
+> **Diretriz funcional obrigatória:** a camada de apresentação **não deve expor nomes, IDs ou qualquer visualização individual de pacientes**. O produto é orientado a métricas quantitativas, agregações e comparativos. Registros individuais podem existir internamente apenas para cálculo dos indicadores, nunca para exibição na dashboard.
 
 ---
 
@@ -18,7 +20,7 @@ Sistema web que permite equipes de saúde da Atenção Básica carregar relatór
 | Atributo | Descrição |
 |---|---|
 | Função principal | Exportar relatórios do prontuário e carregar no dashboard |
-| Necessidade | Ver rapidamente quais pacientes estão sem acompanhamento |
+| Necessidade | Ver rapidamente quantos pacientes estão sem acompanhamento e em quais recortes isso se concentra |
 | Acesso | Upload de CSV + visualização completa |
 | Frequência | Semanal ou quinzenal |
 
@@ -26,7 +28,7 @@ Sistema web que permite equipes de saúde da Atenção Básica carregar relatór
 | Atributo | Descrição |
 |---|---|
 | Função principal | Consultar indicadores para planejamento de agenda |
-| Necessidade | Identificar pacientes prioritários para consulta |
+| Necessidade | Identificar grupos prioritários para consulta e reorganização da agenda |
 | Acesso | Somente leitura — sem upload |
 
 ### 📋 Gestor / Coordenador — Visão Gerencial
@@ -40,7 +42,7 @@ Sistema web que permite equipes de saúde da Atenção Básica carregar relatór
 | Atributo | Descrição |
 |---|---|
 | Função principal | Verificar pacientes da sua microárea sem visita domiciliar |
-| Necessidade | Lista filtrada automaticamente pelo seu bairro |
+| Necessidade | Entender quantitativamente o volume de pacientes da sua microárea sem visita domiciliar recente |
 | Acesso | Somente leitura — visão simplificada |
 
 ---
@@ -55,7 +57,7 @@ Sistema web que permite equipes de saúde da Atenção Básica carregar relatór
 - Suporte a encoding ISO-8859-1 e UTF-8, separador ponto e vírgula
 - Validação de colunas obrigatórias antes de persistir no banco
 - Histórico de uploads salvo no PostgreSQL: data, arquivo, tipo, total de registros, usuário
-- Dados persistem entre sessões — equipe inteira vê os dados mais recentes
+- Dados persistem entre sessões — equipe inteira vê os dados agregados mais recentes
 
 > ⚠️ **LGPD:** Nenhum dado de paciente deve trafegar para serviços externos. Toda a cadeia (Next.js + PostgreSQL) deve rodar em infraestrutura controlada pela unidade ou secretaria.
 
@@ -99,6 +101,14 @@ Sistema web que permite equipes de saúde da Atenção Básica carregar relatór
 | Sem medição de PA recente | Data vazia ou > 6 meses |
 | Sem HbA1c recente *(Diabetes)* | Data vazia ou > 12 meses |
 
+#### Perguntas que a Dashboard Deve Responder
+
+- Quantas pessoas com diabetes existem no recorte atual?
+- Quantas mulheres com diabetes existem em determinado bairro?
+- Quantas pessoas entre 60–79 anos com hipertensão estão sem atendimento médico há mais de 6 meses?
+- Como a cobertura de visitas domiciliares varia por sexo, faixa etária, bairro e condição?
+- Como os indicadores mudaram entre uploads ao longo do tempo?
+
 #### Gráficos
 | Gráfico | Tipo | Descrição |
 |---|---|---|
@@ -109,29 +119,39 @@ Sistema web que permite equipes de saúde da Atenção Básica carregar relatór
 | Diabetes vs Hipertensão | Barras agrupadas | Comparativo quando "Todos" |
 | Cobertura de visitas | Gauge | % com visita < 3 meses |
 | Evolução histórica | Linha | Comparativo entre uploads ao longo do tempo |
+| Cruzamento sexo × condição | Barras empilhadas | Distribuição por sexo dentro de diabetes e hipertensão |
+| Cruzamento faixa etária × condição | Heatmap ou barras agrupadas | Distribuição por faixa etária para cada condição |
+| Ranking de microáreas críticas | Barras horizontais | Recortes com maior concentração de atraso |
 
 ---
 
-### 3.4 Tabela de Pacientes
+### 3.4 Visualizações Quantitativas Consolidadas
 
-- Listagem paginada com todos os pacientes após filtros aplicados
-- Colunas configuráveis (mostrar/ocultar)
-- Ordenação por qualquer coluna
-- Busca textual por nome ou ID
-- Destaque visual para pacientes com indicadores críticos
-- Clicar em card de alerta pré-filtra a tabela
-- Exportação da seleção para CSV ou Excel
+- A dashboard principal **não possui tabela individual de pacientes**
+- Todas as visualizações devem ser agregadas por recortes populacionais
+- Cards e gráficos podem interagir entre si para refinar o contexto quantitativo
+- Exportações devem conter apenas:
+  - tabelas consolidadas
+  - rankings por bairro/microárea
+  - comparativos entre períodos
+  - indicadores por condição, sexo, faixa etária e demais filtros
+- Não deve existir:
+  - busca por nome
+  - busca por ID
+  - listagem nominal
+  - exportação individual
+  - qualquer visualização que permita inferência direta de pessoa específica
 
 ---
 
 ### 3.5 Autenticação e Controle de Acesso
 
-| Perfil | Upload | Dashboard | Tabela | Exportar | Configurações |
+| Perfil | Upload | Dashboard | Visualização nominal | Exportar agregado | Configurações |
 |---|---|---|---|---|---|
-| Enfermeiro(a) | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Médico(a) | ❌ | ✅ | ✅ | ✅ | ❌ |
-| Gestor | ❌ | ✅ | ✅ | ✅ | ✅ |
-| ACS | ❌ | ✅ simplificado | ✅ só seu bairro | ❌ | ❌ |
+| Enfermeiro(a) | ✅ | ✅ | ❌ | ✅ | ❌ |
+| Médico(a) | ❌ | ✅ | ❌ | ✅ | ❌ |
+| Gestor | ❌ | ✅ | ❌ | ✅ | ✅ |
+| ACS | ❌ | ✅ simplificado | ❌ | ❌ | ❌ |
 
 - Autenticação via **NextAuth.js v5** com credenciais (e-mail + senha)
 - Senhas com hash **bcrypt** no PostgreSQL
@@ -162,6 +182,8 @@ O projeto é dividido em **quatro camadas independentes**. Cada camada só conhe
 ```
 
 > **Regra de ouro:** o Domain nunca importa nada de Infrastructure, Application ou Presentation. A dependência sempre aponta para dentro.
+>
+> **Regra funcional de apresentação:** qualquer camada em `app/`, `components/` ou `src/presentation/` deve receber e renderizar apenas estruturas agregadas para a dashboard. Dados individuais podem existir em `domain`, `application` e `infrastructure` apenas como suporte aos cálculos.
 
 ---
 

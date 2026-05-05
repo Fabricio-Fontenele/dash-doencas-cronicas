@@ -83,7 +83,6 @@ Especificação-base: [docs/specs_dashboard_cronico.md](/home/fabricio/Documento
   - bairro
   - Bolsa Família
   - faixa etária
-  - busca por nome/ID
   - mínimo de meses sem atendimento médico
   - mínimo de meses sem atendimento de enfermagem
   - mínimo de meses sem visita
@@ -94,10 +93,9 @@ Especificação-base: [docs/specs_dashboard_cronico.md](/home/fabricio/Documento
   - diabetes vs hipertensão
   - cobertura dos principais pontos de cuidado
 - Tabela atual:
-  - paginação
-  - ordenação por estado do filtro
-  - badges de alerta
-  - colunas mais ricas para demo
+  - existe hoje como implementação transitória de demo
+  - precisa ser substituída por visualizações 100% agregadas
+  - não está alinhada com a direção final quantitativa do produto
 
 ### Dados fictícios de demo
 
@@ -127,7 +125,7 @@ Isso já cobre uma demo convincente de:
 - ingestão de dados
 - persistência
 - leitura do último snapshot
-- exploração do dashboard
+- exploração inicial do dashboard
 
 ## Limitações atuais
 
@@ -138,16 +136,18 @@ Isso já cobre uma demo convincente de:
 
 ### Dashboard
 
+- A direção do produto mudou para uma dashboard **exclusivamente quantitativa**.
+- A implementação atual ainda possui elementos de visualização individual na tela principal e isso precisa ser removido.
 - Ainda não existem:
   - gráfico de faixa etária
   - gráfico de distribuição por sexo
   - evolução histórica entre uploads
   - comparação temporal entre snapshots
-- A tabela ainda não possui:
-  - configuração dinâmica de colunas
-  - exportação CSV/XLSX
-  - ordenação por clique direto no cabeçalho
-  - paginação mais avançada
+- Ainda é necessário:
+  - remover toda exposição individual
+  - substituir tabela por blocos quantitativos agregados
+  - revisar filtros para operar apenas sobre métricas consolidadas
+  - adicionar exportação somente agregada
 
 ### Acesso e segurança
 
@@ -169,9 +169,10 @@ Isso já cobre uma demo convincente de:
   - gráfico por faixa etária
   - evolução histórica entre uploads
 - melhorar:
-  - ordenação por cabeçalho da tabela
-  - exportação da seleção filtrada
-  - interação entre gráficos e tabela
+  - remoção completa da tabela individual
+  - substituição por visualizações agregadas
+  - exportação apenas de dados consolidados
+  - interação entre gráficos e recortes quantitativos
 
 ### Bloco 2: fechar o uso operacional
 
@@ -200,7 +201,7 @@ Para concluir com o menor risco:
 
 1. consolidar a dashboard
 2. adaptar parser ao formato real
-3. adicionar exportação da tabela
+3. adicionar exportação agregada
 4. implementar autenticação e perfis
 5. versionar migrations e fechar testes de integração
 
