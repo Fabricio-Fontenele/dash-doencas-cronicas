@@ -409,6 +409,110 @@ function ComparisonColumns({
   );
 }
 
+function DonutChart({
+  title,
+  subtitle,
+  items,
+}: {
+  title: string;
+  subtitle: string;
+  items: DashboardBarChartItemDTO[];
+}) {
+  const total = items.reduce((sum, item) => sum + item.value, 0);
+  const palette = [
+    "#315c42",
+    "#b35c2e",
+    "#8b3d45",
+    "#d5b17c",
+    "#6c8c74",
+    "#a77f5a",
+  ];
+
+  if (items.length === 0 || total === 0) {
+    return (
+      <section className={SECTION_CLASS_NAME}>
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">{title}</p>
+        <h2 className="mt-2 text-2xl font-semibold text-accent-strong">{subtitle}</h2>
+        <p className="mt-6 text-sm text-muted">Sem dados para este recorte.</p>
+      </section>
+    );
+  }
+
+  const gradientStops = items
+    .reduce<Array<{ start: number; end: number; color: string }>>(
+      (segments, item, index) => {
+        const previousEnd = segments[segments.length - 1]?.end ?? 0;
+        const segmentSize = (item.value / total) * 100;
+
+        return [
+          ...segments,
+          {
+            start: previousEnd,
+            end: previousEnd + segmentSize,
+            color: palette[index % palette.length],
+          },
+        ];
+      },
+      [],
+    )
+    .map((segment) => `${segment.color} ${segment.start}% ${segment.end}%`)
+    .join(", ");
+
+  return (
+    <section className={SECTION_CLASS_NAME}>
+      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">{title}</p>
+      <h2 className="mt-2 text-2xl font-semibold text-accent-strong">{subtitle}</h2>
+
+      <div className="mt-6 grid gap-6 lg:grid-cols-[14rem_minmax(0,1fr)] lg:items-center">
+        <div className="flex flex-col items-center">
+          <div
+            className="relative size-48 rounded-full"
+            style={{
+              background: `conic-gradient(${gradientStops})`,
+            }}
+          >
+            <div className="absolute inset-5 rounded-full bg-surface shadow-[inset_0_0_0_1px_rgba(95,109,95,0.12)]" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+                Total
+              </span>
+              <span className="mt-1 text-4xl font-semibold tracking-tight text-accent-strong">
+                {total}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {items.map((item, index) => {
+            const percentage = Math.round((item.value / total) * 100);
+            const color = palette[index % palette.length];
+
+            return (
+              <div
+                key={item.label}
+                className="flex items-center justify-between gap-4 rounded-[1.15rem] border border-border/70 bg-white/80 px-4 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className="block size-3 rounded-full"
+                    style={{ backgroundColor: color }}
+                  />
+                  <span className="text-sm font-medium text-accent-strong">{item.label}</span>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-accent-strong">{percentage}%</p>
+                  <p className="text-xs text-muted">{item.value} pessoas</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CoverageDeck({ items }: { items: DashboardCoverageItemDTO[] }) {
   return (
     <section className={SECTION_CLASS_NAME}>
@@ -802,9 +906,9 @@ export default async function Home({ searchParams }: HomePageProps) {
             </section>
 
             <section className="grid gap-4 2xl:grid-cols-[1fr_1fr]">
-              <ComparisonColumns
+              <DonutChart
                 title="Raca/cor"
-                subtitle="Distribuicao por raca/cor"
+                subtitle="Composicao do recorte por raca/cor"
                 items={dashboardData.view.raceColorDistribution}
               />
               <CoverageDeck items={visibleCoverageItems} />
