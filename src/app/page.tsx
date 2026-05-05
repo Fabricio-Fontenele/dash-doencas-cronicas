@@ -226,35 +226,6 @@ function getActiveFilterChips(filters: DashboardFiltersDTO) {
   ];
 }
 
-function getSummaryCards(summary: DashboardSummaryDTO) {
-  return [
-    {
-      eyebrow: "Universo",
-      value: summary.totalRecords,
-      label: "Pessoas no recorte atual",
-      accent: "bg-[#315c42]",
-    },
-    {
-      eyebrow: "Atenção",
-      value: summary.withoutMedicalCare,
-      label: "Sem atendimento medico recente",
-      accent: "bg-[#b35c2e]",
-    },
-    {
-      eyebrow: "Cobertura",
-      value: summary.withoutHomeVisit,
-      label: "Sem visita domiciliar recente",
-      accent: "bg-[#8a6a1f]",
-    },
-    {
-      eyebrow: "Monitoramento",
-      value: summary.withoutRecentBloodPressureCheck + summary.withoutRecentHbA1c,
-      label: "Pendencias de exames e afericoes",
-      accent: "bg-[#8b3d45]",
-    },
-  ];
-}
-
 function FilterGroup({
   title,
   name,
@@ -472,15 +443,134 @@ function getVisibleCoverageItems(view: DashboardViewDTO): DashboardCoverageItemD
   return view.careCoverage.filter((item) => hasDiabetes || item.label !== "HbA1c recente");
 }
 
+function getSummaryCards(view: DashboardViewDTO) {
+  const summary = view.summary;
+  const { hasMixedConditions, hasDiabetes, hasHypertension } = getConditionPresence(view);
+
+  if (hasMixedConditions) {
+    return [
+      {
+        eyebrow: "Universo",
+        value: summary.totalRecords,
+        label: "Pessoas no recorte atual",
+        accent: "bg-[#315c42]",
+      },
+      {
+        eyebrow: "Atenção",
+        value: summary.withoutMedicalCare,
+        label: "Sem atendimento medico recente",
+        accent: "bg-[#b35c2e]",
+      },
+      {
+        eyebrow: "Cobertura",
+        value: summary.withoutHomeVisit,
+        label: "Sem visita domiciliar recente",
+        accent: "bg-[#8a6a1f]",
+      },
+      {
+        eyebrow: "Monitoramento",
+        value: summary.withoutRecentBloodPressureCheck + summary.withoutRecentHbA1c,
+        label: "Pendencias de exames e afericoes",
+        accent: "bg-[#8b3d45]",
+      },
+    ];
+  }
+
+  if (hasDiabetes) {
+    return [
+      {
+        eyebrow: "Diabetes",
+        value: summary.totalRecords,
+        label: "Pessoas acompanhadas neste recorte",
+        accent: "bg-[#315c42]",
+      },
+      {
+        eyebrow: "Consulta",
+        value: summary.withoutMedicalCare,
+        label: "Sem atendimento medico recente",
+        accent: "bg-[#b35c2e]",
+      },
+      {
+        eyebrow: "Territorio",
+        value: summary.withoutHomeVisit,
+        label: "Sem visita domiciliar recente",
+        accent: "bg-[#8a6a1f]",
+      },
+      {
+        eyebrow: "HbA1c",
+        value: summary.withoutRecentHbA1c,
+        label: "Sem hemoglobina glicada recente",
+        accent: "bg-[#8b3d45]",
+      },
+    ];
+  }
+
+  if (hasHypertension) {
+    return [
+      {
+        eyebrow: "Hipertensao",
+        value: summary.totalRecords,
+        label: "Pessoas acompanhadas neste recorte",
+        accent: "bg-[#315c42]",
+      },
+      {
+        eyebrow: "Consulta",
+        value: summary.withoutMedicalCare,
+        label: "Sem atendimento medico recente",
+        accent: "bg-[#b35c2e]",
+      },
+      {
+        eyebrow: "Territorio",
+        value: summary.withoutHomeVisit,
+        label: "Sem visita domiciliar recente",
+        accent: "bg-[#8a6a1f]",
+      },
+      {
+        eyebrow: "Pressao arterial",
+        value: summary.withoutRecentBloodPressureCheck,
+        label: "Sem afericao recente de PA",
+        accent: "bg-[#8b3d45]",
+      },
+    ];
+  }
+
+  return [
+    {
+      eyebrow: "Universo",
+      value: summary.totalRecords,
+      label: "Pessoas no recorte atual",
+      accent: "bg-[#315c42]",
+    },
+    {
+      eyebrow: "Atenção",
+      value: summary.withoutMedicalCare,
+      label: "Sem atendimento medico recente",
+      accent: "bg-[#b35c2e]",
+    },
+    {
+      eyebrow: "Cobertura",
+      value: summary.withoutHomeVisit,
+      label: "Sem visita domiciliar recente",
+      accent: "bg-[#8a6a1f]",
+    },
+    {
+      eyebrow: "Monitoramento",
+      value: summary.withoutRecentBloodPressureCheck,
+      label: "Pendencias de exames e afericoes",
+      accent: "bg-[#8b3d45]",
+    },
+  ];
+}
+
 export default async function Home({ searchParams }: HomePageProps) {
   const params = (await searchParams) ?? {};
   const filters = parseFilters(params);
   const dashboardData = await loadDashboardData(filters);
-  const summaryCards = getSummaryCards(dashboardData.view.summary);
-  const activeChips = getActiveFilterChips(dashboardData.view.appliedFilters);
   const { hasMixedConditions, hasDiabetes, hasHypertension } = getConditionPresence(
     dashboardData.view,
   );
+  const summaryCards = getSummaryCards(dashboardData.view);
+  const activeChips = getActiveFilterChips(dashboardData.view.appliedFilters);
   const conditionContextLabel = getConditionContextLabel(dashboardData.view);
   const visibleCoverageItems = getVisibleCoverageItems(dashboardData.view);
 
