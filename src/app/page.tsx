@@ -371,6 +371,54 @@ function HorizontalBars({
   );
 }
 
+function VerticalBars({
+  title,
+  subtitle,
+  items,
+}: {
+  title: string;
+  subtitle: string;
+  items: DashboardBarChartItemDTO[];
+}) {
+  const maxValue = Math.max(...items.map((item) => item.value), 1);
+
+  return (
+    <section className={SECTION_CLASS_NAME}>
+      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">{title}</p>
+      <h2 className="mt-2 text-2xl font-semibold text-accent-strong">{subtitle}</h2>
+
+      {items.length === 0 ? (
+        <p className="mt-6 text-sm text-muted">Sem dados para este recorte.</p>
+      ) : (
+        <div className="mt-6 overflow-x-auto pb-2">
+          <div className="flex min-w-max items-end gap-3">
+            {items.map((item, index) => (
+              <article
+                key={item.label}
+                className="flex w-20 shrink-0 flex-col items-center"
+              >
+                <p className="mb-2 text-sm font-semibold text-accent-strong">{item.value}</p>
+                <div className="flex h-64 w-full items-end rounded-[1.5rem] bg-surface-strong/70 p-1">
+                  <div
+                    className="w-full rounded-[1.15rem] bg-[linear-gradient(180deg,#d5b17c_0%,#b35c2e_100%)]"
+                    style={{ height: `${Math.max((item.value / maxValue) * 100, 8)}%` }}
+                  />
+                </div>
+                <span className="mt-3 inline-flex size-6 items-center justify-center rounded-full bg-surface-strong text-[11px] font-semibold text-muted">
+                  {index + 1}
+                </span>
+                <p className="mt-2 line-clamp-2 text-center text-xs font-medium leading-5 text-accent-strong">
+                  {item.label}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function ComparisonColumns({
   title,
   subtitle,
@@ -917,11 +965,10 @@ export default async function Home({ searchParams }: HomePageProps) {
             <section
               className={`grid gap-4 ${hasMixedConditions ? "2xl:grid-cols-[1.1fr_0.9fr]" : "2xl:grid-cols-1"}`}
             >
-              <HorizontalBars
+              <VerticalBars
                 title="Territorio"
                 subtitle="Top bairros com mais pessoas acompanhadas"
                 items={dashboardData.view.topNeighborhoods}
-                ranked
               />
               {hasMixedConditions ? (
                 <ComparisonColumns
