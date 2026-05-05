@@ -419,14 +419,18 @@ function DonutChart({
   items: DashboardBarChartItemDTO[];
 }) {
   const total = items.reduce((sum, item) => sum + item.value, 0);
-  const palette = [
-    "#315c42",
-    "#b35c2e",
-    "#8b3d45",
-    "#d5b17c",
-    "#6c8c74",
-    "#a77f5a",
-  ];
+  const getRaceColor = (label: string): string => {
+    const normalized = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+    if (normalized.includes("branca")) return "#f1d7c2";
+    if (normalized.includes("parda")) return "#b9855b";
+    if (normalized.includes("preta")) return "#5a3b2e";
+    if (normalized.includes("amarela")) return "#d8b35d";
+    if (normalized.includes("indigena")) return "#9a6745";
+    if (normalized.includes("nao inform")) return "#a8a29e";
+
+    return "#7c8f6b";
+  };
 
   if (items.length === 0 || total === 0) {
     return (
@@ -440,7 +444,7 @@ function DonutChart({
 
   const gradientStops = items
     .reduce<Array<{ start: number; end: number; color: string }>>(
-      (segments, item, index) => {
+      (segments, item) => {
         const previousEnd = segments[segments.length - 1]?.end ?? 0;
         const segmentSize = (item.value / total) * 100;
 
@@ -449,7 +453,7 @@ function DonutChart({
           {
             start: previousEnd,
             end: previousEnd + segmentSize,
-            color: palette[index % palette.length],
+            color: getRaceColor(item.label),
           },
         ];
       },
@@ -484,9 +488,9 @@ function DonutChart({
         </div>
 
         <div className="space-y-3">
-          {items.map((item, index) => {
+          {items.map((item) => {
             const percentage = Math.round((item.value / total) * 100);
-            const color = palette[index % palette.length];
+            const color = getRaceColor(item.label);
 
             return (
               <div
