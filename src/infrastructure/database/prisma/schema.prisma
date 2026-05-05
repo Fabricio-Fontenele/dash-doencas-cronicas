@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  perfil       Perfil
+  bairro       String?
+  ativo        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  uploads      Upload[]
+}
+
+model Upload {
+  id             String    @id
+  fileName       String
+  condicao       Condicao
+  totalRegistros Int
+  createdAt      DateTime
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+  pacientes      Paciente[]
+
+  @@index([createdAt])
+  @@index([userId])
+}
+
+model Paciente {
+  id                                String    @id @default(cuid())
+  externalId                        String
+  nome                              String
+  condicao                          Condicao
+  idade                             Int?
+  sexo                              String?
+  bairro                            String?
+  mesesUltimoAtendMedico            Int?
+  mesesUltimoAtendEnfermagem        Int?
+  mesesUltimaVisitaDomiciliar       Int?
+  mesesUltimaMedicaoPressaoArterial Int?
+  mesesUltimaHbA1c                  Int?
+  uploadId                          String
+  upload                            Upload    @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  @@index([uploadId])
+  @@index([condicao])
+  @@index([bairro])
+  @@index([mesesUltimoAtendMedico])
+  @@index([mesesUltimoAtendEnfermagem])
+  @@index([mesesUltimaVisitaDomiciliar])
+  @@unique([uploadId, externalId])
+}
+
+enum Perfil {
+  ENFERMEIRO
+  MEDICO
+  GESTOR
+  ACS
+}
+
+enum Condicao {
+  DIABETES
+  HIPERTENSAO
+}
