@@ -29,4 +29,47 @@ export class PrismaPacienteRepository implements IPacienteRepository {
       }),
     });
   }
+
+  async findByLatestUpload(limit?: number): Promise<Paciente[]> {
+    const latestUpload = await prisma.upload.findFirst({
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!latestUpload) {
+      return [];
+    }
+
+    const pacientes = await prisma.paciente.findMany({
+      where: {
+        uploadId: latestUpload.id,
+      },
+      orderBy: [
+        {
+          nome: "asc",
+        },
+      ],
+      ...(typeof limit === "number" ? { take: limit } : {}),
+    });
+
+    return pacientes.map((paciente) =>
+      Paciente.create({
+        id: paciente.externalId,
+        nome: paciente.nome,
+        condicao: paciente.condicao,
+        idade: paciente.idade,
+        sexo: paciente.sexo,
+        bairro: paciente.bairro,
+        mesesUltimoAtendMedico: paciente.mesesUltimoAtendMedico,
+        mesesUltimoAtendEnfermagem: paciente.mesesUltimoAtendEnfermagem,
+        mesesUltimaVisitaDomiciliar: paciente.mesesUltimaVisitaDomiciliar,
+        mesesUltimaMedicaoPressaoArterial: paciente.mesesUltimaMedicaoPressaoArterial,
+        mesesUltimaHbA1c: paciente.mesesUltimaHbA1c,
+      }),
+    );
+  }
 }
