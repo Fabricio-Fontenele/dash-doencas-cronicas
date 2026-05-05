@@ -56,13 +56,13 @@ describe("Dashboard application use cases", () => {
     ]);
 
     const result = await new GenerateDashboardViewUseCase(repository).execute({
-      condition: "ALL",
-      sex: null,
-      raceColor: null,
-      neighborhood: null,
-      familyAllowance: "ALL",
-      ageGroup: "ALL",
-      careGap: null,
+      conditions: [],
+      sexes: [],
+      raceColors: [],
+      neighborhoods: [],
+      familyAllowances: [],
+      ageGroups: [],
+      careGaps: [],
     });
 
     expect(result.summary).toEqual({
@@ -84,6 +84,30 @@ describe("Dashboard application use cases", () => {
       sexes: ["F", "M"],
       raceColors: ["Parda"],
     });
+  });
+
+  it("applies union filters within the same group", async () => {
+    const repository = makeAggregateBucketRepository([
+      makeBucket({ count: 3, sex: "F", neighborhood: "Centro" }),
+      makeBucket({ count: 2, sex: "M", neighborhood: "Bela Vista" }),
+      makeBucket({ count: 1, sex: "Outro", neighborhood: "Mocambinho" }),
+    ]);
+
+    const result = await new GenerateDashboardViewUseCase(repository).execute({
+      conditions: ["DIABETES"],
+      sexes: ["F", "M"],
+      raceColors: [],
+      neighborhoods: ["Centro", "Bela Vista"],
+      familyAllowances: [],
+      ageGroups: [],
+      careGaps: [],
+    });
+
+    expect(result.filteredRecordCount).toBe(5);
+    expect(result.sexDistribution).toEqual([
+      { label: "F", value: 3 },
+      { label: "M", value: 2 },
+    ]);
   });
 
   it("maps recent uploads to the dashboard history DTO", async () => {

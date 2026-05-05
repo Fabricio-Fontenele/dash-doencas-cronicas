@@ -9,11 +9,11 @@ export type CareGapFilter =
   | "hba1c";
 
 export interface DashboardFiltersDTO {
-  condition: Condition | "ALL";
-  sex: string | null;
-  raceColor: string | null;
-  neighborhood: string | null;
-  familyAllowance: "ALL" | "YES" | "NO";
-  ageGroup: AgeGroup | "ALL";
-  careGap: CareGapFilter | null;
+  conditions: Condition[];
+  sexes: string[];
+  raceColors: string[];
+  neighborhoods: string[];
+  familyAllowances: Array<"YES" | "NO" | "UNKNOWN">;
+  ageGroups: AgeGroup[];
+  careGaps: CareGapFilter[];
 }

@@ -56,35 +56,37 @@ export class GenerateDashboardViewUseCase {
     filters: DashboardFiltersDTO,
   ): AggregateBucket[] {
     return buckets.filter((bucket) => {
-      if (filters.condition !== "ALL" && bucket.condition !== filters.condition) {
+      if (filters.conditions.length > 0 && !filters.conditions.includes(bucket.condition)) {
         return false;
       }
 
-      if (filters.sex && bucket.sex !== filters.sex) {
+      if (filters.sexes.length > 0 && !filters.sexes.includes(bucket.sex ?? "")) {
         return false;
       }
 
-      if (filters.raceColor && bucket.raceColor !== filters.raceColor) {
+      if (filters.raceColors.length > 0 && !filters.raceColors.includes(bucket.raceColor ?? "")) {
         return false;
       }
 
-      if (filters.neighborhood && bucket.neighborhood !== filters.neighborhood) {
+      if (
+        filters.neighborhoods.length > 0 &&
+        !filters.neighborhoods.includes(bucket.neighborhood ?? "")
+      ) {
         return false;
       }
 
-      if (filters.familyAllowance === "YES" && bucket.familyAllowance !== true) {
+      if (
+        filters.familyAllowances.length > 0 &&
+        !filters.familyAllowances.includes(this.getFamilyAllowanceFilterValue(bucket.familyAllowance))
+      ) {
         return false;
       }
 
-      if (filters.familyAllowance === "NO" && bucket.familyAllowance !== false) {
+      if (filters.ageGroups.length > 0 && !filters.ageGroups.includes(bucket.ageGroup!)) {
         return false;
       }
 
-      if (filters.ageGroup !== "ALL" && bucket.ageGroup !== filters.ageGroup) {
-        return false;
-      }
-
-      if (!this.matchesCareGap(bucket, filters.careGap)) {
+      if (!this.matchesCareGapFilters(bucket, filters.careGaps)) {
         return false;
       }
 
@@ -92,21 +94,39 @@ export class GenerateDashboardViewUseCase {
     });
   }
 
-  private matchesCareGap(bucket: AggregateBucket, careGap: CareGapFilter | null): boolean {
-    switch (careGap) {
-      case "medical":
-        return bucket.needsMedicalCare;
-      case "nursing":
-        return bucket.needsNursingCare;
-      case "home-visit":
-        return bucket.needsHomeVisit;
-      case "blood-pressure":
-        return bucket.hasStaleBloodPressureMeasurement;
-      case "hba1c":
-        return bucket.hasStaleHbA1c;
-      default:
-        return true;
+  private matchesCareGapFilters(bucket: AggregateBucket, careGaps: CareGapFilter[]): boolean {
+    if (careGaps.length === 0) {
+      return true;
     }
+
+    return careGaps.some((careGap) => {
+      switch (careGap) {
+        case "medical":
+          return bucket.needsMedicalCare;
+        case "nursing":
+          return bucket.needsNursingCare;
+        case "home-visit":
+          return bucket.needsHomeVisit;
+        case "blood-pressure":
+          return bucket.hasStaleBloodPressureMeasurement;
+        case "hba1c":
+          return bucket.hasStaleHbA1c;
+      }
+    });
+  }
+
+  private getFamilyAllowanceFilterValue(
+    familyAllowance: boolean | null,
+  ): "YES" | "NO" | "UNKNOWN" {
+    if (familyAllowance === true) {
+      return "YES";
+    }
+
+    if (familyAllowance === false) {
+      return "NO";
+    }
+
+    return "UNKNOWN";
   }
 
   private buildSummary(buckets: AggregateBucket[]): DashboardSummaryDTO {
