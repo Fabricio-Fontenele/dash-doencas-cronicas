@@ -55,6 +55,22 @@ describe("SheetJSFileParser", () => {
     expect(result.records[0]?.hasStaleHbA1c).toBe(false);
   });
 
+  it("aceita o layout com 'meses desde' e data da ultima medicao de PA", async () => {
+    const parser = new SheetJSFileParser();
+    const csv = [
+      "Acompanhamento paciente hipertensos",
+      "Idade;Sexo;Raça/cor;Beneficiário Programa Bolsa Família;Bairro;Dias desde o último atendimento médico;Meses desde o último atendimento médico;Dias desde o último atendimento de enfermagem;Meses desde o último atendimento de enfermagem;Dias desde a última visita domiciliar;Meses desde a última visita domiciliar;Última medição de pressão arterial;Data da última medição de pressão arterial",
+      "51;Feminino;Indígena;Não;São Cristóvão;418;13;394;13;313;10;111/99 mmHg;23/08/2025",
+    ].join("\n");
+
+    const result = await parser.parse(Buffer.from(csv, "utf-8"), "hipertensao_1000.csv");
+
+    expect(result.condition).toBe("HYPERTENSION");
+    expect(result.records).toHaveLength(1);
+    expect(result.records[0]?.needsMedicalCare).toBe(true);
+    expect(result.records[0]?.hasStaleBloodPressureMeasurement).toBeDefined();
+  });
+
   it("falha quando o cabecalho obrigatorio nao existe", async () => {
     const parser = new SheetJSFileParser();
     const csv = ["Relatorio de acompanhamento - Diabetes", "Paciente;Idade", "Maria;40"].join("\n");
