@@ -1,0 +1,102 @@
+Relatorio de acompanhamento - Hipertensao
+Codigo;Nome;Idade;Sexo;Raça/cor;Beneficiário Programa Bolsa Família;Bairro;Meses ultimo atend medico;Meses ultimo atend enfermagem;Meses ultima visita domiciliar;Meses ultima medicao pressao arterial;Ultima medicao de pressao arterial
+HIP-001;Juliana Carvalho;65;M;Branca;Nao;Santa Maria;0;6;3;4;150x95
+HIP-002;Juliana Ferreira;57;M;Indigena;Nao;Piçarra;13;7;4;2;120x80
+HIP-003;Francisca Oliveira;41;F;Amarela;Nao;Angelim;7;0;5;11;160x100
+HIP-004;Patricia Carvalho;88;F;Branca;Nao;Promorar;10;16;7;9;110x70
+HIP-005;Juliana Lima;39;M;Preta;Nao;Angelim;7;15;10;13;140x90
+HIP-006;Fabio Barbosa;39;F;Indigena;Nao;Itarare;2;4;3;7;110x70
+HIP-007;Maria Costa;62;M;Preta;Nao;Dirceu;1;9;9;9;120x80
+HIP-008;Marta Ferreira;89;M;Amarela;Sim;Sao Jose;3;6;7;9;140x90
+HIP-009;Silvia Pereira;54;M;Indigena;Nao;Sao Jose;2;4;8;10;110x70
+HIP-010;Claudia Carvalho;41;F;Preta;Sim;Centro;16;3;1;8;140x90
+HIP-011;Jose Carvalho;75;F;Preta;Sim;Promorar;5;3;4;11;150x95
+HIP-012;Patricia Ferreira;60;M;Indigena;Sim;Primavera;15;10;2;8;160x100
+HIP-013;Silvia Carvalho;52;F;Preta;Nao;Itarare;13;4;4;2;
+HIP-014;Fabio Carvalho;70;F;Indigena;Nao;Primavera;5;15;2;4;110x70
+HIP-015;Fabio Pereira;81;M;Parda;Sim;Mocambinho;16;14;1;14;150x95
+HIP-016;Luciana Santos;71;F;Branca;Sim;Dirceu;13;16;6;2;160x100
+HIP-017;Carlos Ferreira;41;F;Parda;Nao;Mocambinho;11;2;4;1;110x70
+HIP-018;Patricia Silva;83;M;Indigena;Nao;Bela Vista;18;9;8;7;
+HIP-019;Diego Souza;55;M;Amarela;Sim;Itarare;18;8;9;12;110x70
+HIP-020;Diego Melo;84;F;Branca;Nao;Promorar;18;5;8;9;140x90
+HIP-021;Adriana Oliveira;53;F;Parda;Nao;Primavera;2;9;6;7;110x70
+HIP-022;Diego Araujo;59;F;Amarela;Sim;Promorar;9;10;0;4;110x70
+HIP-023;Fabio Barbosa;50;F;Preta;Sim;Buenos Aires;11;16;2;4;140x90
+HIP-024;Paulo Gomes;82;F;Parda;Nao;Angelim;9;13;10;0;150x95
+HIP-025;Marta Santos;85;M;Parda;Nao;Centro;5;10;3;7;140x90
+HIP-026;Joao Araujo;48;M;Branca;Nao;Buenos Aires;0;14;3;6;140x90
+HIP-027;Luciana Pereira;45;F;Parda;Nao;Primavera;2;13;7;2;110x70
+HIP-028;Paulo Oliveira;82;M;Branca;Nao;Piçarra;5;5;6;3;
+HIP-029;Luciana Barbosa;38;F;Parda;Sim;Mocambinho;12;15;3;4;160x100
+HIP-030;Joao Melo;40;M;Parda;Sim;Mocambinho;0;5;5;14;150x95
+HIP-031;Fabio Araujo;58;M;Amarela;Nao;Angelim;10;2;5;8;150x95
+HIP-032;Jose Carvalho;63;F;Preta;Nao;Mocambinho;17;4;3;11;120x80
+HIP-033;Juliana Melo;49;F;Amarela;Sim;Piçarra;10;3;1;8;150x95
+HIP-034;Camila Silva;41;M;Parda;Nao;Angelim;1;0;5;0;
+HIP-035;Luciana Araujo;82;M;Indigena;Sim;Bela Vista;14;2;10;6;130x85
+HIP-036;Patricia Costa;60;F;Parda;Nao;Angelim;3;1;3;6;140x90
+HIP-037;Jose Ferreira;88;F;Parda;Nao;Piçarra;1;5;0;3;
+HIP-038;Renata Melo;43;F;Amarela;Sim;Centro;12;6;1;9;130x85
+HIP-039;Silvia Lima;45;M;Amarela;Nao;Primavera;9;1;7;14;150x95
+HIP-040;Pedro Oliveira;75;M;Parda;Nao;Primavera;14;12;7;6;110x70
+HIP-041;Fabio Melo;35;F;Indigena;Sim;Promorar;14;15;1;7;110x70
+HIP-042;Antonio Almeida;50;F;Indigena;Nao;Promorar;12;10;10;9;150x95
+HIP-043;Patricia Santos;86;M;Parda;Nao;Bela Vista;12;1;1;8;120x80
+HIP-044;Carlos Ferreira;63;F;Branca;Sim;Angelim;2;2;5;5;160x100
+HIP-045;Maria Melo;54;M;Indigena;Nao;Mocambinho;1;5;5;0;110x70
+HIP-046;Juliana Almeida;63;M;Preta;Nao;Buenos Aires;7;7;7;11;140x90
+HIP-047;Joao Melo;38;M;Parda;Nao;Buenos Aires;16;8;4;0;
+HIP-048;Simone Oliveira;56;F;Indigena;Nao;Sao Jose;18;0;0;4;150x95
+HIP-049;Marta Melo;36;M;Indigena;Nao;Angelim;11;6;10;7;140x90
+HIP-050;Jose Lima;71;F;Amarela;Nao;Itarare;7;10;9;12;160x100
+HIP-051;Diego Pereira;39;M;Preta;Nao;Sao Jose;16;7;4;13;140x90
+HIP-052;Pedro Silva;56;F;Indigena;Nao;Centro;13;14;2;10;140x90
+HIP-053;Raimundo Silva;62;F;Amarela;Sim;Itarare;15;11;8;14;140x90
+HIP-054;Francisca Ferreira;55;F;Indigena;Nao;Dirceu;15;15;2;6;140x90
+HIP-055;Joao Pereira;42;F;Parda;Nao;Mocambinho;9;8;2;8;130x85
+HIP-056;Carlos Pereira;71;M;Indigena;Nao;Buenos Aires;12;7;9;4;150x95
+HIP-057;Ana Melo;65;F;Branca;Nao;Sao Jose;17;6;9;7;
+HIP-058;Jose Carvalho;58;M;Parda;Nao;Primavera;12;6;10;12;140x90
+HIP-059;Fabiana Costa;39;M;Indigena;Nao;Centro;0;8;7;12;160x100
+HIP-060;Juliana Santos;51;M;Branca;Nao;Promorar;13;6;7;3;130x85
+HIP-061;Simone Souza;88;F;Branca;Nao;Mocambinho;17;14;0;12;140x90
+HIP-062;Marcos Silva;66;F;Branca;Sim;Bela Vista;9;11;5;10;140x90
+HIP-063;Roberto Barbosa;54;M;Preta;Nao;Angelim;12;8;3;10;130x85
+HIP-064;Maria Rodrigues;86;M;Indigena;Nao;Promorar;6;12;1;4;110x70
+HIP-065;Joao Oliveira;75;F;Preta;Sim;Centro;3;12;10;7;140x90
+HIP-066;Claudia Souza;49;M;Parda;Nao;Itarare;8;0;6;0;110x70
+HIP-067;Ana Melo;85;M;Indigena;Sim;Primavera;18;10;6;1;140x90
+HIP-068;Ana Araujo;69;M;Preta;Sim;Dirceu;0;12;3;8;110x70
+HIP-069;Jose Lima;34;M;Parda;Nao;Promorar;0;1;5;8;150x95
+HIP-070;Paulo Oliveira;65;M;Branca;Sim;Bela Vista;14;11;9;3;160x100
+HIP-071;Silvia Barbosa;68;M;Branca;Sim;Promorar;3;0;10;4;130x85
+HIP-072;Marta Gomes;85;M;Branca;Nao;Angelim;8;9;0;14;140x90
+HIP-073;Marcos Carvalho;44;M;Branca;Sim;Itarare;17;7;3;3;120x80
+HIP-074;Camila Ferreira;66;F;Parda;Nao;Buenos Aires;12;4;2;1;150x95
+HIP-075;Raimundo Rodrigues;58;F;Indigena;Nao;Sao Jose;0;14;2;11;120x80
+HIP-076;Adriana Carvalho;82;F;Parda;Nao;Mocambinho;3;14;1;3;130x85
+HIP-077;Raimundo Almeida;75;M;Branca;Nao;Dirceu;7;7;4;1;
+HIP-078;Renata Lima;77;F;Preta;Nao;Mocambinho;2;16;7;14;150x95
+HIP-079;Ana Gomes;59;F;Indigena;Sim;Itarare;7;7;1;7;110x70
+HIP-080;Pedro Lima;49;F;Indigena;Nao;Angelim;16;14;1;5;130x85
+HIP-081;Fabiana Araujo;34;M;Parda;Nao;Santa Maria;11;13;6;13;
+HIP-082;Jose Souza;77;M;Branca;Sim;Promorar;16;10;2;8;150x95
+HIP-083;Carlos Lima;61;M;Branca;Nao;Buenos Aires;15;9;9;0;150x95
+HIP-084;Camila Costa;39;F;Preta;Nao;Sao Jose;9;14;8;11;160x100
+HIP-085;Patricia Santos;61;M;Branca;Nao;Mocambinho;9;16;6;8;130x85
+HIP-086;Claudia Silva;55;F;Amarela;Nao;Santa Maria;11;10;4;0;110x70
+HIP-087;Raimundo Rodrigues;42;M;Preta;Nao;Santa Maria;12;9;3;1;120x80
+HIP-088;Fabiana Melo;89;M;Preta;Nao;Santa Maria;12;2;4;6;120x80
+HIP-089;Francisca Rodrigues;78;F;Branca;Nao;Itarare;3;10;1;10;140x90
+HIP-090;Simone Rodrigues;81;M;Parda;Nao;Centro;14;16;3;14;110x70
+HIP-091;Fabiana Melo;41;M;Indigena;Nao;Buenos Aires;14;4;5;0;
+HIP-092;Fabiana Pereira;50;F;Branca;Nao;Promorar;15;1;8;0;130x85
+HIP-093;Carlos Rodrigues;65;M;Indigena;Sim;Dirceu;2;2;9;1;160x100
+HIP-094;Juliana Silva;41;F;Parda;Sim;Buenos Aires;18;12;6;13;
+HIP-095;Claudia Lima;41;F;Parda;Nao;Itarare;3;14;3;0;150x95
+HIP-096;Diego Melo;38;F;Preta;Nao;Sao Jose;7;0;6;1;140x90
+HIP-097;Paulo Oliveira;45;F;Branca;Nao;Mocambinho;14;9;8;0;130x85
+HIP-098;Fabio Almeida;56;F;Amarela;Sim;Angelim;11;1;9;6;
+HIP-099;Roberto Costa;83;F;Amarela;Nao;Buenos Aires;18;6;8;7;160x100
+HIP-100;Fabiana Ferreira;34;M;Preta;Nao;Bela Vista;6;8;9;7;150x95

@@ -1,0 +1,102 @@
+Relatorio de acompanhamento - Diabetes
+Codigo;Nome;Idade;Sexo;Raça/cor;Beneficiário Programa Bolsa Família;Bairro;Meses ultimo atend medico;Meses ultimo atend enfermagem;Meses ultima visita domiciliar;Meses ultima medicao pressao arterial;Ultima medicao de pressao arterial;Meses ultima HbA1c;Hemoglobina glicada
+DBT-001;Carlos Rodrigues;65;F;Preta;Nao;Dirceu;16;11;9;11;110x70;8;9,7
+DBT-002;Paulo Rodrigues;77;F;Amarela;Nao;Centro;2;5;4;3;150x95;17;
+DBT-003;Antonio Carvalho;58;M;Preta;Nao;Centro;17;16;10;12;;19;8,4
+DBT-004;Patricia Araujo;75;F;Preta;Sim;Dirceu;6;6;0;7;140x90;16;6,1
+DBT-005;Francisca Costa;56;F;Parda;Nao;Itarare;3;7;6;12;;3;6,0
+DBT-006;Renata Costa;76;F;Indigena;Nao;Primavera;14;5;7;10;160x100;16;9,5
+DBT-007;Pedro Lima;84;F;Amarela;Nao;Bela Vista;1;13;1;10;150x95;9;6,1
+DBT-008;Fabio Melo;58;M;Indigena;Nao;Centro;9;4;3;4;130x85;8;6,4
+DBT-009;Diego Rodrigues;73;F;Amarela;Nao;Primavera;18;13;3;0;120x80;19;9,5
+DBT-010;Maria Melo;53;F;Indigena;Nao;Itarare;1;5;9;3;150x95;6;6,4
+DBT-011;Paulo Santos;35;F;Preta;Nao;Primavera;12;10;10;6;160x100;16;6,4
+DBT-012;Fabiana Silva;57;F;Branca;Nao;Angelim;12;14;7;13;110x70;18;8,3
+DBT-013;Fabiana Santos;42;F;Indigena;Nao;Primavera;5;0;8;10;150x95;7;
+DBT-014;Marcos Gomes;63;F;Parda;Sim;Promorar;1;6;6;7;140x90;16;
+DBT-015;Simone Araujo;74;F;Indigena;Sim;Primavera;18;7;1;10;120x80;17;
+DBT-016;Roberto Carvalho;35;M;Preta;Sim;Dirceu;16;9;4;12;160x100;3;5,7
+DBT-017;Ana Souza;82;M;Parda;Nao;Angelim;18;10;5;12;140x90;3;8,8
+DBT-018;Marta Souza;84;F;Branca;Nao;Bela Vista;14;10;8;11;110x70;9;7,7
+DBT-019;Camila Carvalho;69;F;Parda;Nao;Mocambinho;15;0;8;12;140x90;10;6,5
+DBT-020;Jose Lima;77;M;Indigena;Nao;Promorar;18;4;2;9;120x80;15;9,0
+DBT-021;Jose Santos;44;M;Amarela;Sim;Angelim;15;1;5;9;120x80;17;7,4
+DBT-022;Silvia Barbosa;74;F;Preta;Nao;Promorar;17;12;2;5;;19;6,9
+DBT-023;Simone Carvalho;53;F;Amarela;Nao;Itarare;5;11;5;6;120x80;0;
+DBT-024;Raimundo Santos;41;M;Indigena;Nao;Piçarra;1;6;3;11;110x70;18;
+DBT-025;Roberto Santos;51;M;Parda;Nao;Buenos Aires;11;0;4;5;140x90;7;8,9
+DBT-026;Silvia Costa;81;M;Branca;Nao;Piçarra;3;14;4;2;150x95;4;
+DBT-027;Paulo Almeida;84;M;Branca;Nao;Centro;13;15;0;7;160x100;13;6,8
+DBT-028;Antonio Lima;57;M;Branca;Nao;Itarare;15;14;4;12;150x95;1;
+DBT-029;Marcos Silva;79;M;Preta;Sim;Mocambinho;9;4;6;3;150x95;11;8,6
+DBT-030;Fabiana Carvalho;42;F;Indigena;Nao;Primavera;17;10;3;1;150x95;1;6,1
+DBT-031;Pedro Ferreira;86;F;Indigena;Nao;Dirceu;6;14;1;2;150x95;20;
+DBT-032;Claudia Melo;46;F;Indigena;Nao;Sao Jose;1;2;9;12;150x95;11;5,6
+DBT-033;Marta Carvalho;36;F;Parda;Nao;Angelim;4;8;5;1;130x85;12;
+DBT-034;Jose Pereira;34;M;Indigena;Nao;Promorar;3;2;6;6;140x90;17;
+DBT-035;Ana Gomes;57;M;Indigena;Nao;Bela Vista;14;3;3;9;;16;8,7
+DBT-036;Marcos Pereira;46;F;Branca;Sim;Santa Maria;11;10;10;5;120x80;20;7,5
+DBT-037;Maria Araujo;86;F;Preta;Nao;Piçarra;15;10;8;6;150x95;13;7,4
+DBT-038;Roberto Ferreira;77;M;Preta;Sim;Angelim;10;12;2;10;110x70;11;5,7
+DBT-039;Paulo Costa;65;M;Indigena;Nao;Angelim;1;10;7;10;;18;9,5
+DBT-040;Marcos Almeida;81;M;Branca;Nao;Buenos Aires;3;1;5;9;140x90;20;7,6
+DBT-041;Ana Oliveira;58;F;Indigena;Nao;Angelim;16;3;1;0;;6;6,2
+DBT-042;Claudia Silva;60;M;Indigena;Sim;Itarare;4;5;9;0;150x95;10;5,8
+DBT-043;Marcos Silva;38;M;Branca;Nao;Buenos Aires;18;6;1;0;110x70;9;8,3
+DBT-044;Patricia Costa;66;M;Amarela;Nao;Sao Jose;5;2;8;5;160x100;6;6,8
+DBT-045;Raimundo Gomes;80;F;Indigena;Nao;Santa Maria;8;16;10;10;110x70;19;9,9
+DBT-046;Luciana Rodrigues;73;M;Indigena;Nao;Piçarra;9;2;4;2;130x85;2;10,0
+DBT-047;Simone Oliveira;35;F;Preta;Nao;Piçarra;15;14;0;6;160x100;12;8,9
+DBT-048;Silvia Carvalho;40;F;Amarela;Nao;Sao Jose;8;12;4;8;130x85;16;
+DBT-049;Fabiana Carvalho;70;M;Parda;Nao;Angelim;16;10;5;5;150x95;11;
+DBT-050;Raimundo Gomes;53;M;Amarela;Sim;Angelim;17;2;10;13;140x90;8;6,0
+DBT-051;Juliana Souza;45;F;Indigena;Nao;Buenos Aires;11;6;8;14;130x85;7;
+DBT-052;Ana Pereira;51;F;Parda;Nao;Mocambinho;18;14;3;12;130x85;20;8,5
+DBT-053;Patricia Gomes;44;M;Parda;Nao;Bela Vista;8;6;10;8;150x95;6;5,7
+DBT-054;Luciana Souza;58;M;Branca;Sim;Angelim;13;3;4;11;160x100;11;
+DBT-055;Raimundo Almeida;86;M;Preta;Nao;Santa Maria;7;11;7;0;120x80;10;5,8
+DBT-056;Luciana Melo;53;M;Indigena;Nao;Centro;4;12;9;3;;6;8,5
+DBT-057;Juliana Souza;36;M;Amarela;Nao;Piçarra;12;4;4;8;160x100;1;9,2
+DBT-058;Pedro Ferreira;77;F;Indigena;Nao;Primavera;7;11;4;8;130x85;9;
+DBT-059;Juliana Pereira;54;F;Indigena;Nao;Itarare;1;16;8;4;150x95;8;9,7
+DBT-060;Diego Gomes;36;M;Indigena;Nao;Bela Vista;6;9;5;9;150x95;18;5,6
+DBT-061;Marcos Santos;86;F;Indigena;Sim;Promorar;14;14;8;7;110x70;16;
+DBT-062;Adriana Pereira;35;M;Branca;Nao;Buenos Aires;14;2;4;8;;20;9,4
+DBT-063;Silvia Ferreira;34;F;Branca;Nao;Santa Maria;18;16;9;9;;16;
+DBT-064;Carlos Lima;45;M;Branca;Nao;Mocambinho;13;2;5;9;;9;7,6
+DBT-065;Camila Almeida;80;F;Branca;Nao;Piçarra;1;16;0;6;110x70;11;7,1
+DBT-066;Camila Oliveira;54;M;Branca;Sim;Santa Maria;10;2;9;14;130x85;13;9,8
+DBT-067;Marcos Gomes;84;F;Indigena;Nao;Dirceu;11;1;1;13;130x85;15;9,1
+DBT-068;Pedro Silva;50;M;Branca;Sim;Promorar;11;11;10;8;140x90;11;10,1
+DBT-069;Juliana Rodrigues;73;M;Amarela;Sim;Santa Maria;17;10;8;14;140x90;19;8,7
+DBT-070;Paulo Gomes;69;F;Amarela;Nao;Itarare;14;5;3;3;160x100;0;5,9
+DBT-071;Adriana Oliveira;89;M;Parda;Nao;Sao Jose;16;5;4;12;140x90;6;10,2
+DBT-072;Paulo Oliveira;76;F;Amarela;Nao;Mocambinho;7;9;4;13;160x100;5;7,6
+DBT-073;Silvia Melo;82;F;Indigena;Nao;Centro;1;3;10;2;;9;7,2
+DBT-074;Claudia Rodrigues;65;F;Preta;Nao;Dirceu;5;16;8;12;150x95;2;6,8
+DBT-075;Roberto Lima;89;F;Preta;Sim;Mocambinho;14;16;10;2;150x95;6;
+DBT-076;Marta Barbosa;70;M;Branca;Nao;Primavera;16;13;5;8;160x100;7;
+DBT-077;Silvia Gomes;60;M;Amarela;Sim;Primavera;9;11;2;9;150x95;19;6,2
+DBT-078;Renata Souza;66;M;Indigena;Nao;Bela Vista;14;11;3;6;160x100;9;8,2
+DBT-079;Paulo Oliveira;38;M;Preta;Nao;Bela Vista;10;8;1;10;120x80;3;6,6
+DBT-080;Simone Lima;34;F;Preta;Sim;Centro;11;13;1;2;120x80;13;
+DBT-081;Luciana Almeida;63;M;Amarela;Nao;Santa Maria;5;5;2;14;;0;6,6
+DBT-082;Claudia Melo;49;F;Indigena;Nao;Bela Vista;10;5;3;8;;18;
+DBT-083;Fabio Costa;80;M;Indigena;Nao;Sao Jose;10;1;1;6;150x95;20;6,4
+DBT-084;Patricia Oliveira;74;M;Preta;Sim;Itarare;2;16;5;12;140x90;0;6,7
+DBT-085;Claudia Rodrigues;75;F;Branca;Sim;Promorar;17;5;6;4;150x95;18;7,8
+DBT-086;Antonio Costa;45;M;Parda;Nao;Piçarra;4;7;6;3;110x70;17;6,2
+DBT-087;Antonio Carvalho;35;M;Parda;Nao;Primavera;17;6;5;12;160x100;13;
+DBT-088;Carlos Silva;80;M;Parda;Nao;Sao Jose;0;3;8;8;120x80;18;9,7
+DBT-089;Ana Oliveira;48;F;Amarela;Sim;Itarare;4;0;10;2;;2;8,7
+DBT-090;Marta Ferreira;48;M;Amarela;Nao;Santa Maria;13;7;1;1;110x70;18;
+DBT-091;Raimundo Ferreira;69;F;Amarela;Sim;Itarare;17;15;0;3;150x95;12;9,2
+DBT-092;Ana Carvalho;42;F;Branca;Nao;Mocambinho;4;4;1;5;160x100;15;7,6
+DBT-093;Ana Oliveira;38;F;Amarela;Nao;Centro;1;12;7;13;110x70;4;7,4
+DBT-094;Joao Oliveira;57;M;Branca;Nao;Sao Jose;17;6;4;2;150x95;12;9,2
+DBT-095;Marta Almeida;74;F;Preta;Sim;Sao Jose;12;15;5;2;120x80;0;
+DBT-096;Diego Carvalho;38;M;Amarela;Nao;Promorar;10;0;2;1;;3;
+DBT-097;Juliana Silva;48;F;Branca;Nao;Santa Maria;4;12;10;6;120x80;9;
+DBT-098;Fabio Ferreira;44;M;Parda;Nao;Sao Jose;12;9;8;5;140x90;19;6,3
+DBT-099;Fabio Pereira;46;F;Parda;Nao;Centro;0;15;2;0;;11;
+DBT-100;Fabiana Carvalho;85;F;Branca;Nao;Centro;10;14;5;5;150x95;17;7,7
