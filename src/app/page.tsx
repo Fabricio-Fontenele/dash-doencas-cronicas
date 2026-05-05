@@ -392,23 +392,20 @@ function VerticalBars({
         <p className="mt-6 text-sm text-muted">Sem dados para este recorte.</p>
       ) : (
         <div className="mt-6 overflow-x-auto pb-2">
-          <div className="flex min-w-max items-end gap-3">
-            {items.map((item, index) => (
+          <div className="flex min-w-max items-end gap-2">
+            {items.map((item) => (
               <article
                 key={item.label}
-                className="flex w-20 shrink-0 flex-col items-center"
+                className="flex w-16 shrink-0 flex-col items-center"
               >
                 <p className="mb-2 text-sm font-semibold text-accent-strong">{item.value}</p>
-                <div className="flex h-64 w-full items-end rounded-[1.5rem] bg-surface-strong/70 p-1">
+                <div className="flex h-64 w-full items-end rounded-[1.25rem] bg-surface-strong/70 p-1">
                   <div
-                    className="w-full rounded-[1.15rem] bg-[linear-gradient(180deg,#d5b17c_0%,#b35c2e_100%)]"
+                    className="w-full rounded-[0.95rem] bg-[linear-gradient(180deg,#d5b17c_0%,#b35c2e_100%)]"
                     style={{ height: `${Math.max((item.value / maxValue) * 100, 8)}%` }}
                   />
                 </div>
-                <span className="mt-3 inline-flex size-6 items-center justify-center rounded-full bg-surface-strong text-[11px] font-semibold text-muted">
-                  {index + 1}
-                </span>
-                <p className="mt-2 line-clamp-2 text-center text-xs font-medium leading-5 text-accent-strong">
+                <p className="mt-3 line-clamp-2 text-center text-[11px] font-medium leading-5 text-accent-strong">
                   {item.label}
                 </p>
               </article>
