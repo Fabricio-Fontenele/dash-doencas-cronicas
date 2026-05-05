@@ -3,9 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { ProcessarUploadUseCase } from "@/application/use-cases/upload/ProcessarUploadUseCase";
+import { ProcessUploadUseCase } from "@/application/use-cases/upload/ProcessUploadUseCase";
 import { prisma } from "@/infrastructure/database/prisma/client";
-import { PrismaPacienteRepository } from "@/infrastructure/database/repositories/PrismaPacienteRepository";
+import { PrismaAggregateBucketRepository } from "@/infrastructure/database/repositories/PrismaAggregateBucketRepository";
 import { PrismaUploadRepository } from "@/infrastructure/database/repositories/PrismaUploadRepository";
 import { FileParsingError } from "@/infrastructure/parsers/errors/FileParsingError";
 import { SheetJSFileParser } from "@/infrastructure/parsers/SheetJSFileParser";
@@ -49,10 +49,10 @@ export async function processUploadAction(
     const uploaderUserId = await ensureUploaderUser();
     const fileBuffer = Buffer.from(await parsedInput.data.file.arrayBuffer());
 
-    const useCase = new ProcessarUploadUseCase(
+    const useCase = new ProcessUploadUseCase(
       new SheetJSFileParser(),
       new PrismaUploadRepository(),
-      new PrismaPacienteRepository(),
+      new PrismaAggregateBucketRepository(),
     );
 
     const result = await useCase.execute({
@@ -66,7 +66,7 @@ export async function processUploadAction(
 
     return {
       status: "success",
-      message: `${result.totalRegistros} pacientes importados em ${result.condicao.toLowerCase()}.`,
+      message: `${result.totalRecords} registros agregados importados em ${formatConditionLabel(result.condition)}.`,
       uploadedFileName: result.fileName,
     };
   } catch (error) {
@@ -84,6 +84,10 @@ export async function processUploadAction(
       uploadedFileName: null,
     };
   }
+}
+
+function formatConditionLabel(condition: "DIABETES" | "HYPERTENSION"): string {
+  return condition === "DIABETES" ? "diabetes" : "hipertensao";
 }
 
 async function ensureUploaderUser(): Promise<string> {

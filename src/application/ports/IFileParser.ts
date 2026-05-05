@@ -1,9 +1,9 @@
-import { Paciente } from "@/domain/entities/Paciente";
-import { type Condicao } from "@/domain/value-objects/Condicao";
+import { CareRecord } from "@/domain/entities/CareRecord";
+import { type Condition } from "@/domain/value-objects/Condition";
 
 export interface ParsedFileResult {
-  condicao: Condicao;
-  pacientes: Paciente[];
+  condition: Condition;
+  records: CareRecord[];
 }
 
 export interface IFileParser {

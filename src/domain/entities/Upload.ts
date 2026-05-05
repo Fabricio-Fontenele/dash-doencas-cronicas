@@ -1,21 +1,21 @@
 import { randomUUID } from "node:crypto";
 
 import { DomainError } from "@/domain/errors/DomainError";
-import { type Condicao } from "@/domain/value-objects/Condicao";
+import { type Condition } from "@/domain/value-objects/Condition";
 
 export interface UploadProps {
   id: string;
   fileName: string;
-  condicao: Condicao;
-  totalRegistros: number;
+  condition: Condition;
+  totalRecords: number;
   userId: string;
   createdAt: Date;
 }
 
 export interface CreateUploadProps {
   fileName: string;
-  condicao: Condicao;
-  totalRegistros: number;
+  condition: Condition;
+  totalRecords: number;
   userId: string;
 }
 
@@ -24,22 +24,22 @@ export class Upload {
 
   static create(props: CreateUploadProps): Upload {
     if (!props.fileName.trim()) {
-      throw new DomainError("Upload precisa de um nome de arquivo.");
+      throw new DomainError("Upload requires a file name.");
     }
 
     if (!props.userId.trim()) {
-      throw new DomainError("Upload precisa de um usuario responsavel.");
+      throw new DomainError("Upload requires an uploader user.");
     }
 
-    if (props.totalRegistros < 0) {
-      throw new DomainError("Upload nao pode possuir quantidade negativa de registros.");
+    if (props.totalRecords < 0) {
+      throw new DomainError("Upload cannot have a negative record count.");
     }
 
     return new Upload({
       id: randomUUID(),
       fileName: props.fileName.trim(),
-      condicao: props.condicao,
-      totalRegistros: props.totalRegistros,
+      condition: props.condition,
+      totalRecords: props.totalRecords,
       userId: props.userId.trim(),
       createdAt: new Date(),
     });

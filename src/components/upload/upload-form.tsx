@@ -40,8 +40,7 @@ export function UploadForm() {
             Carregue o relatorio exportado do prontuario
           </h2>
           <p className="max-w-2xl text-sm leading-6 text-muted">
-            O processamento acontece no servidor. Sao aceitos arquivos{" "}
-            <code>.csv</code>, <code>.xls</code> e <code>.xlsx</code> de ate 10 MB.
+            O processamento acontece no servidor. Sao aceitos arquivos <code>.csv</code>, <code>.xls</code> e <code>.xlsx</code> de ate 10 MB. O resultado persistido contem apenas agregados anonimizados.
           </p>
         </div>
 
@@ -61,8 +60,7 @@ export function UploadForm() {
             className="mt-3 block w-full rounded-2xl border border-border bg-white px-4 py-3 text-sm text-foreground file:mr-4 file:rounded-full file:border-0 file:bg-surface-strong file:px-4 file:py-2 file:text-sm file:font-semibold file:text-accent-strong"
           />
           <p className="mt-3 text-xs leading-5 text-muted">
-            Dica: o sistema detecta automaticamente se o relatorio e de diabetes
-            ou hipertensao.
+            Dica: o sistema detecta automaticamente se o relatorio e de diabetes ou hipertensao e transforma o conteudo em metricas quantitativas.
           </p>
           <div className="mt-5">
             <SubmitButton />

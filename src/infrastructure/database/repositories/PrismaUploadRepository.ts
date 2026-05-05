@@ -1,7 +1,7 @@
 import { Upload } from "@/domain/entities/Upload";
 import {
   type IUploadRepository,
-  type UploadHistoricoItem,
+  type UploadHistoryItem,
 } from "@/domain/repositories/IUploadRepository";
 import { prisma } from "@/infrastructure/database/prisma/client";
 
@@ -13,8 +13,8 @@ export class PrismaUploadRepository implements IUploadRepository {
       data: {
         id: data.id,
         fileName: data.fileName,
-        condicao: data.condicao,
-        totalRegistros: data.totalRegistros,
+        condition: data.condition,
+        totalRecords: data.totalRecords,
         userId: data.userId,
         createdAt: data.createdAt,
       },
@@ -23,7 +23,7 @@ export class PrismaUploadRepository implements IUploadRepository {
     return upload;
   }
 
-  async listRecent(limit: number): Promise<UploadHistoricoItem[]> {
+  async listRecent(limit: number): Promise<UploadHistoryItem[]> {
     const uploads = await prisma.upload.findMany({
       include: {
         user: {
@@ -41,8 +41,8 @@ export class PrismaUploadRepository implements IUploadRepository {
     return uploads.map((upload) => ({
       id: upload.id,
       fileName: upload.fileName,
-      condicao: upload.condicao,
-      totalRegistros: upload.totalRegistros,
+      condition: upload.condition,
+      totalRecords: upload.totalRecords,
       createdAt: upload.createdAt,
       uploadedBy: upload.user.name,
     }));

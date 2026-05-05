@@ -1,4 +1,4 @@
-export const FAIXAS_ETARIAS = [
+export const AGE_GROUPS = [
   "0-17",
   "18-39",
   "40-59",
@@ -6,10 +6,10 @@ export const FAIXAS_ETARIAS = [
   "80+",
 ] as const;
 
-export type FaixaEtaria = (typeof FAIXAS_ETARIAS)[number];
+export type AgeGroup = (typeof AGE_GROUPS)[number];
 
-export class FaixaEtariaCalculator {
-  static fromAge(age: number | null): FaixaEtaria | null {
+export class AgeGroupCalculator {
+  static fromAge(age: number | null): AgeGroup | null {
     if (age === null) {
       return null;
     }

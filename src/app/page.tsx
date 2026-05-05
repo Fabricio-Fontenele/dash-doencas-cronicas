@@ -1,50 +1,41 @@
 import Link from "next/link";
 
-import { type DashboardResumoDTO } from "@/application/dtos/DashboardResumoDTO";
-import { type DashboardVisaoDTO } from "@/application/dtos/DashboardVisaoDTO";
-import {
-  type AlertaFiltro,
-  type FiltrosDashboardDTO,
-} from "@/application/dtos/FiltrosDashboardDTO";
-import { type UploadHistoricoDTO } from "@/application/dtos/UploadHistoricoDTO";
-import { GerarDashboardVisaoUseCase } from "@/application/use-cases/dashboard/GerarDashboardVisaoUseCase";
-import { ListarUploadsUseCase } from "@/application/use-cases/upload/ListarUploadsUseCase";
-import { PrismaPacienteRepository } from "@/infrastructure/database/repositories/PrismaPacienteRepository";
+import { type DashboardFiltersDTO, type CareGapFilter } from "@/application/dtos/DashboardFiltersDTO";
+import { type DashboardSummaryDTO } from "@/application/dtos/DashboardSummaryDTO";
+import { type DashboardViewDTO, type DashboardBarChartItemDTO } from "@/application/dtos/DashboardViewDTO";
+import { type UploadHistoryDTO } from "@/application/dtos/UploadHistoryDTO";
+import { GenerateDashboardViewUseCase } from "@/application/use-cases/dashboard/GenerateDashboardViewUseCase";
+import { ListRecentUploadsUseCase } from "@/application/use-cases/upload/ListRecentUploadsUseCase";
+import { AGE_GROUPS } from "@/domain/value-objects/AgeGroup";
+import { PrismaAggregateBucketRepository } from "@/infrastructure/database/repositories/PrismaAggregateBucketRepository";
 import { PrismaUploadRepository } from "@/infrastructure/database/repositories/PrismaUploadRepository";
 
 export const dynamic = "force-dynamic";
 
-const CARD_CLASSNAME = [
+const CARD_CLASS_NAME = [
   "rounded-[1.75rem] border border-border bg-surface p-5",
   "shadow-[0_20px_50px_rgba(49,92,66,0.08)]",
 ].join(" ");
 
-const EMPTY_RESUMO: DashboardResumoDTO = {
-  totalPacientes: 0,
-  semAtendimentoMedico: 0,
-  semAtendimentoEnfermagem: 0,
-  semVisitaDomiciliar: 0,
-  semMedicaoPressaoRecente: 0,
-  semHbA1cRecente: 0,
+const EMPTY_SUMMARY: DashboardSummaryDTO = {
+  totalRecords: 0,
+  withoutMedicalCare: 0,
+  withoutNursingCare: 0,
+  withoutHomeVisit: 0,
+  withoutRecentBloodPressureCheck: 0,
+  withoutRecentHbA1c: 0,
   totalDiabetes: 0,
-  totalHipertensao: 0,
+  totalHypertension: 0,
 };
 
-const DEFAULT_FILTERS: FiltrosDashboardDTO = {
-  condicao: "TODOS",
-  sexo: null,
-  racaCor: null,
-  bairro: null,
-  bolsaFamilia: "TODOS",
-  faixaEtaria: "TODAS",
-  busca: "",
-  alerta: null,
-  minMesesMedico: 0,
-  minMesesEnfermagem: 0,
-  minMesesVisita: 0,
-  page: 1,
-  pageSize: 8,
-  sortBy: "risk",
+const DEFAULT_FILTERS: DashboardFiltersDTO = {
+  condition: "ALL",
+  sex: null,
+  raceColor: null,
+  neighborhood: null,
+  familyAllowance: "ALL",
+  ageGroup: "ALL",
+  careGap: null,
 };
 
 type SearchParamValue = string | string[] | undefined;
@@ -60,31 +51,6 @@ function formatUploadDate(date: Date): string {
   }).format(date);
 }
 
-function createQueryString(
-  filters: FiltrosDashboardDTO,
-  overrides: Partial<FiltrosDashboardDTO>,
-): string {
-  const next = { ...filters, ...overrides };
-  const params = new URLSearchParams();
-
-  if (next.condicao !== "TODOS") params.set("condicao", next.condicao);
-  if (next.sexo) params.set("sexo", next.sexo);
-  if (next.racaCor) params.set("racaCor", next.racaCor);
-  if (next.bairro) params.set("bairro", next.bairro);
-  if (next.bolsaFamilia !== "TODOS") params.set("bolsaFamilia", next.bolsaFamilia);
-  if (next.faixaEtaria !== "TODAS") params.set("faixaEtaria", next.faixaEtaria);
-  if (next.busca.trim()) params.set("busca", next.busca.trim());
-  if (next.alerta) params.set("alerta", next.alerta);
-  if (next.minMesesMedico > 0) params.set("minMesesMedico", String(next.minMesesMedico));
-  if (next.minMesesEnfermagem > 0) params.set("minMesesEnfermagem", String(next.minMesesEnfermagem));
-  if (next.minMesesVisita > 0) params.set("minMesesVisita", String(next.minMesesVisita));
-  if (next.page > 1) params.set("page", String(next.page));
-  if (next.sortBy !== "risk") params.set("sortBy", next.sortBy);
-
-  const query = params.toString();
-  return query ? `/?${query}` : "/";
-}
-
 function parseSingleValue(value: SearchParamValue): string | null {
   if (Array.isArray(value)) {
     return value[0] ?? null;
@@ -93,118 +59,122 @@ function parseSingleValue(value: SearchParamValue): string | null {
   return value ?? null;
 }
 
-function parseFilters(
-  searchParams: Record<string, SearchParamValue>,
-): FiltrosDashboardDTO {
-  const condicao = parseSingleValue(searchParams.condicao);
-  const sexo = parseSingleValue(searchParams.sexo);
-  const racaCor = parseSingleValue(searchParams.racaCor);
-  const bairro = parseSingleValue(searchParams.bairro);
-  const bolsaFamilia = parseSingleValue(searchParams.bolsaFamilia);
-  const faixaEtaria = parseSingleValue(searchParams.faixaEtaria);
-  const busca = parseSingleValue(searchParams.busca) ?? "";
-  const alerta = parseSingleValue(searchParams.alerta);
-  const minMesesMedico = Number.parseInt(parseSingleValue(searchParams.minMesesMedico) ?? "0", 10);
-  const minMesesEnfermagem = Number.parseInt(parseSingleValue(searchParams.minMesesEnfermagem) ?? "0", 10);
-  const minMesesVisita = Number.parseInt(parseSingleValue(searchParams.minMesesVisita) ?? "0", 10);
-  const page = Number.parseInt(parseSingleValue(searchParams.page) ?? "1", 10);
-  const sortBy = parseSingleValue(searchParams.sortBy);
+function parseFilters(searchParams: Record<string, SearchParamValue>): DashboardFiltersDTO {
+  const condition = parseSingleValue(searchParams.condition);
+  const familyAllowance = parseSingleValue(searchParams.familyAllowance);
+  const ageGroup = parseSingleValue(searchParams.ageGroup);
+  const careGap = parseSingleValue(searchParams.careGap);
 
   return {
-    condicao:
-      condicao === "DIABETES" || condicao === "HIPERTENSAO"
-        ? condicao
-        : DEFAULT_FILTERS.condicao,
-    sexo: sexo || null,
-    racaCor: racaCor || null,
-    bairro: bairro || null,
-    bolsaFamilia:
-      bolsaFamilia === "SIM" || bolsaFamilia === "NAO"
-        ? bolsaFamilia
-        : DEFAULT_FILTERS.bolsaFamilia,
-    faixaEtaria:
-      faixaEtaria === "0-17" ||
-      faixaEtaria === "18-39" ||
-      faixaEtaria === "40-59" ||
-      faixaEtaria === "60-79" ||
-      faixaEtaria === "80+"
-        ? faixaEtaria
-        : DEFAULT_FILTERS.faixaEtaria,
-    busca,
-    alerta:
-      alerta === "medical" ||
-      alerta === "nursing" ||
-      alerta === "home-visit" ||
-      alerta === "blood-pressure" ||
-      alerta === "hba1c"
-        ? alerta
-        : DEFAULT_FILTERS.alerta,
-    minMesesMedico:
-      Number.isFinite(minMesesMedico) && minMesesMedico > 0 ? minMesesMedico : 0,
-    minMesesEnfermagem:
-      Number.isFinite(minMesesEnfermagem) && minMesesEnfermagem > 0 ? minMesesEnfermagem : 0,
-    minMesesVisita:
-      Number.isFinite(minMesesVisita) && minMesesVisita > 0 ? minMesesVisita : 0,
-    page: Number.isFinite(page) && page > 0 ? page : DEFAULT_FILTERS.page,
-    pageSize: DEFAULT_FILTERS.pageSize,
-    sortBy:
-      sortBy === "name" ||
-      sortBy === "condition" ||
-      sortBy === "neighborhood" ||
-      sortBy === "risk" ||
-      sortBy === "age" ||
-      sortBy === "medical-delay"
-        ? sortBy
-        : DEFAULT_FILTERS.sortBy,
+    condition:
+      condition === "DIABETES" || condition === "HYPERTENSION"
+        ? condition
+        : DEFAULT_FILTERS.condition,
+    sex: parseSingleValue(searchParams.sex),
+    raceColor: parseSingleValue(searchParams.raceColor),
+    neighborhood: parseSingleValue(searchParams.neighborhood),
+    familyAllowance:
+      familyAllowance === "YES" || familyAllowance === "NO"
+        ? familyAllowance
+        : DEFAULT_FILTERS.familyAllowance,
+    ageGroup:
+      ageGroup && AGE_GROUPS.includes(ageGroup as (typeof AGE_GROUPS)[number])
+        ? (ageGroup as (typeof AGE_GROUPS)[number])
+        : DEFAULT_FILTERS.ageGroup,
+    careGap:
+      careGap === "medical" ||
+      careGap === "nursing" ||
+      careGap === "home-visit" ||
+      careGap === "blood-pressure" ||
+      careGap === "hba1c"
+        ? (careGap as CareGapFilter)
+        : DEFAULT_FILTERS.careGap,
   };
 }
 
-function getSummaryCardConfig(
-  resumo: DashboardResumoDTO,
-): Array<{
-  label: string;
-  value: number;
-  alerta: AlertaFiltro | null;
-}> {
+function createQueryString(
+  filters: DashboardFiltersDTO,
+  overrides: Partial<DashboardFiltersDTO>,
+): string {
+  const next = { ...filters, ...overrides };
+  const params = new URLSearchParams();
+
+  if (next.condition !== "ALL") params.set("condition", next.condition);
+  if (next.sex) params.set("sex", next.sex);
+  if (next.raceColor) params.set("raceColor", next.raceColor);
+  if (next.neighborhood) params.set("neighborhood", next.neighborhood);
+  if (next.familyAllowance !== "ALL") params.set("familyAllowance", next.familyAllowance);
+  if (next.ageGroup !== "ALL") params.set("ageGroup", next.ageGroup);
+  if (next.careGap) params.set("careGap", next.careGap);
+
+  const query = params.toString();
+  return query ? `/?${query}` : "/";
+}
+
+function getSummaryCards(summary: DashboardSummaryDTO) {
   return [
-    {
-      label: "Total de pacientes",
-      value: resumo.totalPacientes,
-      alerta: null,
-    },
-    {
-      label: "Sem atendimento medico > 6 meses",
-      value: resumo.semAtendimentoMedico,
-      alerta: "medical",
-    },
-    {
-      label: "Sem enfermagem > 6 meses",
-      value: resumo.semAtendimentoEnfermagem,
-      alerta: "nursing",
-    },
-    {
-      label: "Sem visita domiciliar > 3 meses",
-      value: resumo.semVisitaDomiciliar,
-      alerta: "home-visit",
-    },
-    {
-      label: "Sem medicao de PA recente",
-      value: resumo.semMedicaoPressaoRecente,
-      alerta: "blood-pressure",
-    },
-    {
-      label: "Sem HbA1c recente",
-      value: resumo.semHbA1cRecente,
-      alerta: "hba1c",
-    },
+    { label: "Total no recorte", value: summary.totalRecords, careGap: null },
+    { label: "Sem atendimento medico > 6 meses", value: summary.withoutMedicalCare, careGap: "medical" as CareGapFilter },
+    { label: "Sem enfermagem > 6 meses", value: summary.withoutNursingCare, careGap: "nursing" as CareGapFilter },
+    { label: "Sem visita domiciliar > 3 meses", value: summary.withoutHomeVisit, careGap: "home-visit" as CareGapFilter },
+    { label: "Sem PA recente", value: summary.withoutRecentBloodPressureCheck, careGap: "blood-pressure" as CareGapFilter },
+    { label: "Sem HbA1c recente", value: summary.withoutRecentHbA1c, careGap: "hba1c" as CareGapFilter },
   ];
+}
+
+function formatConditionLabel(condition: "DIABETES" | "HYPERTENSION"): string {
+  return condition === "DIABETES" ? "Diabetes" : "Hipertensao";
+}
+
+function ChartCard({
+  title,
+  subtitle,
+  items,
+}: {
+  title: string;
+  subtitle: string;
+  items: DashboardBarChartItemDTO[];
+}) {
+  const maxValue = Math.max(...items.map((item) => item.value), 1);
+
+  return (
+    <section className={CARD_CLASS_NAME}>
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">{title}</p>
+          <h2 className="mt-2 text-2xl font-semibold text-accent-strong">{subtitle}</h2>
+        </div>
+      </div>
+
+      <div className="mt-6 space-y-4">
+        {items.length === 0 ? (
+          <p className="text-sm text-muted">Sem dados para este recorte.</p>
+        ) : (
+          items.map((item) => (
+            <div key={item.label} className="space-y-2">
+              <div className="flex items-center justify-between gap-4 text-sm">
+                <span className="font-medium text-accent-strong">{item.label}</span>
+                <span className="text-muted">{item.value}</span>
+              </div>
+              <div className="h-2 rounded-full bg-surface-strong">
+                <div
+                  className="h-full rounded-full bg-accent"
+                  style={{ width: `${(item.value / maxValue) * 100}%` }}
+                />
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </section>
+  );
 }
 
 export default async function Home({ searchParams }: HomePageProps) {
   const params = (await searchParams) ?? {};
-  const filtros = parseFilters(params);
-  const dashboardData = await loadDashboardData(filtros);
-  const summaryCards = getSummaryCardConfig(dashboardData.visao.resumo);
+  const filters = parseFilters(params);
+  const dashboardData = await loadDashboardData(filters);
+  const summaryCards = getSummaryCards(dashboardData.view.summary);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,#eef5e5_0%,#f4f1e8_34%,#ebe1ce_100%)]">
@@ -214,14 +184,13 @@ export default async function Home({ searchParams }: HomePageProps) {
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <span className="inline-flex rounded-full border border-border bg-surface-strong px-4 py-1 text-sm font-medium text-accent-strong">
-                Modo apresentacao
+                Dashboard quantitativa
               </span>
               <h1 className="mt-5 text-4xl font-semibold tracking-tight text-accent-strong sm:text-5xl">
-                Panorama clinico do ultimo snapshot importado.
+                Panorama agregado do ultimo snapshot importado.
               </h1>
               <p className="mt-4 max-w-2xl text-base leading-7 text-muted">
-                Dashboard narrativo para demonstracao, com filtros reais, indicadores acionaveis,
-                leitura do ultimo upload e foco em pacientes com cuidado em atraso.
+                O sistema processa os CSVs e gera metricas anonimizadas para acompanhamento de diabetes e hipertensao, sem armazenar nomes ou identificadores individuais.
               </p>
             </div>
 
@@ -244,35 +213,32 @@ export default async function Home({ searchParams }: HomePageProps) {
 
         {!dashboardData.hasDatabaseConnection ? (
           <section className="rounded-[1.75rem] border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-            O banco nao esta acessivel nesta execucao. O painel continua pronto para a apresentacao,
-            mas os dados so aparecem quando o PostgreSQL estiver disponivel.
+            O banco nao esta acessivel nesta execucao. O painel continua pronto, mas os dados so aparecem quando o PostgreSQL estiver disponivel.
           </section>
         ) : null}
 
-        {dashboardData.ultimoUpload ? (
-          <section className={CARD_CLASSNAME}>
+        {dashboardData.latestUpload ? (
+          <section className={CARD_CLASS_NAME}>
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-                  Ultimo upload
-                </p>
+                <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">Ultimo upload</p>
                 <h2 className="mt-2 text-2xl font-semibold text-accent-strong">
-                  {dashboardData.ultimoUpload.fileName}
+                  {dashboardData.latestUpload.fileName}
                 </h2>
               </div>
 
               <div className="grid gap-3 text-sm text-muted sm:grid-cols-3">
                 <div>
                   <p className="font-medium text-accent-strong">Condicao</p>
-                  <p>{dashboardData.ultimoUpload.condicao}</p>
+                  <p>{formatConditionLabel(dashboardData.latestUpload.condition)}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-accent-strong">Responsavel</p>
-                  <p>{dashboardData.ultimoUpload.uploadedBy}</p>
+                  <p className="font-medium text-accent-strong">Registros</p>
+                  <p>{dashboardData.latestUpload.totalRecords}</p>
                 </div>
                 <div>
                   <p className="font-medium text-accent-strong">Momento</p>
-                  <p>{formatUploadDate(dashboardData.ultimoUpload.createdAt)}</p>
+                  <p>{formatUploadDate(dashboardData.latestUpload.createdAt)}</p>
                 </div>
               </div>
             </div>
@@ -281,107 +247,81 @@ export default async function Home({ searchParams }: HomePageProps) {
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {summaryCards.map((card) => {
-            const href = createQueryString(dashboardData.visao.filtrosAplicados, {
-              alerta:
-                dashboardData.visao.filtrosAplicados.alerta === card.alerta
-                  ? null
-                  : card.alerta,
-              page: 1,
+            const href = createQueryString(dashboardData.view.appliedFilters, {
+              careGap: dashboardData.view.appliedFilters.careGap === card.careGap ? null : card.careGap,
             });
             const isActive =
-              card.alerta !== null &&
-              dashboardData.visao.filtrosAplicados.alerta === card.alerta;
+              card.careGap !== null && dashboardData.view.appliedFilters.careGap === card.careGap;
 
             return (
               <Link
                 key={card.label}
                 href={href}
-                className={`${CARD_CLASSNAME} transition hover:-translate-y-0.5 ${
-                  isActive ? "ring-2 ring-accent/40" : ""
-                }`}
+                className={`${CARD_CLASS_NAME} transition hover:-translate-y-0.5 ${isActive ? "ring-2 ring-accent/40" : ""}`}
               >
-                <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted">
-                  {card.label}
-                </p>
-                <p className="mt-4 text-4xl font-semibold text-accent-strong">
-                  {card.value}
-                </p>
+                <p className="text-sm font-medium uppercase tracking-[0.18em] text-muted">{card.label}</p>
+                <p className="mt-4 text-4xl font-semibold text-accent-strong">{card.value}</p>
                 <p className="mt-3 text-xs text-muted">
-                  {card.alerta ? "Clique para destacar este risco na tabela." : "Visao agregada atual."}
+                  {card.careGap ? "Clique para filtrar este indicador." : "Visao agregada do recorte atual."}
                 </p>
               </Link>
             );
           })}
         </section>
 
-        <section className={CARD_CLASSNAME}>
+        <section className={CARD_CLASS_NAME}>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-                Filtros ativos
-              </p>
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">Filtros ativos</p>
               <h2 className="mt-2 text-2xl font-semibold text-accent-strong">
-                Refine o recorte para a apresentacao
+                Recorte quantitativo da populacao acompanhada
               </h2>
             </div>
 
-            <p className="text-sm text-muted">
-              {dashboardData.visao.totalPacientesFiltrados} pacientes no recorte atual
-            </p>
+            <p className="text-sm text-muted">{dashboardData.view.filteredRecordCount} registros no recorte atual</p>
           </div>
 
-          <form className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-8">
-            <label className="flex flex-col gap-2 text-sm">
-              <span className="font-medium text-accent-strong">Busca</span>
-              <input
-                type="text"
-                name="busca"
-                defaultValue={dashboardData.visao.filtrosAplicados.busca}
-                placeholder="Nome ou ID"
-                className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
-              />
-            </label>
-
+          <form className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
             <label className="flex flex-col gap-2 text-sm">
               <span className="font-medium text-accent-strong">Condicao</span>
               <select
-                name="condicao"
-                defaultValue={dashboardData.visao.filtrosAplicados.condicao}
+                name="condition"
+                defaultValue={dashboardData.view.appliedFilters.condition}
                 className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
               >
-                <option value="TODOS">Todos</option>
-                <option value="DIABETES">Diabetes</option>
-                <option value="HIPERTENSAO">Hipertensao</option>
+                <option value="ALL">Diabetes + hipertensao</option>
+                <option value="DIABETES">Somente diabetes</option>
+                <option value="HYPERTENSION">Somente hipertensao</option>
               </select>
             </label>
 
             <label className="flex flex-col gap-2 text-sm">
               <span className="font-medium text-accent-strong">Sexo</span>
               <select
-                name="sexo"
-                defaultValue={dashboardData.visao.filtrosAplicados.sexo ?? ""}
+                name="sex"
+                defaultValue={dashboardData.view.appliedFilters.sex ?? ""}
                 className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
               >
                 <option value="">Todos</option>
-                {dashboardData.visao.filterOptions.sexos.map((sexo) => (
-                  <option key={sexo} value={sexo}>
-                    {sexo}
+                {dashboardData.view.filterOptions.sexes.map((sex) => (
+                  <option key={sex} value={sex}>
+                    {sex}
                   </option>
                 ))}
               </select>
             </label>
 
             <label className="flex flex-col gap-2 text-sm">
-              <span className="font-medium text-accent-strong">Raça/cor</span>
+              <span className="font-medium text-accent-strong">Raca/cor</span>
               <select
-                name="racaCor"
-                defaultValue={dashboardData.visao.filtrosAplicados.racaCor ?? ""}
+                name="raceColor"
+                defaultValue={dashboardData.view.appliedFilters.raceColor ?? ""}
                 className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
               >
                 <option value="">Todas</option>
-                {dashboardData.visao.filterOptions.racas.map((raca) => (
-                  <option key={raca} value={raca}>
-                    {raca}
+                {dashboardData.view.filterOptions.raceColors.map((raceColor) => (
+                  <option key={raceColor} value={raceColor}>
+                    {raceColor}
                   </option>
                 ))}
               </select>
@@ -390,30 +330,30 @@ export default async function Home({ searchParams }: HomePageProps) {
             <label className="flex flex-col gap-2 text-sm">
               <span className="font-medium text-accent-strong">Faixa etaria</span>
               <select
-                name="faixaEtaria"
-                defaultValue={dashboardData.visao.filtrosAplicados.faixaEtaria}
+                name="ageGroup"
+                defaultValue={dashboardData.view.appliedFilters.ageGroup}
                 className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
               >
-                <option value="TODAS">Todas</option>
-                <option value="0-17">0-17</option>
-                <option value="18-39">18-39</option>
-                <option value="40-59">40-59</option>
-                <option value="60-79">60-79</option>
-                <option value="80+">80+</option>
+                <option value="ALL">Todas</option>
+                {AGE_GROUPS.map((ageGroup) => (
+                  <option key={ageGroup} value={ageGroup}>
+                    {ageGroup}
+                  </option>
+                ))}
               </select>
             </label>
 
             <label className="flex flex-col gap-2 text-sm">
               <span className="font-medium text-accent-strong">Bairro</span>
               <select
-                name="bairro"
-                defaultValue={dashboardData.visao.filtrosAplicados.bairro ?? ""}
+                name="neighborhood"
+                defaultValue={dashboardData.view.appliedFilters.neighborhood ?? ""}
                 className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
               >
                 <option value="">Todos</option>
-                {dashboardData.visao.filterOptions.bairros.map((bairro) => (
-                  <option key={bairro} value={bairro}>
-                    {bairro}
+                {dashboardData.view.filterOptions.neighborhoods.map((neighborhood) => (
+                  <option key={neighborhood} value={neighborhood}>
+                    {neighborhood}
                   </option>
                 ))}
               </select>
@@ -422,77 +362,17 @@ export default async function Home({ searchParams }: HomePageProps) {
             <label className="flex flex-col gap-2 text-sm">
               <span className="font-medium text-accent-strong">Bolsa Familia</span>
               <select
-                name="bolsaFamilia"
-                defaultValue={dashboardData.visao.filtrosAplicados.bolsaFamilia}
+                name="familyAllowance"
+                defaultValue={dashboardData.view.appliedFilters.familyAllowance}
                 className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
               >
-                <option value="TODOS">Todos</option>
-                <option value="SIM">Sim</option>
-                <option value="NAO">Nao</option>
+                <option value="ALL">Todos</option>
+                <option value="YES">Somente sim</option>
+                <option value="NO">Somente nao</option>
               </select>
             </label>
 
-            <label className="flex flex-col gap-2 text-sm">
-              <span className="font-medium text-accent-strong">Min. meses medico</span>
-              <input
-                type="number"
-                min="0"
-                max="24"
-                name="minMesesMedico"
-                defaultValue={dashboardData.visao.filtrosAplicados.minMesesMedico}
-                className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
-              />
-            </label>
-
-            <label className="flex flex-col gap-2 text-sm">
-              <span className="font-medium text-accent-strong">Min. meses enfermagem</span>
-              <input
-                type="number"
-                min="0"
-                max="24"
-                name="minMesesEnfermagem"
-                defaultValue={dashboardData.visao.filtrosAplicados.minMesesEnfermagem}
-                className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
-              />
-            </label>
-
-            <label className="flex flex-col gap-2 text-sm">
-              <span className="font-medium text-accent-strong">Min. meses visita</span>
-              <input
-                type="number"
-                min="0"
-                max="24"
-                name="minMesesVisita"
-                defaultValue={dashboardData.visao.filtrosAplicados.minMesesVisita}
-                className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
-              />
-            </label>
-
-            <label className="flex flex-col gap-2 text-sm">
-              <span className="font-medium text-accent-strong">Ordenacao</span>
-              <select
-                name="sortBy"
-                defaultValue={dashboardData.visao.filtrosAplicados.sortBy}
-                className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
-              >
-                <option value="risk">Maior risco</option>
-                <option value="name">Nome</option>
-                <option value="age">Maior idade</option>
-                <option value="condition">Condicao</option>
-                <option value="neighborhood">Bairro</option>
-                <option value="medical-delay">Maior atraso medico</option>
-              </select>
-            </label>
-
-            {dashboardData.visao.filtrosAplicados.alerta ? (
-              <input
-                type="hidden"
-                name="alerta"
-                value={dashboardData.visao.filtrosAplicados.alerta}
-              />
-            ) : null}
-
-            <div className="flex gap-3 md:col-span-2 xl:col-span-8">
+            <div className="md:col-span-2 xl:col-span-6 flex flex-wrap gap-3 pt-2">
               <button
                 type="submit"
                 className="inline-flex h-11 items-center justify-center rounded-full bg-accent px-5 text-sm font-semibold text-white transition hover:bg-accent-strong"
@@ -500,7 +380,7 @@ export default async function Home({ searchParams }: HomePageProps) {
                 Aplicar filtros
               </button>
               <Link
-                href="/"
+                href={createQueryString(DEFAULT_FILTERS, {})}
                 className="inline-flex h-11 items-center justify-center rounded-full border border-border px-5 text-sm font-semibold text-accent-strong transition hover:bg-surface-strong"
               >
                 Resetar
@@ -509,352 +389,116 @@ export default async function Home({ searchParams }: HomePageProps) {
           </form>
         </section>
 
-        <section className="grid gap-4 xl:grid-cols-[1.2fr_0.9fr]">
-          <article className={CARD_CLASSNAME}>
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-                  Grafico 1
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold text-accent-strong">
-                  Top bairros com maior concentracao
-                </h2>
-              </div>
-            </div>
-
-            <div className="mt-8 space-y-4">
-              {dashboardData.visao.topBairros.length === 0 ? (
-                <p className="text-sm text-muted">Sem dados para o recorte atual.</p>
-              ) : (
-                dashboardData.visao.topBairros.map((item) => {
-                  const maxValue = dashboardData.visao.topBairros[0]?.value ?? 1;
-                  const width = `${(item.value / maxValue) * 100}%`;
-
-                  return (
-                    <div key={item.label} className="grid gap-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium text-accent-strong">{item.label}</span>
-                        <span className="text-muted">{item.value}</span>
-                      </div>
-                      <div className="h-3 rounded-full bg-surface-strong">
-                        <div
-                          className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-accent-strong),var(--color-accent))]"
-                          style={{ width }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </article>
-
-          <article className={CARD_CLASSNAME}>
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-              Grafico 2
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold text-accent-strong">
-              Diabetes versus hipertensao
-            </h2>
-
-            <div className="mt-8 grid gap-6 sm:grid-cols-2">
-              {dashboardData.visao.distribuicaoCondicao.map((item) => {
-                const total =
-                  dashboardData.visao.distribuicaoCondicao.reduce(
-                    (sum, chartItem) => sum + chartItem.value,
-                    0,
-                  ) || 1;
-                const percentage = Math.round((item.value / total) * 100);
-
-                return (
-                  <div
-                    key={item.label}
-                    className="rounded-[1.5rem] bg-surface-strong p-5 text-center"
-                  >
-                    <svg
-                      viewBox="0 0 120 120"
-                      className="mx-auto size-32"
-                      aria-hidden="true"
-                    >
-                      <circle
-                        cx="60"
-                        cy="60"
-                        r="42"
-                        fill="none"
-                        stroke="rgba(49,92,66,0.12)"
-                        strokeWidth="12"
-                      />
-                      <circle
-                        cx="60"
-                        cy="60"
-                        r="42"
-                        fill="none"
-                        stroke="var(--color-accent)"
-                        strokeWidth="12"
-                        strokeLinecap="round"
-                        strokeDasharray={`${(percentage / 100) * 264} 264`}
-                        transform="rotate(-90 60 60)"
-                      />
-                      <text
-                        x="60"
-                        y="64"
-                        textAnchor="middle"
-                        fontSize="20"
-                        fill="var(--color-accent-strong)"
-                        fontWeight="600"
-                      >
-                        {percentage}%
-                      </text>
-                    </svg>
-                    <p className="mt-3 text-lg font-semibold text-accent-strong">
-                      {item.label}
-                    </p>
-                    <p className="text-sm text-muted">{item.value} pacientes</p>
-                  </div>
-                );
-              })}
-            </div>
-          </article>
+        <section className="grid gap-4 xl:grid-cols-2">
+          <ChartCard
+            title="Distribuicao"
+            subtitle="Diabetes versus hipertensao"
+            items={dashboardData.view.conditionDistribution}
+          />
+          <ChartCard
+            title="Territorio"
+            subtitle="Bairros com maior volume"
+            items={dashboardData.view.topNeighborhoods}
+          />
         </section>
 
-        <section className={CARD_CLASSNAME}>
-          <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-            Grafico 3
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-accent-strong">
-            Cobertura dos principais pontos de cuidado
-          </h2>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-            {dashboardData.visao.coberturaCuidado.map((item) => (
-              <article
-                key={item.label}
-                className="rounded-[1.5rem] border border-border bg-white p-4"
-              >
-                <p className="text-sm font-medium text-accent-strong">{item.label}</p>
-                <p className="mt-3 text-3xl font-semibold text-accent-strong">
-                  {Math.round(item.coverageRate)}%
-                </p>
-                <div className="mt-3 h-3 rounded-full bg-surface-strong">
-                  <div
-                    className="h-full rounded-full bg-[linear-gradient(90deg,#1e4130,#4e8a61)]"
-                    style={{ width: `${Math.max(item.coverageRate, 4)}%` }}
-                  />
-                </div>
-                <p className="mt-3 text-xs leading-5 text-muted">
-                  {item.covered} em dia • {item.uncovered} em atraso
-                </p>
-              </article>
-            ))}
-          </div>
+        <section className="grid gap-4 xl:grid-cols-2">
+          <ChartCard
+            title="Faixa etaria"
+            subtitle="Composicao do recorte"
+            items={dashboardData.view.ageGroupDistribution}
+          />
+          <ChartCard
+            title="Sexo"
+            subtitle="Distribuicao declarada"
+            items={dashboardData.view.sexDistribution}
+          />
         </section>
 
-        <section className={CARD_CLASSNAME}>
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <section className="grid gap-4 xl:grid-cols-2">
+          <ChartCard
+            title="Raca/cor"
+            subtitle="Distribuicao declarada"
+            items={dashboardData.view.raceColorDistribution}
+          />
+          <section className={CARD_CLASS_NAME}>
             <div>
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-                Tabela de pacientes
-              </p>
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">Cobertura</p>
               <h2 className="mt-2 text-2xl font-semibold text-accent-strong">
-                Lista paginada do recorte filtrado
+                Indicadores do cuidado no recorte atual
               </h2>
             </div>
-            <p className="text-sm text-muted">
-              Pagina {dashboardData.visao.paginaAtual} de {dashboardData.visao.totalPaginas}
-            </p>
-          </div>
 
-          <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-border">
-            <table className="w-full border-collapse">
-              <thead className="bg-surface-strong text-left text-sm text-accent-strong">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Paciente</th>
-                  <th className="px-4 py-3 font-semibold">Condicao</th>
-                  <th className="px-4 py-3 font-semibold">Perfil</th>
-                  <th className="px-4 py-3 font-semibold">Bairro</th>
-                  <th className="px-4 py-3 font-semibold">Meses</th>
-                  <th className="px-4 py-3 font-semibold">Alertas</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white text-sm text-foreground">
-                {dashboardData.visao.pacientes.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-10 text-center text-muted">
-                      Nenhum paciente encontrado para os filtros atuais.
-                    </td>
-                  </tr>
-                ) : (
-                  dashboardData.visao.pacientes.map((paciente) => {
-                    const flags = [
-                      paciente.needsMedicalCare ? "Medico" : null,
-                      paciente.needsNursingCare ? "Enfermagem" : null,
-                      paciente.needsHomeVisit ? "Visita" : null,
-                      paciente.hasStaleBloodPressureMeasurement ? "PA" : null,
-                      paciente.hasStaleHbA1c ? "HbA1c" : null,
-                    ].filter((value): value is string => value !== null);
-
-                    return (
-                      <tr key={paciente.id} className="border-t border-border/70 align-top">
-                        <td className="px-4 py-4">
-                          <p className="font-medium text-accent-strong">{paciente.nome}</p>
-                          <p className="text-xs text-muted">ID {paciente.id}</p>
-                        </td>
-                        <td className="px-4 py-4">{paciente.condicao}</td>
-                        <td className="px-4 py-4">
-                          <p>{paciente.sexo ?? "Nao informado"}</p>
-                          <p className="text-xs text-muted">
-                            {paciente.faixaEtaria ?? "Sem faixa"} • {paciente.racaCor ?? "Raça n/i"}
-                          </p>
-                          <p className="text-xs text-muted">
-                            Bolsa Familia: {paciente.bolsaFamilia === null ? "n/i" : paciente.bolsaFamilia ? "Sim" : "Nao"}
-                          </p>
-                        </td>
-                        <td className="px-4 py-4">
-                          {paciente.bairro ?? "Nao informado"}
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="space-y-1 text-xs text-muted">
-                            <p>Medico: {paciente.mesesUltimoAtendMedico ?? "n/i"}m</p>
-                            <p>Enfermagem: {paciente.mesesUltimoAtendEnfermagem ?? "n/i"}m</p>
-                            <p>Visita: {paciente.mesesUltimaVisitaDomiciliar ?? "n/i"}m</p>
-                          </div>
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="flex flex-wrap gap-2">
-                            {flags.length === 0 ? (
-                              <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-                                Sem alertas
-                              </span>
-                            ) : (
-                              flags.map((flag) => (
-                                <span
-                                  key={flag}
-                                  className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800"
-                                >
-                                  {flag}
-                                </span>
-                              ))
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-muted">
-              Exibindo {dashboardData.visao.pacientes.length} de{" "}
-              {dashboardData.visao.totalPacientesFiltrados} pacientes filtrados.
-            </p>
-
-            <div className="flex gap-2">
-              <Link
-                href={createQueryString(dashboardData.visao.filtrosAplicados, {
-                  page: Math.max(1, dashboardData.visao.paginaAtual - 1),
-                })}
-                className={`inline-flex h-10 items-center justify-center rounded-full border px-4 text-sm font-semibold ${
-                  dashboardData.visao.paginaAtual === 1
-                    ? "pointer-events-none border-border/50 text-muted/50"
-                    : "border-border text-accent-strong transition hover:bg-surface-strong"
-                }`}
-              >
-                Anterior
-              </Link>
-              <Link
-                href={createQueryString(dashboardData.visao.filtrosAplicados, {
-                  page: Math.min(
-                    dashboardData.visao.totalPaginas,
-                    dashboardData.visao.paginaAtual + 1,
-                  ),
-                })}
-                className={`inline-flex h-10 items-center justify-center rounded-full border px-4 text-sm font-semibold ${
-                  dashboardData.visao.paginaAtual === dashboardData.visao.totalPaginas
-                    ? "pointer-events-none border-border/50 text-muted/50"
-                    : "border-border text-accent-strong transition hover:bg-surface-strong"
-                }`}
-              >
-                Proxima
-              </Link>
+            <div className="mt-6 space-y-4">
+              {dashboardData.view.careCoverage.map((item) => (
+                <div key={item.label} className="rounded-[1.25rem] border border-border/70 bg-white p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="font-medium text-accent-strong">{item.label}</p>
+                    <p className="text-sm text-muted">{item.coverageRate}% em dia</p>
+                  </div>
+                  <div className="mt-3 h-3 overflow-hidden rounded-full bg-surface-strong">
+                    <div
+                      className="h-full rounded-full bg-accent"
+                      style={{ width: `${item.coverageRate}%` }}
+                    />
+                  </div>
+                  <div className="mt-3 flex justify-between text-xs text-muted">
+                    <span>Em dia: {item.covered}</span>
+                    <span>Em atraso: {item.uncovered}</span>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          </section>
         </section>
       </section>
     </main>
   );
 }
 
-async function loadDashboardData(filtros: FiltrosDashboardDTO) {
+async function loadDashboardData(filters: DashboardFiltersDTO) {
   try {
     const uploadRepository = new PrismaUploadRepository();
-    const pacienteRepository = new PrismaPacienteRepository();
+    const aggregateBucketRepository = new PrismaAggregateBucketRepository();
 
-    const [visao, uploads] = await Promise.all([
-      new GerarDashboardVisaoUseCase(pacienteRepository).execute(filtros),
-      new ListarUploadsUseCase(uploadRepository).execute(1),
+    const [view, uploads] = await Promise.all([
+      new GenerateDashboardViewUseCase(aggregateBucketRepository).execute(filters),
+      new ListRecentUploadsUseCase(uploadRepository).execute(1),
     ]);
 
     return {
-      visao,
-      ultimoUpload: uploads[0] ?? null,
+      view,
+      latestUpload: uploads[0] ?? null,
       hasDatabaseConnection: true,
     };
   } catch {
     return {
-      visao: {
-        resumo: EMPTY_RESUMO,
-        pacientes: [],
-        totalPacientesFiltrados: 0,
-        totalPaginas: 1,
-        paginaAtual: 1,
-        topBairros: [],
-        distribuicaoCondicao: [
+      view: {
+        summary: EMPTY_SUMMARY,
+        filteredRecordCount: 0,
+        conditionDistribution: [
           { label: "Diabetes", value: 0 },
           { label: "Hipertensao", value: 0 },
         ],
-        coberturaCuidado: [
-          {
-            label: "Atendimento medico",
-            covered: 0,
-            uncovered: 0,
-            coverageRate: 0,
-          },
-          {
-            label: "Atendimento enfermagem",
-            covered: 0,
-            uncovered: 0,
-            coverageRate: 0,
-          },
-          {
-            label: "Visita domiciliar",
-            covered: 0,
-            uncovered: 0,
-            coverageRate: 0,
-          },
-          {
-            label: "Pressao arterial",
-            covered: 0,
-            uncovered: 0,
-            coverageRate: 0,
-          },
-          {
-            label: "Hemoglobina glicada",
-            covered: 0,
-            uncovered: 0,
-            coverageRate: 0,
-          },
+        topNeighborhoods: [],
+        ageGroupDistribution: [],
+        sexDistribution: [],
+        raceColorDistribution: [],
+        careCoverage: [
+          { label: "Atendimento medico em dia", covered: 0, uncovered: 0, coverageRate: 0 },
+          { label: "Enfermagem em dia", covered: 0, uncovered: 0, coverageRate: 0 },
+          { label: "Visita domiciliar em dia", covered: 0, uncovered: 0, coverageRate: 0 },
+          { label: "PA recente", covered: 0, uncovered: 0, coverageRate: 0 },
+          { label: "HbA1c recente", covered: 0, uncovered: 0, coverageRate: 0 },
         ],
         filterOptions: {
-          bairros: [],
-          sexos: [],
-          racas: [],
+          neighborhoods: [],
+          sexes: [],
+          raceColors: [],
         },
-        filtrosAplicados: filtros,
-      } satisfies DashboardVisaoDTO,
-      ultimoUpload: null as UploadHistoricoDTO | null,
+        appliedFilters: filters,
+      } satisfies DashboardViewDTO,
+      latestUpload: null as UploadHistoryDTO | null,
       hasDatabaseConnection: false,
     };
   }

@@ -14,7 +14,7 @@ function makeXlsxBuffer(rows: string[][]): Buffer {
 }
 
 describe("SheetJSFileParser", () => {
-  it("detecta diabetes em CSV latin1 e cria pacientes", async () => {
+  it("detecta diabetes em CSV latin1 e cria registros anonimos", async () => {
     const parser = new SheetJSFileParser();
     const csv = [
       "Relatorio de acompanhamento - Diabetes",
@@ -24,14 +24,10 @@ describe("SheetJSFileParser", () => {
 
     const result = await parser.parse(Buffer.from(csv, "latin1"), "diabetes.csv");
 
-    expect(result.condicao).toBe("DIABETES");
-    expect(result.pacientes).toHaveLength(1);
-    expect(result.pacientes[0]?.toJSON()).toMatchObject({
-      id: "1",
-      nome: "João da Silva",
-      condicao: "DIABETES",
-      mesesUltimaHbA1c: 14,
-    });
+    expect(result.condition).toBe("DIABETES");
+    expect(result.records).toHaveLength(1);
+    expect(result.records[0]?.ageGroup).toBe("60-79");
+    expect(result.records[0]?.hasStaleHbA1c).toBe(true);
   });
 
   it("detecta hipertensao em XLSX e ignora HbA1c", async () => {
@@ -54,13 +50,9 @@ describe("SheetJSFileParser", () => {
 
     const result = await parser.parse(buffer, "hipertensao.xlsx");
 
-    expect(result.condicao).toBe("HIPERTENSAO");
-    expect(result.pacientes[0]?.toJSON()).toMatchObject({
-      id: "ABC-10",
-      nome: "Maria Souza",
-      condicao: "HIPERTENSAO",
-      mesesUltimaHbA1c: null,
-    });
+    expect(result.condition).toBe("HYPERTENSION");
+    expect(result.records).toHaveLength(1);
+    expect(result.records[0]?.hasStaleHbA1c).toBe(false);
   });
 
   it("falha quando o cabecalho obrigatorio nao existe", async () => {

@@ -15,12 +15,9 @@ describe("Demo datasets", () => {
 
     const result = await parser.parse(buffer, fileName);
 
-    expect(result.condicao).toBe("DIABETES");
-    expect(result.pacientes).toHaveLength(100);
-    expect(result.pacientes[0]?.toJSON()).toMatchObject({
-      id: "DBT-001",
-      condicao: "DIABETES",
-    });
+    expect(result.condition).toBe("DIABETES");
+    expect(result.records).toHaveLength(100);
+    expect(result.records[0]?.condition).toBe("DIABETES");
   });
 
   it("parseia o dataset de hipertensao com 100 registros", async () => {
@@ -30,11 +27,8 @@ describe("Demo datasets", () => {
 
     const result = await parser.parse(buffer, fileName);
 
-    expect(result.condicao).toBe("HIPERTENSAO");
-    expect(result.pacientes).toHaveLength(100);
-    expect(result.pacientes[0]?.toJSON()).toMatchObject({
-      id: "HIP-001",
-      condicao: "HIPERTENSAO",
-    });
+    expect(result.condition).toBe("HYPERTENSION");
+    expect(result.records).toHaveLength(100);
+    expect(result.records[0]?.condition).toBe("HYPERTENSION");
   });
 });

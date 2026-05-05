@@ -1,5 +1,5 @@
-import { Paciente } from "@/domain/entities/Paciente";
-import { type Condicao } from "@/domain/value-objects/Condicao";
+import { CareRecord } from "@/domain/entities/CareRecord";
+import { type Condition } from "@/domain/value-objects/Condition";
 import { FileParsingError } from "@/infrastructure/parsers/errors/FileParsingError";
 
 type RawRecord = Record<string, string>;
@@ -7,34 +7,32 @@ type RawRecord = Record<string, string>;
 const EMPTY_TOKENS = new Set(["", "-", "--", "na", "n/a", "ni", "nao informado"]);
 
 const COMMON_FIELD_ALIASES = {
-  id: ["id", "codigo", "codigo do paciente", "codigo do cidadao", "id paciente"],
-  nome: ["nome", "nome do paciente", "paciente"],
-  idade: ["idade"],
-  sexo: ["sexo"],
-  racaCor: ["raca cor", "raça cor", "raca/cor", "raça/cor"],
-  bolsaFamilia: [
+  age: ["idade"],
+  sex: ["sexo"],
+  raceColor: ["raca cor", "raça cor", "raca/cor", "raça/cor"],
+  familyAllowance: [
     "beneficiario programa bolsa familia",
     "beneficiário programa bolsa família",
     "bolsa familia",
     "bolsa família",
   ],
-  bairro: ["bairro", "microarea", "bairro microarea"],
-  mesesUltimoAtendMedico: [
+  neighborhood: ["bairro", "microarea", "bairro microarea"],
+  monthsSinceMedicalAppointment: [
     "meses ultimo atend medico",
     "meses sem atendimento medico",
     "tempo sem atendimento medico",
   ],
-  mesesUltimoAtendEnfermagem: [
+  monthsSinceNursingAppointment: [
     "meses ultimo atend enfermagem",
     "meses sem atendimento enfermagem",
     "tempo sem atendimento enfermagem",
   ],
-  mesesUltimaVisitaDomiciliar: [
+  monthsSinceHomeVisit: [
     "meses ultima visita domiciliar",
     "meses sem visita domiciliar",
     "tempo sem visita domiciliar",
   ],
-  mesesUltimaMedicaoPressaoArterial: [
+  monthsSinceBloodPressureCheck: [
     "meses ultima medicao pressao arterial",
     "meses sem medicao de pa",
     "tempo sem medicao de pa",
@@ -43,18 +41,23 @@ const COMMON_FIELD_ALIASES = {
 } as const;
 
 export abstract class BaseConditionParser {
-  abstract readonly condicao: Condicao;
+  abstract readonly condition: Condition;
 
-  parse(rows: RawRecord[]): Paciente[] {
+  parse(rows: RawRecord[]): CareRecord[] {
     if (rows.length === 0) {
-      throw new FileParsingError("O arquivo nao possui linhas de pacientes para importar.");
+      throw new FileParsingError("O arquivo nao possui linhas validas para importar.");
     }
 
-    return rows.map((row) => this.toPaciente(row));
+    return rows.map((row) => this.toCareRecord(row));
   }
 
   validateHeaders(headers: string[]): void {
-    const requiredFields = ["id", "nome"] as const;
+    const requiredFields = [
+      "monthsSinceMedicalAppointment",
+      "monthsSinceNursingAppointment",
+      "monthsSinceHomeVisit",
+      "monthsSinceBloodPressureCheck",
+    ] as const;
     const hasAllRequiredFields = requiredFields.every((field) =>
       this.findHeaderValue(headers, COMMON_FIELD_ALIASES[field]),
     );
@@ -66,33 +69,31 @@ export abstract class BaseConditionParser {
 
   protected abstract getConditionSpecificMonths(row: RawRecord): number | null;
 
-  private toPaciente(row: RawRecord): Paciente {
-    const externalId = this.readRequiredValue(row, COMMON_FIELD_ALIASES.id, "identificador");
-    const nome = this.readRequiredValue(row, COMMON_FIELD_ALIASES.nome, "nome");
-
-    return Paciente.create({
-      id: externalId,
-      nome,
-      condicao: this.condicao,
-      idade: this.readIntegerValue(row, COMMON_FIELD_ALIASES.idade),
-      sexo: this.readOptionalValue(row, COMMON_FIELD_ALIASES.sexo),
-      racaCor: this.readOptionalValue(row, COMMON_FIELD_ALIASES.racaCor),
-      bolsaFamilia: this.readBooleanValue(row, COMMON_FIELD_ALIASES.bolsaFamilia),
-      bairro: this.readOptionalValue(row, COMMON_FIELD_ALIASES.bairro),
-      mesesUltimoAtendMedico: this.readIntegerValue(row, COMMON_FIELD_ALIASES.mesesUltimoAtendMedico),
-      mesesUltimoAtendEnfermagem: this.readIntegerValue(
+  private toCareRecord(row: RawRecord): CareRecord {
+    return CareRecord.create({
+      condition: this.condition,
+      age: this.readIntegerValue(row, COMMON_FIELD_ALIASES.age),
+      sex: this.readOptionalValue(row, COMMON_FIELD_ALIASES.sex),
+      raceColor: this.readOptionalValue(row, COMMON_FIELD_ALIASES.raceColor),
+      familyAllowance: this.readBooleanValue(row, COMMON_FIELD_ALIASES.familyAllowance),
+      neighborhood: this.readOptionalValue(row, COMMON_FIELD_ALIASES.neighborhood),
+      monthsSinceMedicalAppointment: this.readIntegerValue(
         row,
-        COMMON_FIELD_ALIASES.mesesUltimoAtendEnfermagem,
+        COMMON_FIELD_ALIASES.monthsSinceMedicalAppointment,
       ),
-      mesesUltimaVisitaDomiciliar: this.readIntegerValue(
+      monthsSinceNursingAppointment: this.readIntegerValue(
         row,
-        COMMON_FIELD_ALIASES.mesesUltimaVisitaDomiciliar,
+        COMMON_FIELD_ALIASES.monthsSinceNursingAppointment,
       ),
-      mesesUltimaMedicaoPressaoArterial: this.readIntegerValue(
+      monthsSinceHomeVisit: this.readIntegerValue(
         row,
-        COMMON_FIELD_ALIASES.mesesUltimaMedicaoPressaoArterial,
+        COMMON_FIELD_ALIASES.monthsSinceHomeVisit,
       ),
-      mesesUltimaHbA1c: this.getConditionSpecificMonths(row),
+      monthsSinceBloodPressureCheck: this.readIntegerValue(
+        row,
+        COMMON_FIELD_ALIASES.monthsSinceBloodPressureCheck,
+      ),
+      monthsSinceHbA1c: this.getConditionSpecificMonths(row),
     });
   }
 
@@ -136,16 +137,6 @@ export abstract class BaseConditionParser {
 
     const normalized = row[value]?.trim() ?? "";
     return EMPTY_TOKENS.has(this.normalizeValue(normalized)) ? null : normalized;
-  }
-
-  private readRequiredValue(row: RawRecord, aliases: readonly string[], fieldName: string): string {
-    const value = this.readOptionalValue(row, aliases);
-
-    if (!value) {
-      throw new FileParsingError(`Linha invalida no relatorio: campo obrigatorio ausente (${fieldName}).`);
-    }
-
-    return value;
   }
 
   private findHeaderValue(headers: readonly string[], aliases: readonly string[]): string | null {

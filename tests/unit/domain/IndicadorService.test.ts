@@ -1,85 +1,70 @@
 import { describe, expect, it } from "vitest";
 
-import { Paciente } from "@/domain/entities/Paciente";
+import { CareRecord, type CareRecordProps } from "@/domain/entities/CareRecord";
 import { DomainError } from "@/domain/errors/DomainError";
-import { IndicadorService } from "@/domain/services/IndicadorService";
+import { DashboardAggregationService } from "@/domain/services/DashboardAggregationService";
 
-function makePaciente(
-  overrides: Partial<ConstructorParameters<typeof Paciente.create>[0]> = {},
-): Paciente {
-  return Paciente.create({
-    id: "patient-1",
-    nome: "Maria da Silva",
-    condicao: "DIABETES",
-    idade: 58,
-    sexo: "F",
-    racaCor: "Parda",
-    bolsaFamilia: false,
-    bairro: "Centro",
-    mesesUltimoAtendMedico: 8,
-    mesesUltimoAtendEnfermagem: 2,
-    mesesUltimaVisitaDomiciliar: 4,
-    mesesUltimaMedicaoPressaoArterial: null,
-    mesesUltimaHbA1c: 15,
+function makeRecord(
+  overrides: Partial<CareRecordProps> = {},
+): CareRecord {
+  return CareRecord.create({
+    condition: "DIABETES",
+    age: 58,
+    sex: "F",
+    raceColor: "Parda",
+    familyAllowance: false,
+    neighborhood: "Centro",
+    monthsSinceMedicalAppointment: 8,
+    monthsSinceNursingAppointment: 2,
+    monthsSinceHomeVisit: 4,
+    monthsSinceBloodPressureCheck: null,
+    monthsSinceHbA1c: 15,
     ...overrides,
   });
 }
 
-describe("Paciente", () => {
-  it("classifica faixa etaria corretamente", () => {
-    expect(makePaciente({ idade: 16 }).faixaEtaria).toBe("0-17");
-    expect(makePaciente({ idade: 39 }).faixaEtaria).toBe("18-39");
-    expect(makePaciente({ idade: 58 }).faixaEtaria).toBe("40-59");
-    expect(makePaciente({ idade: 79 }).faixaEtaria).toBe("60-79");
-    expect(makePaciente({ idade: 80 }).faixaEtaria).toBe("80+");
+describe("CareRecord", () => {
+  it("classifies age groups correctly", () => {
+    expect(makeRecord({ age: 16 }).ageGroup).toBe("0-17");
+    expect(makeRecord({ age: 39 }).ageGroup).toBe("18-39");
+    expect(makeRecord({ age: 58 }).ageGroup).toBe("40-59");
+    expect(makeRecord({ age: 79 }).ageGroup).toBe("60-79");
+    expect(makeRecord({ age: 80 }).ageGroup).toBe("80+");
   });
 
-  it("valida idade invalida", () => {
-    expect(() => makePaciente({ idade: 151 })).toThrow(DomainError);
+  it("validates invalid age", () => {
+    expect(() => makeRecord({ age: 151 })).toThrow(DomainError);
   });
 
-  it("aplica regras clinicas por limite de meses", () => {
-    const patient = makePaciente();
+  it("applies care-gap rules using month thresholds", () => {
+    const record = makeRecord();
 
-    expect(patient.needsMedicalCare).toBe(true);
-    expect(patient.needsNursingCare).toBe(false);
-    expect(patient.needsHomeVisit).toBe(true);
-    expect(patient.hasStaleBloodPressureMeasurement).toBe(true);
-    expect(patient.hasStaleHbA1c).toBe(true);
+    expect(record.needsMedicalCare).toBe(true);
+    expect(record.needsNursingCare).toBe(false);
+    expect(record.needsHomeVisit).toBe(true);
+    expect(record.hasStaleBloodPressureMeasurement).toBe(true);
+    expect(record.hasStaleHbA1c).toBe(true);
   });
 
-  it("ignora HbA1c para pacientes hipertensos", () => {
-    const patient = makePaciente({
-      condicao: "HIPERTENSAO",
-      mesesUltimaHbA1c: 30,
+  it("ignores HbA1c freshness for hypertension records", () => {
+    const record = makeRecord({
+      condition: "HYPERTENSION",
+      monthsSinceHbA1c: 30,
     });
 
-    expect(patient.hasStaleHbA1c).toBe(false);
+    expect(record.hasStaleHbA1c).toBe(false);
   });
 });
 
-describe("IndicadorService", () => {
-  it("gera o resumo agregado do dashboard", () => {
-    const pacientes = [
-      makePaciente(),
-      makePaciente({
-        id: "patient-2",
-        condicao: "HIPERTENSAO",
-        mesesUltimoAtendMedico: 1,
-        mesesUltimoAtendEnfermagem: 9,
-        mesesUltimaVisitaDomiciliar: 1,
-        mesesUltimaMedicaoPressaoArterial: 2,
-        mesesUltimaHbA1c: null,
-      }),
-    ];
+describe("DashboardAggregationService", () => {
+  it("groups identical records into counted buckets", () => {
+    const buckets = DashboardAggregationService.buildBuckets(
+      [makeRecord(), makeRecord()],
+      "upload-1",
+    );
 
-    expect(IndicadorService.gerarResumo(pacientes)).toEqual({
-      totalPacientes: 2,
-      semAtendimentoMedico: 1,
-      semAtendimentoEnfermagem: 1,
-      semVisitaDomiciliar: 1,
-      semMedicaoPressaoRecente: 1,
-      semHbA1cRecente: 1,
-    });
+    expect(buckets).toHaveLength(1);
+    expect(buckets[0]?.count).toBe(2);
+    expect(buckets[0]?.condition).toBe("DIABETES");
   });
 });

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ListarUploadsUseCase } from "@/application/use-cases/upload/ListarUploadsUseCase";
+import { ListRecentUploadsUseCase } from "@/application/use-cases/upload/ListRecentUploadsUseCase";
 import { UploadForm } from "@/components/upload/upload-form";
 import { PrismaUploadRepository } from "@/infrastructure/database/repositories/PrismaUploadRepository";
 
@@ -11,6 +11,10 @@ function formatUploadDate(date: Date): string {
     dateStyle: "short",
     timeStyle: "short",
   }).format(date);
+}
+
+function formatConditionLabel(condition: "DIABETES" | "HYPERTENSION"): string {
+  return condition === "DIABETES" ? "Diabetes" : "Hipertensao";
 }
 
 export default async function ImportarPage() {
@@ -24,12 +28,10 @@ export default async function ImportarPage() {
             Fluxo de upload
           </span>
           <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-accent-strong sm:text-5xl">
-            Importe os relatorios cronicos e grave uma nova fotografia da equipe.
+            Importe os relatorios cronicos e gere um novo snapshot quantitativo.
           </h1>
           <p className="max-w-2xl text-base leading-7 text-muted">
-            Esta etapa ja usa o parser real, o caso de uso de upload e a
-            persistencia com Prisma. O historico abaixo confirma as importacoes
-            mais recentes registradas no banco.
+            Cada arquivo e processado no servidor para gerar contagens e distribuicoes anonimizadas. O sistema nao persiste nomes, IDs ou qualquer dado individual de pacientes.
           </p>
         </section>
 
@@ -57,7 +59,7 @@ export default async function ImportarPage() {
               Persistencia
             </p>
             <p className="mt-3 text-2xl font-semibold text-accent-strong">
-              PostgreSQL via Prisma
+              Snapshot agregado
             </p>
           </article>
         </section>
@@ -86,7 +88,7 @@ export default async function ImportarPage() {
                 <tr>
                   <th className="px-4 py-3 font-semibold">Arquivo</th>
                   <th className="px-4 py-3 font-semibold">Condicao</th>
-                  <th className="px-4 py-3 font-semibold">Pacientes</th>
+                  <th className="px-4 py-3 font-semibold">Registros</th>
                   <th className="px-4 py-3 font-semibold">Responsavel</th>
                   <th className="px-4 py-3 font-semibold">Data</th>
                 </tr>
@@ -102,8 +104,8 @@ export default async function ImportarPage() {
                   uploads.map((upload) => (
                     <tr key={upload.id} className="border-t border-border/70">
                       <td className="px-4 py-4 font-medium">{upload.fileName}</td>
-                      <td className="px-4 py-4">{upload.condicao}</td>
-                      <td className="px-4 py-4">{upload.totalRegistros}</td>
+                      <td className="px-4 py-4">{formatConditionLabel(upload.condition)}</td>
+                      <td className="px-4 py-4">{upload.totalRecords}</td>
                       <td className="px-4 py-4">{upload.uploadedBy}</td>
                       <td className="px-4 py-4 text-muted">
                         {formatUploadDate(upload.createdAt)}
@@ -122,7 +124,7 @@ export default async function ImportarPage() {
 
 async function loadRecentUploads() {
   try {
-    return await new ListarUploadsUseCase(new PrismaUploadRepository()).execute(6);
+    return await new ListRecentUploadsUseCase(new PrismaUploadRepository()).execute(6);
   } catch {
     return [];
   }

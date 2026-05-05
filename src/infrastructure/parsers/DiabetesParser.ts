@@ -1,4 +1,4 @@
-import { type Condicao } from "@/domain/value-objects/Condicao";
+import { type Condition } from "@/domain/value-objects/Condition";
 import { BaseConditionParser } from "@/infrastructure/parsers/BaseConditionParser";
 
 const HBA1C_ALIASES = [
@@ -9,7 +9,7 @@ const HBA1C_ALIASES = [
 ] as const;
 
 export class DiabetesParser extends BaseConditionParser {
-  readonly condicao: Condicao = "DIABETES";
+  readonly condition: Condition = "DIABETES";
 
   protected getConditionSpecificMonths(row: Record<string, string>): number | null {
     return this.readIntegerValue(row, HBA1C_ALIASES);

@@ -1,16 +1,16 @@
 import { Upload } from "@/domain/entities/Upload";
-import { type Condicao } from "@/domain/value-objects/Condicao";
+import { type Condition } from "@/domain/value-objects/Condition";
 
-export interface UploadHistoricoItem {
+export interface UploadHistoryItem {
   id: string;
   fileName: string;
-  condicao: Condicao;
-  totalRegistros: number;
+  condition: Condition;
+  totalRecords: number;
   createdAt: Date;
   uploadedBy: string;
 }
 
 export interface IUploadRepository {
   save(upload: Upload): Promise<Upload>;
-  listRecent(limit: number): Promise<UploadHistoricoItem[]>;
+  listRecent(limit: number): Promise<UploadHistoryItem[]>;
 }

@@ -22,42 +22,37 @@ model User {
 model Upload {
   id             String    @id
   fileName       String
-  condicao       Condicao
-  totalRegistros Int
+  condition      Condition
+  totalRecords   Int
   createdAt      DateTime
   userId         String
   user           User      @relation(fields: [userId], references: [id])
-  pacientes      Paciente[]
+  aggregateBuckets AggregateBucket[]
 
   @@index([createdAt])
   @@index([userId])
 }
 
-model Paciente {
+model AggregateBucket {
   id                                String    @id @default(cuid())
-  externalId                        String
-  nome                              String
-  condicao                          Condicao
-  idade                             Int?
-  sexo                              String?
-  racaCor                           String?
-  bolsaFamilia                      Boolean?
-  bairro                            String?
-  mesesUltimoAtendMedico            Int?
-  mesesUltimoAtendEnfermagem        Int?
-  mesesUltimaVisitaDomiciliar       Int?
-  mesesUltimaMedicaoPressaoArterial Int?
-  mesesUltimaHbA1c                  Int?
+  condition                         Condition
+  ageGroup                          String?
+  sex                               String?
+  raceColor                         String?
+  familyAllowance                   Boolean?
+  neighborhood                      String?
+  needsMedicalCare                  Boolean
+  needsNursingCare                  Boolean
+  needsHomeVisit                    Boolean
+  hasStaleBloodPressureMeasurement  Boolean
+  hasStaleHbA1c                     Boolean
+  count                             Int
   uploadId                          String
   upload                            Upload    @relation(fields: [uploadId], references: [id], onDelete: Cascade)
 
   @@index([uploadId])
-  @@index([condicao])
-  @@index([bairro])
-  @@index([mesesUltimoAtendMedico])
-  @@index([mesesUltimoAtendEnfermagem])
-  @@index([mesesUltimaVisitaDomiciliar])
-  @@unique([uploadId, externalId])
+  @@index([condition])
+  @@index([neighborhood])
 }
 
 enum Perfil {
@@ -67,7 +62,7 @@ enum Perfil {
   ACS
 }
 
-enum Condicao {
+enum Condition {
   DIABETES
-  HIPERTENSAO
+  HYPERTENSION
 }

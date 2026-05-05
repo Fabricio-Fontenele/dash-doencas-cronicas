@@ -3,7 +3,7 @@ import { extname } from "node:path";
 import { type IFileParser, type ParsedFileResult } from "@/application/ports/IFileParser";
 import { FileParsingError } from "@/infrastructure/parsers/errors/FileParsingError";
 import { DiabetesParser } from "@/infrastructure/parsers/DiabetesParser";
-import { HipertensaoParser } from "@/infrastructure/parsers/HipertensaoParser";
+import { HypertensionParser } from "@/infrastructure/parsers/HypertensionParser";
 import * as XLSX from "xlsx";
 
 type MatrixRow = string[];
@@ -17,15 +17,15 @@ export class SheetJSFileParser implements IFileParser {
     this.validateFileExtension(fileName);
 
     const matrix = this.readMatrix(buffer, fileName);
-    const condicao = this.detectCondition(matrix, fileName);
-    const parser = condicao === "DIABETES" ? new DiabetesParser() : new HipertensaoParser();
+    const condition = this.detectCondition(matrix, fileName);
+    const parser = condition === "DIABETES" ? new DiabetesParser() : new HypertensionParser();
     const records = this.extractRecords(matrix);
 
     parser.validateHeaders(Object.keys(records[0] ?? {}));
 
     return {
-      condicao,
-      pacientes: parser.parse(records),
+      condition,
+      records: parser.parse(records),
     };
   }
 
@@ -66,7 +66,7 @@ export class SheetJSFileParser implements IFileParser {
     return utf8Decoded.includes("�") ? new TextDecoder("latin1").decode(buffer) : utf8Decoded;
   }
 
-  private detectCondition(matrix: MatrixRow[], fileName: string): ParsedFileResult["condicao"] {
+  private detectCondition(matrix: MatrixRow[], fileName: string): ParsedFileResult["condition"] {
     const titleSample = matrix
       .slice(0, MAX_TITLE_SCAN_ROWS)
       .flat()
@@ -78,7 +78,7 @@ export class SheetJSFileParser implements IFileParser {
     }
 
     if (normalizedTitle.includes("hipertens")) {
-      return "HIPERTENSAO";
+      return "HYPERTENSION";
     }
 
     throw new FileParsingError("Nao foi possivel identificar se o relatorio e de diabetes ou hipertensao.");
@@ -107,7 +107,10 @@ export class SheetJSFileParser implements IFileParser {
 
   private isHeaderRow(row: MatrixRow): boolean {
     const normalizedCells = row.map((cell) => this.normalize(cell));
-    return normalizedCells.includes("nome") && normalizedCells.some((cell) => cell === "id" || cell === "codigo");
+    return (
+      normalizedCells.some((cell) => cell === "bairro" || cell === "microarea") &&
+      normalizedCells.some((cell) => cell.includes("atend") || cell.includes("pressao"))
+    );
   }
 
   private normalize(value: string): string {

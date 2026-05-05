@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Dashboard de Acompanhamento Cronico",
-  description: "Painel para acompanhamento de pacientes com diabetes e hipertensao.",
+  description: "Painel quantitativo para acompanhamento agregado de diabetes e hipertensao.",
 };
 
 export default function RootLayout({
