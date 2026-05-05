@@ -23,7 +23,11 @@ export class GenerateDashboardViewUseCase {
       summary: this.buildSummary(filteredBuckets),
       filteredRecordCount: this.sumCounts(filteredBuckets),
       conditionDistribution: this.buildConditionDistribution(filteredBuckets),
-      topNeighborhoods: this.groupAndSort(filteredBuckets, (bucket) => bucket.neighborhood ?? "Nao informado", 6),
+      topNeighborhoods: this.groupAndSort(
+        filteredBuckets,
+        (bucket) => bucket.neighborhood ?? "Nao informado",
+        10,
+      ),
       ageGroupDistribution: this.groupAndSort(filteredBuckets, (bucket) => bucket.ageGroup ?? "Nao informada"),
       sexDistribution: this.groupAndSort(filteredBuckets, (bucket) => bucket.sex ?? "Nao informado"),
       raceColorDistribution: this.groupAndSort(filteredBuckets, (bucket) => bucket.raceColor ?? "Nao informada"),

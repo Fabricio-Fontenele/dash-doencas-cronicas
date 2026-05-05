@@ -325,11 +325,13 @@ function HorizontalBars({
   subtitle,
   items,
   tone = "bg-accent",
+  ranked = false,
 }: {
   title: string;
   subtitle: string;
   items: DashboardBarChartItemDTO[];
   tone?: string;
+  ranked?: boolean;
 }) {
   const maxValue = Math.max(...items.map((item) => item.value), 1);
 
@@ -342,10 +344,17 @@ function HorizontalBars({
         {items.length === 0 ? (
           <p className="text-sm text-muted">Sem dados para este recorte.</p>
         ) : (
-          items.map((item) => (
+          items.map((item, index) => (
             <div key={item.label} className="space-y-2">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-medium text-accent-strong">{item.label}</p>
+                <div className="flex min-w-0 items-center gap-3">
+                  {ranked ? (
+                    <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-strong text-xs font-semibold text-muted">
+                      {index + 1}
+                    </span>
+                  ) : null}
+                  <p className="truncate text-sm font-medium text-accent-strong">{item.label}</p>
+                </div>
                 <p className="text-sm text-muted">{item.value}</p>
               </div>
               <div className="h-3 overflow-hidden rounded-full bg-surface-strong">
@@ -910,8 +919,9 @@ export default async function Home({ searchParams }: HomePageProps) {
             >
               <HorizontalBars
                 title="Territorio"
-                subtitle="Bairros com mais pessoas acompanhadas"
+                subtitle="Top bairros com mais pessoas acompanhadas"
                 items={dashboardData.view.topNeighborhoods}
+                ranked
               />
               {hasMixedConditions ? (
                 <ComparisonColumns
