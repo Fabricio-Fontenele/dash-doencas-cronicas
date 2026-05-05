@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col bg-[radial-gradient(circle_at_top,#e6f0df_0%,#f4f1e8_45%,#ede7d9_100%)]">
@@ -13,6 +15,14 @@ export default function Home() {
             A fundacao do projeto ja foi iniciada com Next.js, TypeScript e a primeira camada de dominio.
             As proximas entregas vao conectar upload, persistencia e indicadores reais.
           </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/importar"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-sm font-semibold text-white transition hover:bg-accent-strong"
+            >
+              Abrir fluxo de importacao
+            </Link>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
