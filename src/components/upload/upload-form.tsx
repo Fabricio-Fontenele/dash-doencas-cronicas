@@ -3,10 +3,8 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
-import {
-  initialUploadActionState,
-  processUploadAction,
-} from "@/presentation/actions/upload.actions";
+import { processUploadAction } from "@/presentation/actions/upload.actions";
+import { initialUploadActionState } from "@/presentation/actions/upload-action-state";
 
 function SubmitButton() {
   const { pending } = useFormStatus();

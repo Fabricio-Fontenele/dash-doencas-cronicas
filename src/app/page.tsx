@@ -33,10 +33,15 @@ const EMPTY_RESUMO: DashboardResumoDTO = {
 const DEFAULT_FILTERS: FiltrosDashboardDTO = {
   condicao: "TODOS",
   sexo: null,
+  racaCor: null,
   bairro: null,
+  bolsaFamilia: "TODOS",
   faixaEtaria: "TODAS",
   busca: "",
   alerta: null,
+  minMesesMedico: 0,
+  minMesesEnfermagem: 0,
+  minMesesVisita: 0,
   page: 1,
   pageSize: 8,
   sortBy: "risk",
@@ -64,10 +69,15 @@ function createQueryString(
 
   if (next.condicao !== "TODOS") params.set("condicao", next.condicao);
   if (next.sexo) params.set("sexo", next.sexo);
+  if (next.racaCor) params.set("racaCor", next.racaCor);
   if (next.bairro) params.set("bairro", next.bairro);
+  if (next.bolsaFamilia !== "TODOS") params.set("bolsaFamilia", next.bolsaFamilia);
   if (next.faixaEtaria !== "TODAS") params.set("faixaEtaria", next.faixaEtaria);
   if (next.busca.trim()) params.set("busca", next.busca.trim());
   if (next.alerta) params.set("alerta", next.alerta);
+  if (next.minMesesMedico > 0) params.set("minMesesMedico", String(next.minMesesMedico));
+  if (next.minMesesEnfermagem > 0) params.set("minMesesEnfermagem", String(next.minMesesEnfermagem));
+  if (next.minMesesVisita > 0) params.set("minMesesVisita", String(next.minMesesVisita));
   if (next.page > 1) params.set("page", String(next.page));
   if (next.sortBy !== "risk") params.set("sortBy", next.sortBy);
 
@@ -88,10 +98,15 @@ function parseFilters(
 ): FiltrosDashboardDTO {
   const condicao = parseSingleValue(searchParams.condicao);
   const sexo = parseSingleValue(searchParams.sexo);
+  const racaCor = parseSingleValue(searchParams.racaCor);
   const bairro = parseSingleValue(searchParams.bairro);
+  const bolsaFamilia = parseSingleValue(searchParams.bolsaFamilia);
   const faixaEtaria = parseSingleValue(searchParams.faixaEtaria);
   const busca = parseSingleValue(searchParams.busca) ?? "";
   const alerta = parseSingleValue(searchParams.alerta);
+  const minMesesMedico = Number.parseInt(parseSingleValue(searchParams.minMesesMedico) ?? "0", 10);
+  const minMesesEnfermagem = Number.parseInt(parseSingleValue(searchParams.minMesesEnfermagem) ?? "0", 10);
+  const minMesesVisita = Number.parseInt(parseSingleValue(searchParams.minMesesVisita) ?? "0", 10);
   const page = Number.parseInt(parseSingleValue(searchParams.page) ?? "1", 10);
   const sortBy = parseSingleValue(searchParams.sortBy);
 
@@ -101,7 +116,12 @@ function parseFilters(
         ? condicao
         : DEFAULT_FILTERS.condicao,
     sexo: sexo || null,
+    racaCor: racaCor || null,
     bairro: bairro || null,
+    bolsaFamilia:
+      bolsaFamilia === "SIM" || bolsaFamilia === "NAO"
+        ? bolsaFamilia
+        : DEFAULT_FILTERS.bolsaFamilia,
     faixaEtaria:
       faixaEtaria === "0-17" ||
       faixaEtaria === "18-39" ||
@@ -119,13 +139,21 @@ function parseFilters(
       alerta === "hba1c"
         ? alerta
         : DEFAULT_FILTERS.alerta,
+    minMesesMedico:
+      Number.isFinite(minMesesMedico) && minMesesMedico > 0 ? minMesesMedico : 0,
+    minMesesEnfermagem:
+      Number.isFinite(minMesesEnfermagem) && minMesesEnfermagem > 0 ? minMesesEnfermagem : 0,
+    minMesesVisita:
+      Number.isFinite(minMesesVisita) && minMesesVisita > 0 ? minMesesVisita : 0,
     page: Number.isFinite(page) && page > 0 ? page : DEFAULT_FILTERS.page,
     pageSize: DEFAULT_FILTERS.pageSize,
     sortBy:
       sortBy === "name" ||
       sortBy === "condition" ||
       sortBy === "neighborhood" ||
-      sortBy === "risk"
+      sortBy === "risk" ||
+      sortBy === "age" ||
+      sortBy === "medical-delay"
         ? sortBy
         : DEFAULT_FILTERS.sortBy,
   };
@@ -302,7 +330,7 @@ export default async function Home({ searchParams }: HomePageProps) {
             </p>
           </div>
 
-          <form className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+          <form className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-8">
             <label className="flex flex-col gap-2 text-sm">
               <span className="font-medium text-accent-strong">Busca</span>
               <input
@@ -344,6 +372,22 @@ export default async function Home({ searchParams }: HomePageProps) {
             </label>
 
             <label className="flex flex-col gap-2 text-sm">
+              <span className="font-medium text-accent-strong">Raça/cor</span>
+              <select
+                name="racaCor"
+                defaultValue={dashboardData.visao.filtrosAplicados.racaCor ?? ""}
+                className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
+              >
+                <option value="">Todas</option>
+                {dashboardData.visao.filterOptions.racas.map((raca) => (
+                  <option key={raca} value={raca}>
+                    {raca}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm">
               <span className="font-medium text-accent-strong">Faixa etaria</span>
               <select
                 name="faixaEtaria"
@@ -376,6 +420,55 @@ export default async function Home({ searchParams }: HomePageProps) {
             </label>
 
             <label className="flex flex-col gap-2 text-sm">
+              <span className="font-medium text-accent-strong">Bolsa Familia</span>
+              <select
+                name="bolsaFamilia"
+                defaultValue={dashboardData.visao.filtrosAplicados.bolsaFamilia}
+                className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
+              >
+                <option value="TODOS">Todos</option>
+                <option value="SIM">Sim</option>
+                <option value="NAO">Nao</option>
+              </select>
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm">
+              <span className="font-medium text-accent-strong">Min. meses medico</span>
+              <input
+                type="number"
+                min="0"
+                max="24"
+                name="minMesesMedico"
+                defaultValue={dashboardData.visao.filtrosAplicados.minMesesMedico}
+                className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
+              />
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm">
+              <span className="font-medium text-accent-strong">Min. meses enfermagem</span>
+              <input
+                type="number"
+                min="0"
+                max="24"
+                name="minMesesEnfermagem"
+                defaultValue={dashboardData.visao.filtrosAplicados.minMesesEnfermagem}
+                className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
+              />
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm">
+              <span className="font-medium text-accent-strong">Min. meses visita</span>
+              <input
+                type="number"
+                min="0"
+                max="24"
+                name="minMesesVisita"
+                defaultValue={dashboardData.visao.filtrosAplicados.minMesesVisita}
+                className="h-11 rounded-2xl border border-border bg-white px-4 text-foreground outline-none transition focus:border-accent"
+              />
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm">
               <span className="font-medium text-accent-strong">Ordenacao</span>
               <select
                 name="sortBy"
@@ -384,8 +477,10 @@ export default async function Home({ searchParams }: HomePageProps) {
               >
                 <option value="risk">Maior risco</option>
                 <option value="name">Nome</option>
+                <option value="age">Maior idade</option>
                 <option value="condition">Condicao</option>
                 <option value="neighborhood">Bairro</option>
+                <option value="medical-delay">Maior atraso medico</option>
               </select>
             </label>
 
@@ -397,7 +492,7 @@ export default async function Home({ searchParams }: HomePageProps) {
               />
             ) : null}
 
-            <div className="flex gap-3 md:col-span-2 xl:col-span-6">
+            <div className="flex gap-3 md:col-span-2 xl:col-span-8">
               <button
                 type="submit"
                 className="inline-flex h-11 items-center justify-center rounded-full bg-accent px-5 text-sm font-semibold text-white transition hover:bg-accent-strong"
@@ -575,15 +670,16 @@ export default async function Home({ searchParams }: HomePageProps) {
                 <tr>
                   <th className="px-4 py-3 font-semibold">Paciente</th>
                   <th className="px-4 py-3 font-semibold">Condicao</th>
+                  <th className="px-4 py-3 font-semibold">Perfil</th>
                   <th className="px-4 py-3 font-semibold">Bairro</th>
-                  <th className="px-4 py-3 font-semibold">Faixa etaria</th>
+                  <th className="px-4 py-3 font-semibold">Meses</th>
                   <th className="px-4 py-3 font-semibold">Alertas</th>
                 </tr>
               </thead>
               <tbody className="bg-white text-sm text-foreground">
                 {dashboardData.visao.pacientes.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-10 text-center text-muted">
+                    <td colSpan={6} className="px-4 py-10 text-center text-muted">
                       Nenhum paciente encontrado para os filtros atuais.
                     </td>
                   </tr>
@@ -605,10 +701,23 @@ export default async function Home({ searchParams }: HomePageProps) {
                         </td>
                         <td className="px-4 py-4">{paciente.condicao}</td>
                         <td className="px-4 py-4">
+                          <p>{paciente.sexo ?? "Nao informado"}</p>
+                          <p className="text-xs text-muted">
+                            {paciente.faixaEtaria ?? "Sem faixa"} • {paciente.racaCor ?? "Raça n/i"}
+                          </p>
+                          <p className="text-xs text-muted">
+                            Bolsa Familia: {paciente.bolsaFamilia === null ? "n/i" : paciente.bolsaFamilia ? "Sim" : "Nao"}
+                          </p>
+                        </td>
+                        <td className="px-4 py-4">
                           {paciente.bairro ?? "Nao informado"}
                         </td>
                         <td className="px-4 py-4">
-                          {paciente.faixaEtaria ?? "Nao informada"}
+                          <div className="space-y-1 text-xs text-muted">
+                            <p>Medico: {paciente.mesesUltimoAtendMedico ?? "n/i"}m</p>
+                            <p>Enfermagem: {paciente.mesesUltimoAtendEnfermagem ?? "n/i"}m</p>
+                            <p>Visita: {paciente.mesesUltimaVisitaDomiciliar ?? "n/i"}m</p>
+                          </div>
                         </td>
                         <td className="px-4 py-4">
                           <div className="flex flex-wrap gap-2">
@@ -741,6 +850,7 @@ async function loadDashboardData(filtros: FiltrosDashboardDTO) {
         filterOptions: {
           bairros: [],
           sexos: [],
+          racas: [],
         },
         filtrosAplicados: filtros,
       } satisfies DashboardVisaoDTO,

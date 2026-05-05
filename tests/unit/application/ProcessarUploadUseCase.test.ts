@@ -13,6 +13,8 @@ function makePaciente(id: string): Paciente {
     condicao: "DIABETES",
     idade: 61,
     sexo: "F",
+    racaCor: "Parda",
+    bolsaFamilia: false,
     bairro: "Centro",
     mesesUltimoAtendMedico: 8,
     mesesUltimoAtendEnfermagem: 3,

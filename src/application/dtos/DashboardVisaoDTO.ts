@@ -17,6 +17,7 @@ export interface DashboardCoverageItemDTO {
 export interface DashboardFilterOptionsDTO {
   bairros: string[];
   sexos: string[];
+  racas: string[];
 }
 
 export interface DashboardVisaoDTO {

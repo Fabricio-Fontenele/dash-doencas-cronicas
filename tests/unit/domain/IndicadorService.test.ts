@@ -13,6 +13,8 @@ function makePaciente(
     condicao: "DIABETES",
     idade: 58,
     sexo: "F",
+    racaCor: "Parda",
+    bolsaFamilia: false,
     bairro: "Centro",
     mesesUltimoAtendMedico: 8,
     mesesUltimoAtendEnfermagem: 2,

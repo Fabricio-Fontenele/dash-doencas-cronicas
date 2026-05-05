@@ -47,6 +47,7 @@ export class GerarDashboardVisaoUseCase {
   private buildFilterOptions(pacientes: Paciente[]) {
     const bairros = new Set<string>();
     const sexos = new Set<string>();
+    const racas = new Set<string>();
 
     for (const paciente of pacientes) {
       const data = paciente.toJSON();
@@ -58,11 +59,16 @@ export class GerarDashboardVisaoUseCase {
       if (data.sexo) {
         sexos.add(data.sexo);
       }
+
+      if (data.racaCor) {
+        racas.add(data.racaCor);
+      }
     }
 
     return {
       bairros: Array.from(bairros).sort((a, b) => a.localeCompare(b)),
       sexos: Array.from(sexos).sort((a, b) => a.localeCompare(b)),
+      racas: Array.from(racas).sort((a, b) => a.localeCompare(b)),
     };
   }
 
@@ -79,7 +85,25 @@ export class GerarDashboardVisaoUseCase {
         return false;
       }
 
+      if (filtros.racaCor && data.racaCor !== filtros.racaCor) {
+        return false;
+      }
+
       if (filtros.bairro && data.bairro !== filtros.bairro) {
+        return false;
+      }
+
+      if (
+        filtros.bolsaFamilia === "SIM" &&
+        data.bolsaFamilia !== true
+      ) {
+        return false;
+      }
+
+      if (
+        filtros.bolsaFamilia === "NAO" &&
+        data.bolsaFamilia !== false
+      ) {
         return false;
       }
 
@@ -99,6 +123,27 @@ export class GerarDashboardVisaoUseCase {
       }
 
       if (!this.matchAlertFilter(paciente, filtros.alerta)) {
+        return false;
+      }
+
+      if (
+        filtros.minMesesMedico > 0 &&
+        (paciente.mesesUltimoAtendMedico ?? -1) < filtros.minMesesMedico
+      ) {
+        return false;
+      }
+
+      if (
+        filtros.minMesesEnfermagem > 0 &&
+        (paciente.mesesUltimoAtendEnfermagem ?? -1) < filtros.minMesesEnfermagem
+      ) {
+        return false;
+      }
+
+      if (
+        filtros.minMesesVisita > 0 &&
+        (paciente.mesesUltimaVisitaDomiciliar ?? -1) < filtros.minMesesVisita
+      ) {
         return false;
       }
 
@@ -137,6 +182,17 @@ export class GerarDashboardVisaoUseCase {
 
       if (sortBy === "risk") {
         return this.calculateRiskScore(right) - this.calculateRiskScore(left) || left.nome.localeCompare(right.nome);
+      }
+
+      if (sortBy === "age") {
+        return (right.idade ?? -1) - (left.idade ?? -1) || left.nome.localeCompare(right.nome);
+      }
+
+      if (sortBy === "medical-delay") {
+        return (
+          (right.mesesUltimoAtendMedico ?? -1) - (left.mesesUltimoAtendMedico ?? -1) ||
+          left.nome.localeCompare(right.nome)
+        );
       }
 
       return left.nome.localeCompare(right.nome);
@@ -251,8 +307,14 @@ export class GerarDashboardVisaoUseCase {
       id: paciente.id,
       nome: paciente.nome,
       condicao: paciente.condicao,
+      sexo: data.sexo,
+      racaCor: data.racaCor,
+      bolsaFamilia: data.bolsaFamilia,
       bairro: data.bairro,
       faixaEtaria: paciente.faixaEtaria,
+      mesesUltimoAtendMedico: data.mesesUltimoAtendMedico,
+      mesesUltimoAtendEnfermagem: data.mesesUltimoAtendEnfermagem,
+      mesesUltimaVisitaDomiciliar: data.mesesUltimaVisitaDomiciliar,
       needsMedicalCare: paciente.needsMedicalCare,
       needsNursingCare: paciente.needsNursingCare,
       needsHomeVisit: paciente.needsHomeVisit,

@@ -11,6 +11,13 @@ const COMMON_FIELD_ALIASES = {
   nome: ["nome", "nome do paciente", "paciente"],
   idade: ["idade"],
   sexo: ["sexo"],
+  racaCor: ["raca cor", "raça cor", "raca/cor", "raça/cor"],
+  bolsaFamilia: [
+    "beneficiario programa bolsa familia",
+    "beneficiário programa bolsa família",
+    "bolsa familia",
+    "bolsa família",
+  ],
   bairro: ["bairro", "microarea", "bairro microarea"],
   mesesUltimoAtendMedico: [
     "meses ultimo atend medico",
@@ -69,6 +76,8 @@ export abstract class BaseConditionParser {
       condicao: this.condicao,
       idade: this.readIntegerValue(row, COMMON_FIELD_ALIASES.idade),
       sexo: this.readOptionalValue(row, COMMON_FIELD_ALIASES.sexo),
+      racaCor: this.readOptionalValue(row, COMMON_FIELD_ALIASES.racaCor),
+      bolsaFamilia: this.readBooleanValue(row, COMMON_FIELD_ALIASES.bolsaFamilia),
       bairro: this.readOptionalValue(row, COMMON_FIELD_ALIASES.bairro),
       mesesUltimoAtendMedico: this.readIntegerValue(row, COMMON_FIELD_ALIASES.mesesUltimoAtendMedico),
       mesesUltimoAtendEnfermagem: this.readIntegerValue(
@@ -98,6 +107,26 @@ export abstract class BaseConditionParser {
     return Number.isNaN(numericValue) ? null : numericValue;
   }
 
+  protected readBooleanValue(row: RawRecord, aliases: readonly string[]): boolean | null {
+    const rawValue = this.readOptionalValue(row, aliases);
+
+    if (rawValue === null) {
+      return null;
+    }
+
+    const normalized = this.normalizeValue(rawValue);
+
+    if (["sim", "s", "true", "1"].includes(normalized)) {
+      return true;
+    }
+
+    if (["nao", "n", "false", "0"].includes(normalized)) {
+      return false;
+    }
+
+    return null;
+  }
+
   protected readOptionalValue(row: RawRecord, aliases: readonly string[]): string | null {
     const value = this.findHeaderValue(Object.keys(row), aliases);
 
@@ -124,7 +153,7 @@ export abstract class BaseConditionParser {
     return headers.find((header) => aliasSet.has(this.normalizeValue(header))) ?? null;
   }
 
-  private normalizeValue(value: string): string {
+  protected normalizeValue(value: string): string {
     return value
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")

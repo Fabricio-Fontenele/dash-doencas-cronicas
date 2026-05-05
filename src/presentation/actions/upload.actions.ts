@@ -9,6 +9,7 @@ import { PrismaPacienteRepository } from "@/infrastructure/database/repositories
 import { PrismaUploadRepository } from "@/infrastructure/database/repositories/PrismaUploadRepository";
 import { FileParsingError } from "@/infrastructure/parsers/errors/FileParsingError";
 import { SheetJSFileParser } from "@/infrastructure/parsers/SheetJSFileParser";
+import { type UploadActionState } from "@/presentation/actions/upload-action-state";
 
 const MAX_FILE_SIZE_IN_BYTES = 10 * 1024 * 1024;
 const ACCEPTED_EXTENSIONS = [".csv", ".xls", ".xlsx"] as const;
@@ -27,18 +28,6 @@ const uploadInputSchema = z.object({
       "Envie um arquivo CSV, XLS ou XLSX.",
     ),
 });
-
-export interface UploadActionState {
-  status: "idle" | "success" | "error";
-  message: string | null;
-  uploadedFileName: string | null;
-}
-
-export const initialUploadActionState: UploadActionState = {
-  status: "idle",
-  message: null,
-  uploadedFileName: null,
-};
 
 export async function processUploadAction(
   _previousState: UploadActionState,

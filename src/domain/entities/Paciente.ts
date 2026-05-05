@@ -15,6 +15,8 @@ export interface PacienteProps {
   condicao: Condicao;
   idade: number | null;
   sexo: string | null;
+  racaCor: string | null;
+  bolsaFamilia: boolean | null;
   bairro: string | null;
   mesesUltimoAtendMedico: number | null;
   mesesUltimoAtendEnfermagem: number | null;
@@ -33,6 +35,7 @@ export class Paciente {
       nome: props.nome.trim(),
       bairro: props.bairro?.trim() || null,
       sexo: props.sexo?.trim() || null,
+      racaCor: props.racaCor?.trim() || null,
     });
   }
 
@@ -60,6 +63,46 @@ export class Paciente {
 
   get condicao(): Condicao {
     return this.props.condicao;
+  }
+
+  get idade(): number | null {
+    return this.props.idade;
+  }
+
+  get sexo(): string | null {
+    return this.props.sexo;
+  }
+
+  get racaCor(): string | null {
+    return this.props.racaCor;
+  }
+
+  get bolsaFamilia(): boolean | null {
+    return this.props.bolsaFamilia;
+  }
+
+  get bairro(): string | null {
+    return this.props.bairro;
+  }
+
+  get mesesUltimoAtendMedico(): number | null {
+    return this.props.mesesUltimoAtendMedico;
+  }
+
+  get mesesUltimoAtendEnfermagem(): number | null {
+    return this.props.mesesUltimoAtendEnfermagem;
+  }
+
+  get mesesUltimaVisitaDomiciliar(): number | null {
+    return this.props.mesesUltimaVisitaDomiciliar;
+  }
+
+  get mesesUltimaMedicaoPressaoArterial(): number | null {
+    return this.props.mesesUltimaMedicaoPressaoArterial;
+  }
+
+  get mesesUltimaHbA1c(): number | null {
+    return this.props.mesesUltimaHbA1c;
   }
 
   get faixaEtaria(): FaixaEtaria | null {
