@@ -413,24 +413,14 @@ function DonutChart({
   title,
   subtitle,
   items,
+  getColor,
 }: {
   title: string;
   subtitle: string;
   items: DashboardBarChartItemDTO[];
+  getColor: (label: string) => string;
 }) {
   const total = items.reduce((sum, item) => sum + item.value, 0);
-  const getRaceColor = (label: string): string => {
-    const normalized = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-
-    if (normalized.includes("branca")) return "#f1d7c2";
-    if (normalized.includes("parda")) return "#b9855b";
-    if (normalized.includes("preta")) return "#5a3b2e";
-    if (normalized.includes("amarela")) return "#d8b35d";
-    if (normalized.includes("indigena")) return "#9a6745";
-    if (normalized.includes("nao inform")) return "#a8a29e";
-
-    return "#7c8f6b";
-  };
 
   if (items.length === 0 || total === 0) {
     return (
@@ -453,7 +443,7 @@ function DonutChart({
           {
             start: previousEnd,
             end: previousEnd + segmentSize,
-            color: getRaceColor(item.label),
+            color: getColor(item.label),
           },
         ];
       },
@@ -490,7 +480,7 @@ function DonutChart({
         <div className="space-y-3">
           {items.map((item) => {
             const percentage = Math.round((item.value / total) * 100);
-            const color = getRaceColor(item.label);
+            const color = getColor(item.label);
 
             return (
               <div
@@ -515,6 +505,29 @@ function DonutChart({
       </div>
     </section>
   );
+}
+
+function getRaceColor(label: string): string {
+  const normalized = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+  if (normalized.includes("branca")) return "#f1d7c2";
+  if (normalized.includes("parda")) return "#b9855b";
+  if (normalized.includes("preta")) return "#5a3b2e";
+  if (normalized.includes("amarela")) return "#d8b35d";
+  if (normalized.includes("indigena")) return "#9a6745";
+  if (normalized.includes("nao inform")) return "#a8a29e";
+
+  return "#7c8f6b";
+}
+
+function getSexColor(label: string): string {
+  const normalized = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+  if (normalized.includes("femin")) return "#b35c2e";
+  if (normalized.includes("mascul")) return "#315c42";
+  if (normalized.includes("nao inform")) return "#a8a29e";
+
+  return "#8b3d45";
 }
 
 function CoverageDeck({ items }: { items: DashboardCoverageItemDTO[] }) {
@@ -896,10 +909,11 @@ export default async function Home({ searchParams }: HomePageProps) {
             </section>
 
             <section className="grid gap-4 2xl:grid-cols-[0.9fr_1.1fr]">
-              <ComparisonColumns
+              <DonutChart
                 title="Sexo"
-                subtitle="Distribuicao por sexo no recorte atual"
+                subtitle="Composicao do recorte por sexo"
                 items={dashboardData.view.sexDistribution}
+                getColor={getSexColor}
               />
               <HorizontalBars
                 title="Faixa etaria"
@@ -914,6 +928,7 @@ export default async function Home({ searchParams }: HomePageProps) {
                 title="Raca/cor"
                 subtitle="Composicao do recorte por raca/cor"
                 items={dashboardData.view.raceColorDistribution}
+                getColor={getRaceColor}
               />
               <CoverageDeck items={visibleCoverageItems} />
             </section>
