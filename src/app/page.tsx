@@ -381,31 +381,34 @@ function VerticalBars({
   subtitle: string;
   items: DashboardBarChartItemDTO[];
 }) {
-  const maxValue = Math.max(...items.map((item) => item.value), 1);
+  const sortedItems = [...items].sort(
+    (left, right) => right.value - left.value || left.label.localeCompare(right.label),
+  );
+  const maxValue = Math.max(...sortedItems.map((item) => item.value), 1);
 
   return (
     <section className={SECTION_CLASS_NAME}>
       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">{title}</p>
       <h2 className="mt-2 text-2xl font-semibold text-accent-strong">{subtitle}</h2>
 
-      {items.length === 0 ? (
+      {sortedItems.length === 0 ? (
         <p className="mt-6 text-sm text-muted">Sem dados para este recorte.</p>
       ) : (
         <div className="mt-6 overflow-x-auto pb-2">
-          <div className="flex min-w-max items-end gap-2">
-            {items.map((item) => (
-              <article
-                key={item.label}
-                className="flex w-16 shrink-0 flex-col items-center"
-              >
-                <p className="mb-2 text-sm font-semibold text-accent-strong">{item.value}</p>
-                <div className="flex h-64 w-full items-end rounded-[1.25rem] bg-surface-strong/70 p-1">
+          <div className="flex min-w-max items-end gap-3">
+            {sortedItems.map((item) => (
+              <article key={item.label} className="flex w-14 shrink-0 flex-col items-center">
+                <div className="flex h-72 w-full items-end">
                   <div
-                    className="w-full rounded-[0.95rem] bg-[linear-gradient(180deg,#d5b17c_0%,#b35c2e_100%)]"
+                    className="relative w-full bg-[linear-gradient(180deg,#d5b17c_0%,#b35c2e_100%)]"
                     style={{ height: `${Math.max((item.value / maxValue) * 100, 8)}%` }}
-                  />
+                  >
+                    <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-accent-strong">
+                      {item.value}
+                    </span>
+                  </div>
                 </div>
-                <p className="mt-3 line-clamp-2 text-center text-[11px] font-medium leading-5 text-accent-strong">
+                <p className="mt-3 h-10 text-center text-[11px] font-medium leading-5 text-accent-strong">
                   {item.label}
                 </p>
               </article>
