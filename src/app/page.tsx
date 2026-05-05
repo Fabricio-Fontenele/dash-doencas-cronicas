@@ -187,11 +187,6 @@ function removeFilterValue(
 
 function getActiveFilterChips(filters: DashboardFiltersDTO) {
   return [
-    ...filters.conditions.map((value) => ({
-      key: "conditions" as const,
-      value,
-      label: formatConditionLabel(value),
-    })),
     ...filters.sexes.map((value) => ({
       key: "sexes" as const,
       value,
@@ -240,10 +235,26 @@ function FilterGroup({
   compact?: boolean;
 }) {
   return (
-    <details open className="group rounded-[1.5rem] border border-border/70 bg-white/80 p-4">
+      <details open className="group rounded-[1.5rem] border border-border/70 bg-white/80 p-4">
       <summary className="cursor-pointer list-none text-sm font-semibold text-accent-strong">
         <div className="flex items-center justify-between gap-3">
-          <span>{title}</span>
+          <div className="flex items-center gap-3">
+            <span>{title}</span>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 20 20"
+              className="size-4 text-muted transition group-open:rotate-180"
+              fill="none"
+            >
+              <path
+                d="m5 7.5 5 5 5-5"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.8"
+              />
+            </svg>
+          </div>
           <span className="rounded-full bg-surface-strong px-2 py-0.5 text-xs text-muted">
             {selectedValues.length}
           </span>
@@ -635,17 +646,6 @@ export default async function Home({ searchParams }: HomePageProps) {
               </div>
 
               <form className="mt-6 space-y-4">
-                <FilterGroup
-                  title="Condicao"
-                  name="condition"
-                  compact
-                  selectedValues={dashboardData.view.appliedFilters.conditions}
-                  options={[
-                    { value: "DIABETES", label: "Diabetes" },
-                    { value: "HYPERTENSION", label: "Hipertensao" },
-                  ]}
-                />
-
                 <FilterGroup
                   title="Sexo"
                   name="sex"
