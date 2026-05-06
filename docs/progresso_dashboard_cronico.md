@@ -4,7 +4,23 @@
 
 Este documento consolida o estado atual do projeto, o que já foi implementado, o que está pronto para demonstração e o que ainda falta para encerrar a primeira versão com segurança.
 
-Especificação-base: [docs/specs_dashboard_cronico.md](/home/fabricio/Documentos/uespi/prototipo-pet/docs/specs_dashboard_cronico.md)
+Especificação-base: [docs/specs_dashboard_cronico.md](/home/fabricio/Documentos/Projetos/dash-doen-as-cronicas/docs/specs_dashboard_cronico.md)
+
+## Estado atual resumido
+
+O projeto saiu do modelo de dashboard por paciente e hoje opera como dashboard quantitativa agregada:
+
+- o upload continua aceitando CSV/XLS/XLSX
+- o parser transforma as linhas em registros anonimizados de cuidado
+- o sistema persiste apenas buckets agregados por upload
+- a home não exibe nome, ID nem tabela individual
+- a interface atual já está adaptada ao tipo de snapshot importado
+
+Exemplos:
+
+- upload só de diabetes: a narrativa e os cards passam a priorizar diabetes e HbA1c
+- upload só de hipertensão: a narrativa remove comparação com diabetes e foca em PA e acompanhamento
+- upload misto: a dashboard mostra comparação entre condições
 
 ## Linha do tempo de implementação
 
@@ -28,6 +44,36 @@ Especificação-base: [docs/specs_dashboard_cronico.md](/home/fabricio/Documento
    PostgreSQL local em Docker e scripts de banco.
 10. `fc0eb4f` `feat: expand dashboard filters and table details`
     Mais filtros e tabela mais forte para a dashboard.
+11. `94d57e6` `docs: add quantitative dashboard refactor design`
+    Documento de desenho para a migração de modelo.
+12. `c86c4e9` `feat: switch dashboard to aggregate snapshots`
+    Remoção da persistência individual e adoção de buckets agregados.
+13. `0e6bc48` `fix: support alternate chronic csv headers`
+    Parser compatível com o layout alternativo dos datasets crônicos.
+14. `be9f25a` `feat: add multi-select dashboard filters`
+    Filtros facetados com seleção múltipla e redesign da home.
+15. `e6ce31d` `feat: adapt dashboard copy to imported condition`
+    Narrativa contextual conforme o tipo de upload.
+16. `d4b319c` `feat: contextualize dashboard summary cards`
+    Cards superiores adaptados a diabetes, hipertensão ou cenário misto.
+17. `0ada06a` `feat: simplify dashboard filter panel`
+    Remoção do filtro de condição da UI e visual mais explícito de dropdown.
+18. `8903b16` `feat: add donut chart for race color`
+    Gráfico de rosca para raça/cor.
+19. `554602f` `feat: use skin-tone palette for race chart`
+    Paleta contextual no gráfico de raça/cor.
+20. `48f8cd0` `fix: restore donut chart for race and full sex labels`
+    Ajuste dos gráficos circulares e labels completos para sexo.
+21. `27b4ef8` `feat: add hover tooltip to sex pie chart`
+    Pizza de sexo com tooltip e legenda abaixo.
+22. `349473b` `feat: switch neighborhood chart to vertical bars`
+    Bairros em barras verticais.
+23. `1e60899` `style: tighten neighborhood bar chart`
+    Compactação do gráfico de bairros.
+24. `8279da8` `style: simplify neighborhood columns`
+    Remoção de fundo e simplificação das colunas de bairros.
+25. `7eb01de` `fix: prevent clipping on neighborhood values`
+    Correção de corte dos números no topo das colunas.
 
 ## O que já está pronto
 
@@ -44,11 +90,11 @@ Especificação-base: [docs/specs_dashboard_cronico.md](/home/fabricio/Documento
 - Schema com tabelas:
   - `User`
   - `Upload`
-  - `Paciente`
+  - `AggregateBucket`
 - Prisma Client gerado.
 - Repositórios concretos de:
   - uploads
-  - pacientes
+  - buckets agregados
 
 ### Upload e parsing
 
@@ -61,41 +107,42 @@ Especificação-base: [docs/specs_dashboard_cronico.md](/home/fabricio/Documento
   - `.xlsx`
 - Detecção automática de:
   - `DIABETES`
-  - `HIPERTENSAO`
+  - `HYPERTENSION`
 - Parsing com suporte ao formato atual dos datasets de demo.
-- Persistência do upload e dos pacientes no banco.
+- Suporte ao layout com colunas `Meses desde o último...`.
+- Fallback para cálculo de meses a partir de data da última medição de PA.
+- Persistência apenas do upload e dos buckets agregados no banco.
 
 ### Dashboard
 
-- Home transformada em dashboard.
+- Home transformada em dashboard quantitativa agregada.
 - Leitura do último snapshot importado.
-- Cards de resumo:
-  - total de pacientes
-  - atraso médico
-  - atraso de enfermagem
-  - atraso de visita domiciliar
-  - pressão arterial sem registro recente
-  - HbA1c sem registro recente
+- Cards de resumo contextuais:
+  - mudam conforme o recorte ser de diabetes, hipertensão ou misto
 - Filtros atuais:
-  - condição
   - sexo
   - raça/cor
   - bairro
   - Bolsa Família
   - faixa etária
-  - mínimo de meses sem atendimento médico
-  - mínimo de meses sem atendimento de enfermagem
-  - mínimo de meses sem visita
-  - alerta acionado por card
-  - ordenação
+  - lacunas do cuidado
+  - todos com seleção múltipla onde faz sentido
 - Gráficos atuais:
-  - top bairros
-  - diabetes vs hipertensão
-  - cobertura dos principais pontos de cuidado
-- Tabela atual:
-  - existe hoje como implementação transitória de demo
-  - precisa ser substituída por visualizações 100% agregadas
-  - não está alinhada com a direção final quantitativa do produto
+  - sexo em pizza com tooltip
+  - raça/cor em rosca
+  - bairros em barras verticais
+  - faixa etária em barras
+  - cobertura assistencial
+  - comparação entre condições, apenas quando o recorte contém as duas
+- A dashboard se adapta ao tipo de importação:
+  - se o snapshot for só de diabetes, indicadores específicos de hipertensão comparativa não são enfatizados
+  - se o snapshot for só de hipertensão, HbA1c some
+  - se houver ambas, a comparação aparece
+- Não existe mais:
+  - tabela individual
+  - busca por nome
+  - busca por ID
+  - visualização nominal
 
 ### Dados fictícios de demo
 
@@ -118,14 +165,14 @@ Hoje já é possível demonstrar o fluxo completo:
 2. aplicar o schema
 3. abrir a aplicação
 4. importar um dos arquivos fictícios de `datasets/`
-5. navegar no dashboard com filtros, cards, gráficos e tabela
+5. navegar no dashboard com filtros facetados, cards e gráficos agregados
 
 Isso já cobre uma demo convincente de:
 
 - ingestão de dados
 - persistência
 - leitura do último snapshot
-- exploração inicial do dashboard
+- exploração quantitativa do dashboard
 
 ## Limitações atuais
 
@@ -136,17 +183,14 @@ Isso já cobre uma demo convincente de:
 
 ### Dashboard
 
-- A direção do produto mudou para uma dashboard **exclusivamente quantitativa**.
-- A implementação atual ainda possui elementos de visualização individual na tela principal e isso precisa ser removido.
 - Ainda não existem:
-  - gráfico de faixa etária
-  - gráfico de distribuição por sexo
   - evolução histórica entre uploads
   - comparação temporal entre snapshots
+  - exportação consolidada
+  - busca interna em filtros longos, como bairro
 - Ainda é necessário:
-  - remover toda exposição individual
-  - substituir tabela por blocos quantitativos agregados
-  - revisar filtros para operar apenas sobre métricas consolidadas
+  - consolidar ainda mais a hierarquia visual da dashboard
+  - revisar responsividade fina dos gráficos
   - adicionar exportação somente agregada
 
 ### Acesso e segurança
@@ -165,14 +209,12 @@ Isso já cobre uma demo convincente de:
 ### Bloco 1: consolidar a dashboard
 
 - adicionar:
-  - gráfico por sexo
-  - gráfico por faixa etária
   - evolução histórica entre uploads
 - melhorar:
-  - remoção completa da tabela individual
-  - substituição por visualizações agregadas
   - exportação apenas de dados consolidados
   - interação entre gráficos e recortes quantitativos
+  - busca/UX dos filtros longos
+  - responsividade dos gráficos
 
 ### Bloco 2: fechar o uso operacional
 
