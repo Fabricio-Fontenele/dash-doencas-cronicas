@@ -1,0 +1,98 @@
+import Link from "next/link";
+
+import { type DashboardPageViewModel } from "@/presentation/dashboard/view-model";
+import {
+  DEFAULT_FILTERS,
+  PANEL_CLASS_NAME,
+} from "@/presentation/dashboard/constants";
+import {
+  createDashboardQueryString,
+  removeDashboardFilterValue,
+} from "@/presentation/dashboard/filters";
+import { type DashboardFiltersDTO } from "@/application/dtos/DashboardFiltersDTO";
+
+export function DashboardHero({
+  pageView,
+}: {
+  pageView: DashboardPageViewModel;
+}) {
+  return (
+    <header className={`${PANEL_CLASS_NAME} relative overflow-hidden p-7 lg:p-9`}>
+      <div className="absolute inset-y-0 right-0 hidden w-[32rem] bg-[radial-gradient(circle_at_center,rgba(69,156,215,0.20),transparent_68%)] lg:block" />
+      <div className="relative flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">
+        <div className="max-w-4xl">
+          <span className="inline-flex rounded-full border border-border bg-surface-strong px-4 py-1 text-sm font-medium text-accent-strong">
+            Sala de situação crônica
+          </span>
+          <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-tight text-accent-strong sm:text-5xl">
+            Dashboard quantitativo com filtros facetados e leitura territorial do recorte importado.
+          </h1>
+          <p className="mt-4 max-w-3xl text-base leading-7 text-muted">
+            Os CSVs são convertidos em recortes anonimizados. Aqui o foco é volume,
+            distribuição e lacunas assistenciais em {pageView.conditionContextLabel}, sem qualquer
+            dado nominal.
+          </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Link
+            href="/importar"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-accent-strong px-6 text-sm font-semibold text-white transition hover:bg-accent"
+          >
+            Importar novo snapshot
+          </Link>
+          <Link
+            href={createDashboardQueryString(DEFAULT_FILTERS)}
+            className="inline-flex h-12 items-center justify-center rounded-full border border-border px-6 text-sm font-semibold text-accent-strong transition hover:bg-surface-strong"
+          >
+            Limpar todos os filtros
+          </Link>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+export function DashboardSnapshotPanel({
+  activeFilters,
+  pageView,
+}: {
+  activeFilters: DashboardFiltersDTO;
+  pageView: DashboardPageViewModel;
+}) {
+  return (
+    <section className={`${PANEL_CLASS_NAME} p-5`}>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
+            Snapshot atual
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold text-accent-strong">
+            {pageView.snapshotTitle}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-muted">{pageView.snapshotDescription}</p>
+        </div>
+
+        <div className="flex max-w-xl flex-wrap gap-2">
+          {pageView.activeFilterChips.length === 0 ? (
+            <span className="rounded-full border border-border bg-white px-3 py-1 text-xs font-medium text-muted">
+              Nenhum filtro aplicado
+            </span>
+          ) : (
+            pageView.activeFilterChips.map((chip) => (
+              <Link
+                key={`${chip.key}-${chip.value}`}
+                href={createDashboardQueryString(
+                  removeDashboardFilterValue(activeFilters, chip.key, chip.value),
+                )}
+                className="rounded-full border border-border bg-white px-3 py-1 text-xs font-medium text-accent-strong transition hover:border-accent"
+              >
+                {chip.label} ×
+              </Link>
+            ))
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}

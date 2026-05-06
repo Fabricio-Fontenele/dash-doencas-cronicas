@@ -77,7 +77,7 @@ describe("Dashboard application use cases", () => {
     });
     expect(result.conditionDistribution).toEqual([
       { label: "Diabetes", value: 3 },
-      { label: "Hipertensao", value: 2 },
+      { label: "Hipertensão", value: 2 },
     ]);
     expect(result.filterOptions).toEqual({
       neighborhoods: ["Bela Vista", "Centro"],

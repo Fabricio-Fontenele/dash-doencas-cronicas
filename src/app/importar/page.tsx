@@ -125,7 +125,8 @@ export default async function ImportarPage() {
 async function loadRecentUploads() {
   try {
     return await new ListRecentUploadsUseCase(new PrismaUploadRepository()).execute(6);
-  } catch {
+  } catch (error) {
+    console.error("Falha ao carregar histórico de uploads:", error);
     return [];
   }
 }

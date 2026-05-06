@@ -26,12 +26,21 @@ export class GenerateDashboardViewUseCase {
       conditionDistribution: this.buildConditionDistribution(filteredBuckets),
       topNeighborhoods: this.groupAndSort(
         filteredBuckets,
-        (bucket) => bucket.neighborhood ?? "Nao informado",
+        (bucket) => bucket.neighborhood ?? "Não informado",
         10,
       ),
-      ageGroupDistribution: this.groupAndSort(filteredBuckets, (bucket) => bucket.ageGroup ?? "Nao informada"),
-      sexDistribution: this.groupAndSort(filteredBuckets, (bucket) => bucket.sex ?? "Nao informado"),
-      raceColorDistribution: this.groupAndSort(filteredBuckets, (bucket) => bucket.raceColor ?? "Nao informada"),
+      ageGroupDistribution: this.groupAndSort(
+        filteredBuckets,
+        (bucket) => bucket.ageGroup ?? "Não informada",
+      ),
+      sexDistribution: this.groupAndSort(
+        filteredBuckets,
+        (bucket) => bucket.sex ?? "Não informado",
+      ),
+      raceColorDistribution: this.groupAndSort(
+        filteredBuckets,
+        (bucket) => bucket.raceColor ?? "Não informada",
+      ),
       careCoverage: this.buildCareCoverage(filteredBuckets),
       insights: this.buildInsights(filteredBuckets),
       filterOptions: this.buildFilterOptions(buckets),
@@ -158,7 +167,7 @@ export class GenerateDashboardViewUseCase {
         value: this.sumByFlag(buckets, (bucket) => bucket.condition === "DIABETES"),
       },
       {
-        label: "Hipertensao",
+        label: "Hipertensão",
         value: this.sumByFlag(buckets, (bucket) => bucket.condition === "HYPERTENSION"),
       },
     ];
@@ -168,9 +177,24 @@ export class GenerateDashboardViewUseCase {
     const total = this.sumCounts(buckets) || 1;
 
     return [
-      this.createCoverageItem("Atendimento medico em dia", buckets, (bucket) => bucket.needsMedicalCare, total),
-      this.createCoverageItem("Enfermagem em dia", buckets, (bucket) => bucket.needsNursingCare, total),
-      this.createCoverageItem("Visita domiciliar em dia", buckets, (bucket) => bucket.needsHomeVisit, total),
+      this.createCoverageItem(
+        "Atendimento médico em dia",
+        buckets,
+        (bucket) => bucket.needsMedicalCare,
+        total,
+      ),
+      this.createCoverageItem(
+        "Enfermagem em dia",
+        buckets,
+        (bucket) => bucket.needsNursingCare,
+        total,
+      ),
+      this.createCoverageItem(
+        "Visita domiciliar em dia",
+        buckets,
+        (bucket) => bucket.needsHomeVisit,
+        total,
+      ),
       this.createCoverageItem(
         "PA recente",
         buckets,
@@ -198,12 +222,12 @@ export class GenerateDashboardViewUseCase {
     )[0];
     const topNeighborhood = this.groupAndSort(
       buckets,
-      (bucket) => bucket.neighborhood ?? "Nao informado",
+      (bucket) => bucket.neighborhood ?? "Não informado",
       1,
     )[0];
     const leadingAgeGroup = this.groupAndSort(
       buckets,
-      (bucket) => bucket.ageGroup ?? "Nao informada",
+      (bucket) => bucket.ageGroup ?? "Não informada",
       1,
     )[0];
     const multiGapCount = buckets.reduce(
@@ -214,25 +238,25 @@ export class GenerateDashboardViewUseCase {
 
     return [
       {
-        title: "Pressao assistencial",
+        title: "Pressão assistencial",
         value: `${Math.round((multiGapCount / total) * 100)}%`,
-        description: `${multiGapCount} pessoas concentram duas ou mais pendencias de cuidado no recorte atual.`,
+        description: `${multiGapCount} pessoas concentram duas ou mais pendências de cuidado no recorte atual.`,
         tone: "highlight",
       },
       {
-        title: "Cobertura media",
+        title: "Cobertura média",
         value: `${averageCoverage}%`,
-        description: `Media consolidada dos indicadores de acompanhamento em ${visibleCoverage.length} frentes de cuidado.`,
+        description: `Média consolidada dos indicadores de acompanhamento em ${visibleCoverage.length} frentes de cuidado.`,
         tone: "primary",
       },
       {
         title: "Pior gargalo",
         value: worstCoverage.label,
-        description: `${worstCoverage.uncovered} pessoas estao em atraso no indicador com menor cobertura (${worstCoverage.coverageRate}%).`,
+        description: `${worstCoverage.uncovered} pessoas estão em atraso no indicador com menor cobertura (${worstCoverage.coverageRate}%).`,
         tone: "secondary",
       },
       {
-        title: "Concentracao territorial",
+        title: "Concentração territorial",
         value: `${Math.round((topNeighborhood.value / total) * 100)}%`,
         description: `${topNeighborhood.label} concentra ${topNeighborhood.value} pessoas, a maior carga territorial do recorte.`,
         tone: "muted",
@@ -240,7 +264,7 @@ export class GenerateDashboardViewUseCase {
       {
         title: "Perfil dominante",
         value: leadingAgeGroup.label,
-        description: `${leadingAgeGroup.value} pessoas estao na faixa etaria mais representativa do snapshot filtrado.`,
+        description: `${leadingAgeGroup.value} pessoas estão na faixa etária mais representativa do snapshot filtrado.`,
         tone: "primary",
       },
     ];
