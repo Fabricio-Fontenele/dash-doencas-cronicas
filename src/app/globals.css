@@ -1,14 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f1e8;
-  --foreground: #1b1f19;
-  --surface: #fffdf7;
-  --surface-strong: #dbe8d3;
-  --border: #b7c8ab;
-  --accent: #315c42;
-  --accent-strong: #1e4130;
-  --muted: #5e665d;
+  --background: #e2e0e0;
+  --foreground: #000000;
+  --surface: #f4f3f3;
+  --surface-strong: #d6e7f4;
+  --border: #9eb2c5;
+  --accent: #459cd7;
+  --accent-strong: #143a60;
+  --muted: #4a5c6c;
+  --highlight: #e8531e;
+  --highlight-soft: #fbe1d7;
+  --status-success-bg: #d6e7f4;
+  --status-success-border: #459cd7;
+  --status-success-text: #143a60;
+  --status-error-bg: #fbe1d7;
+  --status-error-border: #e8531e;
+  --status-error-text: #8f3413;
+  --chart-1: #143a60;
+  --chart-2: #459cd7;
+  --chart-3: #e8531e;
+  --chart-4: #7a94ad;
+  --chart-5: #a6b9ca;
+  --chart-6: #74818d;
 }
 
 @theme inline {
@@ -20,6 +34,8 @@
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
   --color-muted: var(--muted);
+  --color-highlight: var(--highlight);
+  --color-highlight-soft: var(--highlight-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

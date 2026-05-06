@@ -72,7 +72,7 @@ export function InteractivePieChart({
 
   if (items.length === 0 || total === 0) {
     return (
-      <section className="rounded-[1.75rem] border border-border/70 bg-surface p-5 shadow-[0_18px_60px_rgba(49,92,66,0.08)]">
+      <section className="rounded-[1.75rem] border border-border/70 bg-surface p-5 shadow-[0_18px_60px_rgba(20,58,96,0.08)]">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">{title}</p>
         <h2 className="mt-2 text-2xl font-semibold text-accent-strong">{subtitle}</h2>
         <p className="mt-6 text-sm text-muted">Sem dados para este recorte.</p>
@@ -81,7 +81,7 @@ export function InteractivePieChart({
   }
 
   return (
-    <section className="rounded-[1.75rem] border border-border/70 bg-surface p-5 shadow-[0_18px_60px_rgba(49,92,66,0.08)]">
+    <section className="rounded-[1.75rem] border border-border/70 bg-surface p-5 shadow-[0_18px_60px_rgba(20,58,96,0.08)]">
       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">{title}</p>
       <h2 className="mt-2 text-2xl font-semibold text-accent-strong">{subtitle}</h2>
 
@@ -135,7 +135,7 @@ export function InteractivePieChart({
 
           {hovered ? (
             <div
-              className="pointer-events-none absolute z-10 rounded-2xl border border-border bg-white px-3 py-2 text-xs shadow-[0_18px_40px_rgba(49,92,66,0.18)]"
+              className="pointer-events-none absolute z-10 rounded-2xl border border-border bg-white px-3 py-2 text-xs shadow-[0_18px_40px_rgba(20,58,96,0.18)]"
               style={{
                 left: Math.min(Math.max(hovered.x + 12, 8), SVG_SIZE - 124),
                 top: Math.min(Math.max(hovered.y - 16, 8), SVG_SIZE - 70),
