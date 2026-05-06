@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type MouseEvent, useState } from "react";
 
 interface PieChartItem {
   color: string;
@@ -19,6 +19,13 @@ interface HoverState {
   item: PieChartItem;
   x: number;
   y: number;
+}
+
+interface PieChartSegment {
+  endAngle: number;
+  item: PieChartItem;
+  startAngle: number;
+  sweepAngle: number;
 }
 
 const SVG_SIZE = 240;
@@ -60,15 +67,30 @@ export function InteractivePieChart({
 }: InteractivePieChartProps) {
   const [hovered, setHovered] = useState<HoverState | null>(null);
   const total = items.reduce((sum, item) => sum + item.value, 0);
-  const segments = items.reduce<
-    Array<{ endAngle: number; item: PieChartItem; startAngle: number }>
-  >((result, item) => {
+  const segments = items.reduce<PieChartSegment[]>((result, item) => {
     const startAngle = result[result.length - 1]?.endAngle ?? 0;
     const sweepAngle = (item.value / total) * 360;
     const endAngle = startAngle + sweepAngle;
 
-    return [...result, { item, startAngle, endAngle }];
+    return [...result, { item, startAngle, endAngle, sweepAngle }];
   }, []);
+
+  function updateHoveredPosition(
+    event: MouseEvent<SVGCircleElement> | MouseEvent<SVGPathElement>,
+    item: PieChartItem,
+  ) {
+    const rect = event.currentTarget.ownerSVGElement?.getBoundingClientRect();
+
+    if (!rect) {
+      return;
+    }
+
+    setHovered({
+      item,
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    });
+  }
 
   if (items.length === 0 || total === 0) {
     return (
@@ -92,7 +114,23 @@ export function InteractivePieChart({
             className="size-[15rem]"
             viewBox={`0 0 ${SVG_SIZE} ${SVG_SIZE}`}
           >
-            {segments.map(({ item, startAngle, endAngle }) => {
+            {segments.map(({ item, startAngle, endAngle, sweepAngle }) => {
+              if (sweepAngle >= 359.999) {
+                return (
+                  <circle
+                    key={item.label}
+                    cx={CENTER}
+                    cy={CENTER}
+                    r={RADIUS}
+                    fill={item.color}
+                    className="cursor-pointer transition-opacity hover:opacity-85"
+                    onMouseEnter={(event) => updateHoveredPosition(event, item)}
+                    onMouseMove={(event) => updateHoveredPosition(event, item)}
+                    onMouseLeave={() => setHovered(null)}
+                  />
+                );
+              }
+
               const path = describeArc(startAngle, endAngle);
 
               return (
@@ -101,32 +139,8 @@ export function InteractivePieChart({
                   d={path}
                   fill={item.color}
                   className="cursor-pointer transition-opacity hover:opacity-85"
-                  onMouseEnter={(event) => {
-                    const rect = event.currentTarget.ownerSVGElement?.getBoundingClientRect();
-
-                    if (!rect) {
-                      return;
-                    }
-
-                    setHovered({
-                      item,
-                      x: event.clientX - rect.left,
-                      y: event.clientY - rect.top,
-                    });
-                  }}
-                  onMouseMove={(event) => {
-                    const rect = event.currentTarget.ownerSVGElement?.getBoundingClientRect();
-
-                    if (!rect) {
-                      return;
-                    }
-
-                    setHovered({
-                      item,
-                      x: event.clientX - rect.left,
-                      y: event.clientY - rect.top,
-                    });
-                  }}
+                  onMouseEnter={(event) => updateHoveredPosition(event, item)}
+                  onMouseMove={(event) => updateHoveredPosition(event, item)}
                   onMouseLeave={() => setHovered(null)}
                 />
               );
