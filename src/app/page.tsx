@@ -398,7 +398,7 @@ function VerticalBars({
           <div className="flex min-w-max items-end gap-3">
             {sortedItems.map((item) => (
               <article key={item.label} className="flex w-14 shrink-0 flex-col items-center">
-                <div className="flex h-72 w-full items-end">
+                <div className="flex h-80 w-full items-end pt-8">
                   <div
                     className="relative w-full bg-[linear-gradient(180deg,#d5b17c_0%,#b35c2e_100%)]"
                     style={{ height: `${Math.max((item.value / maxValue) * 100, 8)}%` }}
