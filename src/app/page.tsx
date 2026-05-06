@@ -326,15 +326,16 @@ function HorizontalBars({
   subtitle,
   items,
   tone = "bg-accent",
-  ranked = false,
 }: {
   title: string;
   subtitle: string;
   items: DashboardBarChartItemDTO[];
   tone?: string;
-  ranked?: boolean;
 }) {
-  const maxValue = Math.max(...items.map((item) => item.value), 1);
+  const sortedItems = [...items].sort(
+    (left, right) => right.value - left.value || left.label.localeCompare(right.label),
+  );
+  const maxValue = Math.max(...sortedItems.map((item) => item.value), 1);
 
   return (
     <section className={SECTION_CLASS_NAME}>
@@ -342,18 +343,13 @@ function HorizontalBars({
       <h2 className="mt-2 text-2xl font-semibold text-accent-strong">{subtitle}</h2>
 
       <div className="mt-6 space-y-4">
-        {items.length === 0 ? (
+        {sortedItems.length === 0 ? (
           <p className="text-sm text-muted">Sem dados para este recorte.</p>
         ) : (
-          items.map((item, index) => (
+          sortedItems.map((item) => (
             <div key={item.label} className="space-y-2">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  {ranked ? (
-                    <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-strong text-xs font-semibold text-muted">
-                      {index + 1}
-                    </span>
-                  ) : null}
                   <p className="truncate text-sm font-medium text-accent-strong">{item.label}</p>
                 </div>
                 <p className="text-sm text-muted">{item.value}</p>
@@ -368,54 +364,6 @@ function HorizontalBars({
           ))
         )}
       </div>
-    </section>
-  );
-}
-
-function VerticalBars({
-  title,
-  subtitle,
-  items,
-}: {
-  title: string;
-  subtitle: string;
-  items: DashboardBarChartItemDTO[];
-}) {
-  const sortedItems = [...items].sort(
-    (left, right) => right.value - left.value || left.label.localeCompare(right.label),
-  );
-  const maxValue = Math.max(...sortedItems.map((item) => item.value), 1);
-
-  return (
-    <section className={SECTION_CLASS_NAME}>
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">{title}</p>
-      <h2 className="mt-2 text-2xl font-semibold text-accent-strong">{subtitle}</h2>
-
-      {sortedItems.length === 0 ? (
-        <p className="mt-6 text-sm text-muted">Sem dados para este recorte.</p>
-      ) : (
-        <div className="mt-6 overflow-x-auto pb-2">
-          <div className="flex min-w-max items-end gap-3">
-            {sortedItems.map((item) => (
-              <article key={item.label} className="flex w-14 shrink-0 flex-col items-center">
-                <div className="flex h-80 w-full items-end pt-8">
-                  <div
-                    className="relative w-full bg-[linear-gradient(180deg,#d5b17c_0%,#b35c2e_100%)]"
-                    style={{ height: `${Math.max((item.value / maxValue) * 100, 8)}%` }}
-                  >
-                    <span className="absolute -top-7 left-1/2 -translate-x-1/2 text-xs font-semibold text-accent-strong">
-                      {item.value}
-                    </span>
-                  </div>
-                </div>
-                <p className="mt-3 h-10 text-center text-[11px] font-medium leading-5 text-accent-strong">
-                  {item.label}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      )}
     </section>
   );
 }
@@ -966,10 +914,11 @@ export default async function Home({ searchParams }: HomePageProps) {
             <section
               className={`grid gap-4 ${hasMixedConditions ? "2xl:grid-cols-[1.1fr_0.9fr]" : "2xl:grid-cols-1"}`}
             >
-              <VerticalBars
+              <HorizontalBars
                 title="Territorio"
                 subtitle="Top bairros com mais pessoas acompanhadas"
                 items={dashboardData.view.topNeighborhoods}
+                tone="bg-[linear-gradient(90deg,#d5b17c_0%,#b35c2e_100%)]"
               />
               {hasMixedConditions ? (
                 <ComparisonColumns
