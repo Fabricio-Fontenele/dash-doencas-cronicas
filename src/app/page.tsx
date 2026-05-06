@@ -8,6 +8,7 @@ import { type DashboardSummaryDTO } from "@/application/dtos/DashboardSummaryDTO
 import {
   type DashboardBarChartItemDTO,
   type DashboardCoverageItemDTO,
+  type DashboardInsightDTO,
   type DashboardViewDTO,
 } from "@/application/dtos/DashboardViewDTO";
 import { type UploadHistoryDTO } from "@/application/dtos/UploadHistoryDTO";
@@ -22,12 +23,12 @@ export const dynamic = "force-dynamic";
 
 const PANEL_CLASS_NAME = [
   "rounded-[2rem] border border-border/70 bg-surface/95",
-  "shadow-[0_24px_80px_rgba(49,92,66,0.10)] backdrop-blur",
+  "shadow-[0_24px_80px_rgba(20,58,96,0.10)] backdrop-blur",
 ].join(" ");
 
 const SECTION_CLASS_NAME = [
   "rounded-[1.75rem] border border-border/70 bg-surface p-5",
-  "shadow-[0_18px_60px_rgba(49,92,66,0.08)]",
+  "shadow-[0_18px_60px_rgba(20,58,96,0.08)]",
 ].join(" ");
 
 const DEFAULT_FILTERS: DashboardFiltersDTO = {
@@ -52,7 +53,7 @@ const EMPTY_SUMMARY: DashboardSummaryDTO = {
 };
 
 const CARE_GAP_OPTIONS: Array<{ value: CareGapFilter; label: string }> = [
-  { value: "medical", label: "Sem atendimento medico > 6 meses" },
+  { value: "medical", label: "Sem atendimento médico > 6 meses" },
   { value: "nursing", label: "Sem enfermagem > 6 meses" },
   { value: "home-visit", label: "Sem visita domiciliar > 3 meses" },
   { value: "blood-pressure", label: "Sem PA recente" },
@@ -61,8 +62,8 @@ const CARE_GAP_OPTIONS: Array<{ value: CareGapFilter; label: string }> = [
 
 const FAMILY_ALLOWANCE_OPTIONS = [
   { value: "YES", label: "Sim" },
-  { value: "NO", label: "Nao" },
-  { value: "UNKNOWN", label: "Nao informado" },
+  { value: "NO", label: "Não" },
+  { value: "UNKNOWN", label: "Não informado" },
 ] as const;
 
 type SearchParamValue = string | string[] | undefined;
@@ -141,14 +142,14 @@ function formatUploadDate(date: Date): string {
 }
 
 function formatConditionLabel(condition: "DIABETES" | "HYPERTENSION"): string {
-  return condition === "DIABETES" ? "Diabetes" : "Hipertensao";
+  return condition === "DIABETES" ? "Diabetes" : "Hipertensão";
 }
 
 function getConditionPresence(view: DashboardViewDTO) {
   const diabetesCount =
     view.conditionDistribution.find((item) => item.label === "Diabetes")?.value ?? 0;
   const hypertensionCount =
-    view.conditionDistribution.find((item) => item.label === "Hipertensao")?.value ?? 0;
+    view.conditionDistribution.find((item) => item.label === "Hipertensão")?.value ?? 0;
 
   return {
     hasDiabetes: diabetesCount > 0,
@@ -161,7 +162,7 @@ function getConditionContextLabel(view: DashboardViewDTO): string {
   const { hasDiabetes, hasHypertension, hasMixedConditions } = getConditionPresence(view);
 
   if (hasMixedConditions) {
-    return "diabetes e hipertensao";
+    return "diabetes e hipertensão";
   }
 
   if (hasDiabetes) {
@@ -169,10 +170,10 @@ function getConditionContextLabel(view: DashboardViewDTO): string {
   }
 
   if (hasHypertension) {
-    return "hipertensao";
+    return "hipertensão";
   }
 
-  return "condicoes cronicas";
+  return "condições crônicas";
 }
 
 function removeFilterValue(
@@ -212,7 +213,11 @@ function getActiveFilterChips(filters: DashboardFiltersDTO) {
       key: "familyAllowances" as const,
       value,
       label:
-        value === "YES" ? "Bolsa Familia: Sim" : value === "NO" ? "Bolsa Familia: Nao" : "Bolsa Familia: Nao informado",
+        value === "YES"
+          ? "Bolsa Família: Sim"
+          : value === "NO"
+            ? "Bolsa Família: Não"
+            : "Bolsa Família: Não informado",
     })),
     ...filters.careGaps.map((value) => ({
       key: "careGaps" as const,
@@ -236,7 +241,7 @@ function FilterGroup({
   compact?: boolean;
 }) {
   return (
-      <details open className="group rounded-[1.5rem] border border-border/70 bg-white/80 p-4">
+      <details className="group rounded-[1.5rem] border border-border/70 bg-white/80 p-4">
       <summary className="cursor-pointer list-none text-sm font-semibold text-accent-strong">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -271,7 +276,7 @@ function FilterGroup({
               key={option.value}
               className={`flex cursor-pointer gap-3 rounded-[1.1rem] border px-3 py-3 text-sm transition ${
                 checked
-                  ? "border-accent bg-[rgba(49,92,66,0.08)]"
+                  ? "border-accent-strong bg-[rgba(69,156,215,0.16)]"
                   : "border-border/70 bg-white hover:border-accent/40"
               }`}
             >
@@ -316,6 +321,35 @@ function StatCard({
           <p className="mt-3 max-w-[18rem] text-sm leading-6 text-muted">{label}</p>
         </div>
         <span className={`mt-1 block size-3 rounded-full ${accent}`} />
+      </div>
+    </article>
+  );
+}
+
+function InsightCard({
+  title,
+  value,
+  description,
+  tone,
+}: DashboardInsightDTO) {
+  const toneClassName =
+    tone === "highlight"
+      ? "bg-highlight"
+      : tone === "secondary"
+        ? "bg-accent"
+        : tone === "muted"
+          ? "bg-[var(--chart-4)]"
+          : "bg-accent-strong";
+
+  return (
+    <article className={SECTION_CLASS_NAME}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">{title}</p>
+          <p className="text-3xl font-semibold tracking-tight text-accent-strong">{value}</p>
+          <p className="max-w-[24rem] text-sm leading-6 text-muted">{description}</p>
+        </div>
+        <span className={`mt-1 block size-3 rounded-full ${toneClassName}`} />
       </div>
     </article>
   );
@@ -391,16 +425,16 @@ function ComparisonColumns({
           {items.map((item, index) => (
             <article
               key={item.label}
-              className="flex min-h-[14rem] flex-col justify-end rounded-[1.5rem] border border-border/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.55),rgba(223,234,214,0.95))] p-4"
+              className="flex min-h-[14rem] flex-col justify-end rounded-[1.5rem] border border-border/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(214,231,244,0.92))] p-4"
             >
               <div className="flex min-h-[7.5rem] items-end">
                 <div
                   className={`w-full rounded-t-[1.25rem] ${
                     index % 3 === 0
-                      ? "bg-[#315c42]"
+                      ? "bg-[var(--chart-1)]"
                       : index % 3 === 1
-                        ? "bg-[#b35c2e]"
-                        : "bg-[#8b3d45]"
+                        ? "bg-[var(--chart-2)]"
+                        : "bg-[var(--chart-3)]"
                   }`}
                   style={{ height: `${Math.max((item.value / maxValue) * 100, 10)}%` }}
                 />
@@ -474,7 +508,7 @@ function PieChart({
             }}
           >
             {donut ? (
-              <div className="absolute inset-5 rounded-full bg-surface shadow-[inset_0_0_0_1px_rgba(95,109,95,0.12)]" />
+              <div className="absolute inset-5 rounded-full bg-surface shadow-[inset_0_0_0_1px_rgba(20,58,96,0.12)]" />
             ) : null}
           </div>
           <div className="mt-4 text-center">
@@ -520,24 +554,24 @@ function PieChart({
 function getRaceColor(label: string): string {
   const normalized = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-  if (normalized.includes("branca")) return "#f1d7c2";
-  if (normalized.includes("parda")) return "#b9855b";
-  if (normalized.includes("preta")) return "#5a3b2e";
-  if (normalized.includes("amarela")) return "#d8b35d";
-  if (normalized.includes("indigena")) return "#9a6745";
-  if (normalized.includes("nao inform")) return "#a8a29e";
+  if (normalized.includes("branca")) return "#d6e7f4";
+  if (normalized.includes("parda")) return "#459cd7";
+  if (normalized.includes("preta")) return "#143a60";
+  if (normalized.includes("amarela")) return "#e8531e";
+  if (normalized.includes("indigena")) return "#7a94ad";
+  if (normalized.includes("nao inform")) return "#a6b9ca";
 
-  return "#7c8f6b";
+  return "#74818d";
 }
 
 function getSexColor(label: string): string {
   const normalized = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-  if (normalized.includes("femin")) return "#b35c2e";
-  if (normalized.includes("mascul")) return "#315c42";
-  if (normalized.includes("nao inform")) return "#a8a29e";
+  if (normalized.includes("femin")) return "#e8531e";
+  if (normalized.includes("mascul")) return "#143a60";
+  if (normalized.includes("nao inform")) return "#a6b9ca";
 
-  return "#8b3d45";
+  return "#459cd7";
 }
 
 function normalizeSexLabel(label: string): string {
@@ -545,7 +579,7 @@ function normalizeSexLabel(label: string): string {
 
   if (normalized === "m" || normalized.includes("mascul")) return "Masculino";
   if (normalized === "f" || normalized.includes("femin")) return "Feminino";
-  if (normalized.includes("nao inform")) return "Nao informado";
+  if (normalized.includes("nao inform")) return "Não informado";
 
   return label;
 }
@@ -555,14 +589,14 @@ function CoverageDeck({ items }: { items: DashboardCoverageItemDTO[] }) {
     <section className={SECTION_CLASS_NAME}>
       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">Cobertura</p>
       <h2 className="mt-2 text-2xl font-semibold text-accent-strong">
-        Equilibrio entre acompanhamento em dia e em atraso
+        Equilíbrio entre acompanhamento em dia e em atraso
       </h2>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {items.map((item) => (
           <article
             key={item.label}
-            className="rounded-[1.5rem] border border-border/70 bg-[linear-gradient(145deg,rgba(255,253,247,0.95),rgba(233,241,229,0.82))] p-4"
+            className="rounded-[1.5rem] border border-border/70 bg-[linear-gradient(145deg,rgba(255,255,255,0.78),rgba(214,231,244,0.86))] p-4"
           >
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-medium text-accent-strong">{item.label}</p>
@@ -570,11 +604,11 @@ function CoverageDeck({ items }: { items: DashboardCoverageItemDTO[] }) {
             </div>
             <div className="mt-4 flex h-4 overflow-hidden rounded-full bg-surface-strong">
               <div
-                className="bg-[#315c42]"
+                className="bg-accent-strong"
                 style={{ width: `${item.coverageRate}%` }}
               />
               <div
-                className="bg-[#d5b17c]"
+                className="bg-highlight"
                 style={{ width: `${100 - item.coverageRate}%` }}
               />
             </div>
@@ -605,25 +639,25 @@ function getSummaryCards(view: DashboardViewDTO) {
         eyebrow: "Universo",
         value: summary.totalRecords,
         label: "Pessoas no recorte atual",
-        accent: "bg-[#315c42]",
+        accent: "bg-accent-strong",
       },
       {
         eyebrow: "Atenção",
         value: summary.withoutMedicalCare,
-        label: "Sem atendimento medico recente",
-        accent: "bg-[#b35c2e]",
+        label: "Sem atendimento médico recente",
+        accent: "bg-highlight",
       },
       {
         eyebrow: "Cobertura",
         value: summary.withoutHomeVisit,
         label: "Sem visita domiciliar recente",
-        accent: "bg-[#8a6a1f]",
+        accent: "bg-accent",
       },
       {
         eyebrow: "Monitoramento",
         value: summary.withoutRecentBloodPressureCheck + summary.withoutRecentHbA1c,
-        label: "Pendencias de exames e afericoes",
-        accent: "bg-[#8b3d45]",
+        label: "Pendências de exames e aferições",
+        accent: "bg-[var(--chart-4)]",
       },
     ];
   }
@@ -634,25 +668,25 @@ function getSummaryCards(view: DashboardViewDTO) {
         eyebrow: "Diabetes",
         value: summary.totalRecords,
         label: "Pessoas acompanhadas neste recorte",
-        accent: "bg-[#315c42]",
+        accent: "bg-accent-strong",
       },
       {
         eyebrow: "Consulta",
         value: summary.withoutMedicalCare,
-        label: "Sem atendimento medico recente",
-        accent: "bg-[#b35c2e]",
+        label: "Sem atendimento médico recente",
+        accent: "bg-highlight",
       },
       {
         eyebrow: "Territorio",
         value: summary.withoutHomeVisit,
         label: "Sem visita domiciliar recente",
-        accent: "bg-[#8a6a1f]",
+        accent: "bg-accent",
       },
       {
         eyebrow: "HbA1c",
         value: summary.withoutRecentHbA1c,
         label: "Sem hemoglobina glicada recente",
-        accent: "bg-[#8b3d45]",
+        accent: "bg-[var(--chart-4)]",
       },
     ];
   }
@@ -660,28 +694,28 @@ function getSummaryCards(view: DashboardViewDTO) {
   if (hasHypertension) {
     return [
       {
-        eyebrow: "Hipertensao",
+        eyebrow: "Hipertensão",
         value: summary.totalRecords,
         label: "Pessoas acompanhadas neste recorte",
-        accent: "bg-[#315c42]",
+        accent: "bg-accent-strong",
       },
       {
         eyebrow: "Consulta",
         value: summary.withoutMedicalCare,
-        label: "Sem atendimento medico recente",
-        accent: "bg-[#b35c2e]",
+        label: "Sem atendimento médico recente",
+        accent: "bg-highlight",
       },
       {
         eyebrow: "Territorio",
         value: summary.withoutHomeVisit,
         label: "Sem visita domiciliar recente",
-        accent: "bg-[#8a6a1f]",
+        accent: "bg-accent",
       },
       {
-        eyebrow: "Pressao arterial",
+        eyebrow: "Pressão arterial",
         value: summary.withoutRecentBloodPressureCheck,
-        label: "Sem afericao recente de PA",
-        accent: "bg-[#8b3d45]",
+        label: "Sem aferição recente de PA",
+        accent: "bg-[var(--chart-4)]",
       },
     ];
   }
@@ -691,25 +725,25 @@ function getSummaryCards(view: DashboardViewDTO) {
       eyebrow: "Universo",
       value: summary.totalRecords,
       label: "Pessoas no recorte atual",
-      accent: "bg-[#315c42]",
+      accent: "bg-accent-strong",
     },
     {
       eyebrow: "Atenção",
       value: summary.withoutMedicalCare,
-      label: "Sem atendimento medico recente",
-      accent: "bg-[#b35c2e]",
+      label: "Sem atendimento médico recente",
+      accent: "bg-highlight",
     },
     {
       eyebrow: "Cobertura",
       value: summary.withoutHomeVisit,
       label: "Sem visita domiciliar recente",
-      accent: "bg-[#8a6a1f]",
+      accent: "bg-accent",
     },
     {
       eyebrow: "Monitoramento",
       value: summary.withoutRecentBloodPressureCheck,
-      label: "Pendencias de exames e afericoes",
-      accent: "bg-[#8b3d45]",
+      label: "Pendências de exames e aferições",
+      accent: "bg-[var(--chart-4)]",
     },
   ];
 }
@@ -727,28 +761,28 @@ export default async function Home({ searchParams }: HomePageProps) {
   const visibleCoverageItems = getVisibleCoverageItems(dashboardData.view);
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#eff4df_0%,#f6f0e4_36%,#eadfc9_100%)]">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#f4f3f3_0%,#e2e0e0_42%,#d6e7f4_100%)]">
       <section className="mx-auto w-full max-w-[92rem] px-5 py-8 lg:px-8">
         <header className={`${PANEL_CLASS_NAME} relative overflow-hidden p-7 lg:p-9`}>
-          <div className="absolute inset-y-0 right-0 hidden w-[32rem] bg-[radial-gradient(circle_at_center,rgba(49,92,66,0.18),transparent_68%)] lg:block" />
+          <div className="absolute inset-y-0 right-0 hidden w-[32rem] bg-[radial-gradient(circle_at_center,rgba(69,156,215,0.20),transparent_68%)] lg:block" />
           <div className="relative flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-4xl">
               <span className="inline-flex rounded-full border border-border bg-surface-strong px-4 py-1 text-sm font-medium text-accent-strong">
-                Sala de situacao cronica
+                Sala de situação crônica
               </span>
               <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-tight text-accent-strong sm:text-5xl">
-                Dashboard quantitativa com filtros facetados e leitura territorial do recorte importado.
+                Dashboard quantitativo com filtros facetados e leitura territorial do recorte importado.
               </h1>
               <p className="mt-4 max-w-3xl text-base leading-7 text-muted">
-                Os CSVs sao convertidos em recortes anonimizados. Aqui o foco e volume,
-                distribuicao e lacunas assistenciais em {conditionContextLabel}, sem qualquer dado nominal.
+                Os CSVs são convertidos em recortes anonimizados. Aqui o foco é volume,
+                distribuição e lacunas assistenciais em {conditionContextLabel}, sem qualquer dado nominal.
               </p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
               <Link
                 href="/importar"
-                className="inline-flex h-12 items-center justify-center rounded-full bg-accent px-6 text-sm font-semibold text-white transition hover:bg-accent-strong"
+                className="inline-flex h-12 items-center justify-center rounded-full bg-accent-strong px-6 text-sm font-semibold text-white transition hover:bg-accent"
               >
                 Importar novo snapshot
               </Link>
@@ -763,8 +797,8 @@ export default async function Home({ searchParams }: HomePageProps) {
         </header>
 
         {!dashboardData.hasDatabaseConnection ? (
-          <section className="mt-6 rounded-[1.75rem] border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-            O banco nao esta acessivel nesta execucao. O layout continua disponivel, mas os dados so aparecem quando o PostgreSQL estiver pronto.
+          <section className="mt-6 rounded-[1.75rem] border border-highlight/30 bg-highlight-soft p-5 text-sm text-[var(--status-error-text)]">
+            O banco não está acessível nesta execução. O layout continua disponível, mas os dados só aparecem quando o PostgreSQL estiver pronto.
           </section>
         ) : null}
 
@@ -778,7 +812,7 @@ export default async function Home({ searchParams }: HomePageProps) {
                     Monte o recorte
                   </h2>
                   <p className="mt-2 text-sm leading-6 text-muted">
-                    Cada grupo aceita multiplas escolhas. Dentro do grupo a logica e de uniao.
+                    Cada grupo aceita múltiplas escolhas. Dentro do grupo, a lógica é de união.
                   </p>
                 </div>
                 <div className="rounded-full bg-surface-strong px-3 py-1 text-xs font-semibold text-muted">
@@ -799,7 +833,7 @@ export default async function Home({ searchParams }: HomePageProps) {
                 />
 
                 <FilterGroup
-                  title="Raca/cor"
+                  title="Raça/cor"
                   name="raceColor"
                   selectedValues={dashboardData.view.appliedFilters.raceColors}
                   options={dashboardData.view.filterOptions.raceColors.map((value) => ({
@@ -809,7 +843,7 @@ export default async function Home({ searchParams }: HomePageProps) {
                 />
 
                 <FilterGroup
-                  title="Faixa etaria"
+                  title="Faixa etária"
                   name="ageGroup"
                   compact
                   selectedValues={dashboardData.view.appliedFilters.ageGroups}
@@ -853,7 +887,7 @@ export default async function Home({ searchParams }: HomePageProps) {
                 <div className="flex flex-wrap gap-3 pt-2">
                   <button
                     type="submit"
-                    className="inline-flex h-11 items-center justify-center rounded-full bg-accent px-5 text-sm font-semibold text-white transition hover:bg-accent-strong"
+                    className="inline-flex h-11 items-center justify-center rounded-full bg-accent-strong px-5 text-sm font-semibold text-white transition hover:bg-accent"
                   >
                     Aplicar recorte
                   </button>
@@ -878,8 +912,8 @@ export default async function Home({ searchParams }: HomePageProps) {
                   </h2>
                   <p className="mt-2 text-sm leading-6 text-muted">
                     {dashboardData.latestUpload
-                      ? `Condicao de origem: ${formatConditionLabel(dashboardData.latestUpload.condition)} • ${dashboardData.latestUpload.totalRecords} registros • ${formatUploadDate(dashboardData.latestUpload.createdAt)}`
-                      : "Carregue um arquivo para gerar a leitura quantitativa do territorio."}
+                      ? `Condição de origem: ${formatConditionLabel(dashboardData.latestUpload.condition)} • ${dashboardData.latestUpload.totalRecords} registros • ${formatUploadDate(dashboardData.latestUpload.createdAt)}`
+                      : "Carregue um arquivo para gerar a leitura quantitativa do território."}
                   </p>
                 </div>
 
@@ -911,6 +945,25 @@ export default async function Home({ searchParams }: HomePageProps) {
               ))}
             </section>
 
+            {dashboardData.view.insights.length > 0 ? (
+              <section className="space-y-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
+                    Insights do recorte
+                  </p>
+                  <h2 className="mt-2 text-2xl font-semibold text-accent-strong">
+                    Leitura executiva para priorização
+                  </h2>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+                  {dashboardData.view.insights.map((insight) => (
+                    <InsightCard key={insight.title} {...insight} />
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
             <section
               className={`grid gap-4 ${hasMixedConditions ? "2xl:grid-cols-[1.1fr_0.9fr]" : "2xl:grid-cols-1"}`}
             >
@@ -918,12 +971,12 @@ export default async function Home({ searchParams }: HomePageProps) {
                 title="Territorio"
                 subtitle="Top bairros com mais pessoas acompanhadas"
                 items={dashboardData.view.topNeighborhoods}
-                tone="bg-[linear-gradient(90deg,#d5b17c_0%,#b35c2e_100%)]"
+                tone="bg-[linear-gradient(90deg,#459cd7_0%,#143a60_100%)]"
               />
               {hasMixedConditions ? (
                 <ComparisonColumns
-                  title="Condicao"
-                  subtitle="Distribuicao entre diabetes e hipertensao"
+                  title="Condição"
+                  subtitle="Distribuição entre diabetes e hipertensão"
                   items={dashboardData.view.conditionDistribution}
                 />
               ) : null}
@@ -932,7 +985,7 @@ export default async function Home({ searchParams }: HomePageProps) {
             <section className="grid gap-4 2xl:grid-cols-[0.9fr_1.1fr]">
               <InteractivePieChart
                 title="Sexo"
-                subtitle="Composicao do recorte por sexo"
+                subtitle="Composição do recorte por sexo"
                 items={dashboardData.view.sexDistribution.map((item) => ({
                   label: normalizeSexLabel(item.label),
                   value: item.value,
@@ -941,17 +994,17 @@ export default async function Home({ searchParams }: HomePageProps) {
                 totalLabel="Total"
               />
               <HorizontalBars
-                title="Faixa etaria"
-                subtitle="Distribuicao por faixa etaria"
+                title="Faixa etária"
+                subtitle="Distribuição por faixa etária"
                 items={dashboardData.view.ageGroupDistribution}
-                tone="bg-[#b35c2e]"
+                tone="bg-highlight"
               />
             </section>
 
             <section className="grid gap-4 2xl:grid-cols-[1fr_1fr]">
               <PieChart
-                title="Raca/cor"
-                subtitle="Composicao do recorte por raca/cor"
+                title="Raça/cor"
+                subtitle="Composição do recorte por raça/cor"
                 items={dashboardData.view.raceColorDistribution}
                 getColor={getRaceColor}
                 donut
@@ -967,18 +1020,18 @@ export default async function Home({ searchParams }: HomePageProps) {
                 {hasMixedConditions
                   ? "Panorama integrado das duas linhas de cuidado"
                   : hasDiabetes
-                    ? "Panorama especifico da linha de cuidado em diabetes"
+                    ? "Panorama específico da linha de cuidado em diabetes"
                     : hasHypertension
-                      ? "Panorama especifico da linha de cuidado em hipertensao"
+                      ? "Panorama específico da linha de cuidado em hipertensão"
                       : "Panorama do recorte importado"}
               </h2>
               <p className="mt-3 max-w-4xl text-sm leading-7 text-muted">
                 {hasMixedConditions
-                  ? "O recorte atual combina pessoas de diabetes e hipertensao. Por isso a dashboard destaca comparacoes entre condicoes e mantem todos os indicadores compartilhados e especificos."
+                  ? "O recorte atual combina pessoas com diabetes e hipertensão. Por isso, a dashboard destaca comparações entre condições e mantém todos os indicadores compartilhados e específicos."
                   : hasDiabetes
-                    ? "Como o recorte atual traz apenas diabetes, a dashboard prioriza distribuicoes demograficas, bairros com maior volume e indicadores clinicos relevantes para essa linha, incluindo HbA1c."
+                    ? "Como o recorte atual traz apenas diabetes, a dashboard prioriza distribuições demográficas, bairros com maior volume e indicadores clínicos relevantes para essa linha, incluindo HbA1c."
                     : hasHypertension
-                      ? "Como o recorte atual traz apenas hipertensao, a dashboard remove comparacoes desnecessarias entre condicoes e concentra a leitura em pressao arterial, acompanhamento e distribuicoes do territorio."
+                      ? "Como o recorte atual traz apenas hipertensão, a dashboard remove comparações desnecessárias entre condições e concentra a leitura em pressão arterial, acompanhamento e distribuições do território."
                       : "Quando houver dados no recorte, a narrativa da dashboard se ajusta automaticamente ao perfil importado."}
               </p>
             </section>
@@ -1011,19 +1064,20 @@ async function loadDashboardData(filters: DashboardFiltersDTO) {
         filteredRecordCount: 0,
         conditionDistribution: [
           { label: "Diabetes", value: 0 },
-          { label: "Hipertensao", value: 0 },
+          { label: "Hipertensão", value: 0 },
         ],
         topNeighborhoods: [],
         ageGroupDistribution: [],
         sexDistribution: [],
         raceColorDistribution: [],
         careCoverage: [
-          { label: "Atendimento medico em dia", covered: 0, uncovered: 0, coverageRate: 0 },
+          { label: "Atendimento médico em dia", covered: 0, uncovered: 0, coverageRate: 0 },
           { label: "Enfermagem em dia", covered: 0, uncovered: 0, coverageRate: 0 },
           { label: "Visita domiciliar em dia", covered: 0, uncovered: 0, coverageRate: 0 },
           { label: "PA recente", covered: 0, uncovered: 0, coverageRate: 0 },
           { label: "HbA1c recente", covered: 0, uncovered: 0, coverageRate: 0 },
         ],
+        insights: [],
         filterOptions: {
           neighborhoods: [],
           sexes: [],

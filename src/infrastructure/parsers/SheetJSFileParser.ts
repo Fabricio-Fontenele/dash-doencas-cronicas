@@ -33,7 +33,7 @@ export class SheetJSFileParser implements IFileParser {
     const extension = extname(fileName).toLowerCase();
 
     if (!SUPPORTED_EXTENSIONS.has(extension)) {
-      throw new FileParsingError("Formato de arquivo nao suportado para importacao.");
+      throw new FileParsingError("Formato de arquivo não suportado para importação.");
     }
   }
 
@@ -47,7 +47,7 @@ export class SheetJSFileParser implements IFileParser {
     const firstSheetName = workbook.SheetNames[0];
 
     if (!firstSheetName) {
-      throw new FileParsingError("Arquivo sem abas ou conteudo legivel.");
+      throw new FileParsingError("Arquivo sem abas ou conteúdo legível.");
     }
 
     const worksheet = workbook.Sheets[firstSheetName];
@@ -81,14 +81,14 @@ export class SheetJSFileParser implements IFileParser {
       return "HYPERTENSION";
     }
 
-    throw new FileParsingError("Nao foi possivel identificar se o relatorio e de diabetes ou hipertensao.");
+    throw new FileParsingError("Não foi possível identificar se o relatório é de diabetes ou hipertensão.");
   }
 
   private extractRecords(matrix: MatrixRow[]): RawRecord[] {
     const headerRowIndex = matrix.findIndex((row) => this.isHeaderRow(row));
 
     if (headerRowIndex === -1) {
-      throw new FileParsingError("Nao foi possivel localizar a linha de cabecalho do relatorio.");
+      throw new FileParsingError("Não foi possível localizar a linha de cabeçalho do relatório.");
     }
 
     const headers = matrix[headerRowIndex].map((header) => header.trim());

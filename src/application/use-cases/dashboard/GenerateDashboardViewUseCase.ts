@@ -2,6 +2,7 @@ import {
   type DashboardBarChartItemDTO,
   type DashboardCoverageItemDTO,
   type DashboardFilterOptionsDTO,
+  type DashboardInsightDTO,
   type DashboardViewDTO,
 } from "@/application/dtos/DashboardViewDTO";
 import {
@@ -32,6 +33,7 @@ export class GenerateDashboardViewUseCase {
       sexDistribution: this.groupAndSort(filteredBuckets, (bucket) => bucket.sex ?? "Nao informado"),
       raceColorDistribution: this.groupAndSort(filteredBuckets, (bucket) => bucket.raceColor ?? "Nao informada"),
       careCoverage: this.buildCareCoverage(filteredBuckets),
+      insights: this.buildInsights(filteredBuckets),
       filterOptions: this.buildFilterOptions(buckets),
       appliedFilters: filters,
     };
@@ -179,6 +181,71 @@ export class GenerateDashboardViewUseCase {
     ];
   }
 
+  private buildInsights(buckets: AggregateBucket[]): DashboardInsightDTO[] {
+    const total = this.sumCounts(buckets);
+
+    if (total === 0) {
+      return [];
+    }
+
+    const visibleCoverage = this.getVisibleCoverageItems(buckets);
+    const averageCoverage = Math.round(
+      visibleCoverage.reduce((sum, item) => sum + item.coverageRate, 0) / visibleCoverage.length,
+    );
+    const worstCoverage = [...visibleCoverage].sort(
+      (left, right) =>
+        left.coverageRate - right.coverageRate || right.uncovered - left.uncovered,
+    )[0];
+    const topNeighborhood = this.groupAndSort(
+      buckets,
+      (bucket) => bucket.neighborhood ?? "Nao informado",
+      1,
+    )[0];
+    const leadingAgeGroup = this.groupAndSort(
+      buckets,
+      (bucket) => bucket.ageGroup ?? "Nao informada",
+      1,
+    )[0];
+    const multiGapCount = buckets.reduce(
+      (sum, bucket) =>
+        sum + (this.countActiveCareGaps(bucket) >= 2 ? bucket.count : 0),
+      0,
+    );
+
+    return [
+      {
+        title: "Pressao assistencial",
+        value: `${Math.round((multiGapCount / total) * 100)}%`,
+        description: `${multiGapCount} pessoas concentram duas ou mais pendencias de cuidado no recorte atual.`,
+        tone: "highlight",
+      },
+      {
+        title: "Cobertura media",
+        value: `${averageCoverage}%`,
+        description: `Media consolidada dos indicadores de acompanhamento em ${visibleCoverage.length} frentes de cuidado.`,
+        tone: "primary",
+      },
+      {
+        title: "Pior gargalo",
+        value: worstCoverage.label,
+        description: `${worstCoverage.uncovered} pessoas estao em atraso no indicador com menor cobertura (${worstCoverage.coverageRate}%).`,
+        tone: "secondary",
+      },
+      {
+        title: "Concentracao territorial",
+        value: `${Math.round((topNeighborhood.value / total) * 100)}%`,
+        description: `${topNeighborhood.label} concentra ${topNeighborhood.value} pessoas, a maior carga territorial do recorte.`,
+        tone: "muted",
+      },
+      {
+        title: "Perfil dominante",
+        value: leadingAgeGroup.label,
+        description: `${leadingAgeGroup.value} pessoas estao na faixa etaria mais representativa do snapshot filtrado.`,
+        tone: "primary",
+      },
+    ];
+  }
+
   private createCoverageItem(
     label: string,
     buckets: AggregateBucket[],
@@ -194,6 +261,13 @@ export class GenerateDashboardViewUseCase {
       uncovered,
       coverageRate: Math.round((covered / total) * 100),
     };
+  }
+
+  private getVisibleCoverageItems(buckets: AggregateBucket[]): DashboardCoverageItemDTO[] {
+    const hasDiabetes = buckets.some((bucket) => bucket.condition === "DIABETES");
+    return this.buildCareCoverage(buckets).filter(
+      (item) => hasDiabetes || item.label !== "HbA1c recente",
+    );
   }
 
   private groupAndSort(
@@ -224,5 +298,15 @@ export class GenerateDashboardViewUseCase {
     predicate: (bucket: AggregateBucket) => boolean,
   ): number {
     return buckets.reduce((total, bucket) => total + (predicate(bucket) ? bucket.count : 0), 0);
+  }
+
+  private countActiveCareGaps(bucket: AggregateBucket): number {
+    return [
+      bucket.needsMedicalCare,
+      bucket.needsNursingCare,
+      bucket.needsHomeVisit,
+      bucket.hasStaleBloodPressureMeasurement,
+      bucket.hasStaleHbA1c,
+    ].filter(Boolean).length;
   }
 }

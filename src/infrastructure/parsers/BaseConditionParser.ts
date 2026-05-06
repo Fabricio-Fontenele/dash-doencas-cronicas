@@ -51,7 +51,7 @@ export abstract class BaseConditionParser {
 
   parse(rows: RawRecord[]): CareRecord[] {
     if (rows.length === 0) {
-      throw new FileParsingError("O arquivo nao possui linhas validas para importar.");
+      throw new FileParsingError("O arquivo não possui linhas válidas para importar.");
     }
 
     return rows.map((row) => this.toCareRecord(row));
@@ -68,7 +68,7 @@ export abstract class BaseConditionParser {
       );
 
     if (!hasAllRequiredFields) {
-      throw new FileParsingError("Colunas obrigatorias ausentes no relatorio importado.");
+      throw new FileParsingError("Colunas obrigatórias ausentes no relatório importado.");
     }
   }
 
