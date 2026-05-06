@@ -40,7 +40,7 @@ export async function processUploadAction(
   if (!parsedInput.success) {
     return {
       status: "error",
-      message: parsedInput.error.issues[0]?.message ?? "Arquivo invalido para importacao.",
+      message: parsedInput.error.issues[0]?.message ?? "Arquivo inválido para importação.",
       uploadedFileName: null,
     };
   }
@@ -87,7 +87,7 @@ export async function processUploadAction(
 }
 
 function formatConditionLabel(condition: "DIABETES" | "HYPERTENSION"): string {
-  return condition === "DIABETES" ? "diabetes" : "hipertensao";
+  return condition === "DIABETES" ? "diabetes" : "hipertensão";
 }
 
 async function ensureUploaderUser(): Promise<string> {
@@ -106,7 +106,7 @@ async function ensureUploaderUser(): Promise<string> {
 
   const createdUser = await prisma.user.create({
     data: {
-      name: "Enfermeiro Responsavel",
+      name: "Enfermeiro Responsável",
       email: "enfermeiro.local@dashboard-cronico.dev",
       passwordHash: "auth-pending",
       perfil: "ENFERMEIRO",

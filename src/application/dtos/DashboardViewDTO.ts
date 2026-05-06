@@ -13,6 +13,13 @@ export interface DashboardCoverageItemDTO {
   coverageRate: number;
 }
 
+export interface DashboardInsightDTO {
+  title: string;
+  value: string;
+  description: string;
+  tone: "primary" | "secondary" | "highlight" | "muted";
+}
+
 export interface DashboardFilterOptionsDTO {
   neighborhoods: string[];
   sexes: string[];
@@ -28,6 +35,7 @@ export interface DashboardViewDTO {
   sexDistribution: DashboardBarChartItemDTO[];
   raceColorDistribution: DashboardBarChartItemDTO[];
   careCoverage: DashboardCoverageItemDTO[];
+  insights: DashboardInsightDTO[];
   filterOptions: DashboardFilterOptionsDTO;
   appliedFilters: DashboardFiltersDTO;
 }
