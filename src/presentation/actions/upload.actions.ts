@@ -6,6 +6,7 @@ import { z } from "zod";
 import { ProcessUploadUseCase } from "@/application/use-cases/upload/ProcessUploadUseCase";
 import { prisma } from "@/infrastructure/database/prisma/client";
 import { PrismaAggregateBucketRepository } from "@/infrastructure/database/repositories/PrismaAggregateBucketRepository";
+import { PrismaCareEventBucketRepository } from "@/infrastructure/database/repositories/PrismaCareEventBucketRepository";
 import { PrismaUploadRepository } from "@/infrastructure/database/repositories/PrismaUploadRepository";
 import { FileParsingError } from "@/infrastructure/parsers/errors/FileParsingError";
 import { SheetJSFileParser } from "@/infrastructure/parsers/SheetJSFileParser";
@@ -53,6 +54,7 @@ export async function processUploadAction(
       new SheetJSFileParser(),
       new PrismaUploadRepository(),
       new PrismaAggregateBucketRepository(),
+      new PrismaCareEventBucketRepository(),
     );
 
     const result = await useCase.execute({
@@ -86,8 +88,11 @@ export async function processUploadAction(
   }
 }
 
-function formatConditionLabel(condition: "DIABETES" | "HYPERTENSION"): string {
-  return condition === "DIABETES" ? "diabetes" : "hipertensão";
+function formatConditionLabel(condition: "DIABETES" | "HYPERTENSION" | "MIXED"): string {
+  if (condition === "DIABETES") return "diabetes";
+  if (condition === "HYPERTENSION") return "hipertensão";
+
+  return "diabetes e hipertensão";
 }
 
 async function ensureUploaderUser(): Promise<string> {

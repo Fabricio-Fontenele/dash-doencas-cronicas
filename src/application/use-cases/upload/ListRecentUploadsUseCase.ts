@@ -12,6 +12,13 @@ export class ListRecentUploadsUseCase {
       fileName: upload.fileName,
       condition: upload.condition,
       totalRecords: upload.totalRecords,
+      supportsMedicalTimeline: upload.supportsMedicalTimeline,
+      supportsNursingTimeline: upload.supportsNursingTimeline,
+      supportsDentalTimeline: upload.supportsDentalTimeline,
+      supportsHomeVisitTimeline: upload.supportsHomeVisitTimeline,
+      supportsBmiClassification: upload.supportsBmiClassification,
+      supportsBloodPressureClassification: upload.supportsBloodPressureClassification,
+      supportsHbA1cClassification: upload.supportsHbA1cClassification,
       createdAt: upload.createdAt,
       uploadedBy: upload.uploadedBy,
     }));

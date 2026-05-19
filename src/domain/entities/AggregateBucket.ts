@@ -1,20 +1,29 @@
 import { DomainError } from "@/domain/errors/DomainError";
 import { type AgeGroup } from "@/domain/value-objects/AgeGroup";
-import { type Condition } from "@/domain/value-objects/Condition";
+import { type BloodPressureClassification } from "@/domain/value-objects/BloodPressureClassification";
+import { type BmiClassification } from "@/domain/value-objects/BmiClassification";
+import { type ClinicalCondition } from "@/domain/value-objects/Condition";
+import { type HbA1cClassification } from "@/domain/value-objects/HbA1cClassification";
+import { type IbgeRaceColor } from "@/domain/value-objects/IbgeRaceColor";
 
 export interface AggregateBucketProps {
   uploadId: string;
-  condition: Condition;
+  condition: ClinicalCondition;
   ageGroup: AgeGroup | null;
   sex: string | null;
   raceColor: string | null;
+  ibgeRaceColor: IbgeRaceColor | null;
   familyAllowance: boolean | null;
   neighborhood: string | null;
   needsMedicalCare: boolean;
   needsNursingCare: boolean;
+  needsDentalCare: boolean;
   needsHomeVisit: boolean;
   hasStaleBloodPressureMeasurement: boolean;
   hasStaleHbA1c: boolean;
+  bmiClassification: BmiClassification | null;
+  bloodPressureClassification: BloodPressureClassification | null;
+  hba1cClassification: HbA1cClassification | null;
   count: number;
 }
 
@@ -44,17 +53,22 @@ export class AggregateBucket {
       props.ageGroup ?? "null",
       props.sex ?? "null",
       props.raceColor ?? "null",
+      props.ibgeRaceColor ?? "null",
       String(props.familyAllowance),
       props.neighborhood ?? "null",
       String(props.needsMedicalCare),
       String(props.needsNursingCare),
+      String(props.needsDentalCare),
       String(props.needsHomeVisit),
       String(props.hasStaleBloodPressureMeasurement),
       String(props.hasStaleHbA1c),
+      props.bmiClassification ?? "null",
+      props.bloodPressureClassification ?? "null",
+      props.hba1cClassification ?? "null",
     ].join("|");
   }
 
-  get condition(): Condition {
+  get condition(): ClinicalCondition {
     return this.props.condition;
   }
 
@@ -74,6 +88,10 @@ export class AggregateBucket {
     return this.props.familyAllowance;
   }
 
+  get ibgeRaceColor(): IbgeRaceColor | null {
+    return this.props.ibgeRaceColor;
+  }
+
   get neighborhood(): string | null {
     return this.props.neighborhood;
   }
@@ -90,12 +108,28 @@ export class AggregateBucket {
     return this.props.needsHomeVisit;
   }
 
+  get needsDentalCare(): boolean {
+    return this.props.needsDentalCare;
+  }
+
   get hasStaleBloodPressureMeasurement(): boolean {
     return this.props.hasStaleBloodPressureMeasurement;
   }
 
   get hasStaleHbA1c(): boolean {
     return this.props.hasStaleHbA1c;
+  }
+
+  get bmiClassification(): BmiClassification | null {
+    return this.props.bmiClassification;
+  }
+
+  get bloodPressureClassification(): BloodPressureClassification | null {
+    return this.props.bloodPressureClassification;
+  }
+
+  get hba1cClassification(): HbA1cClassification | null {
+    return this.props.hba1cClassification;
   }
 
   get count(): number {

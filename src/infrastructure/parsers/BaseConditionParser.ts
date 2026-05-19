@@ -1,5 +1,6 @@
 import { CareRecord } from "@/domain/entities/CareRecord";
-import { type Condition } from "@/domain/value-objects/Condition";
+import { type ParsedFileCapabilities } from "@/application/ports/IFileParser";
+import { type ClinicalCondition } from "@/domain/value-objects/Condition";
 import { FileParsingError } from "@/infrastructure/parsers/errors/FileParsingError";
 
 type RawRecord = Record<string, string>;
@@ -29,6 +30,12 @@ const COMMON_FIELD_ALIASES = {
     "tempo sem atendimento enfermagem",
     "meses desde o ultimo atendimento de enfermagem",
   ],
+  monthsSinceDentalAppointment: [
+    "meses ultimo atendimento odontologico",
+    "meses desde o ultimo atendimento odontologico",
+    "meses sem atendimento odontologico",
+    "tempo sem atendimento odontologico",
+  ],
   monthsSinceHomeVisit: [
     "meses ultima visita domiciliar",
     "meses sem visita domiciliar",
@@ -44,17 +51,24 @@ const COMMON_FIELD_ALIASES = {
   bloodPressureCheckDate: [
     "data da ultima medicao de pressao arterial",
   ],
+  weight: ["ultimo peso", "ultima medicao de peso", "peso"],
+  height: ["ultima altura", "ultima medicao de altura", "altura"],
+  medicalAppointmentDate: ["data da ultima consulta", "data da ultima consulta medica"],
+  nursingAppointmentDate: ["data da ultima consulta de enfermagem"],
+  dentalAppointmentDate: ["data da ultima consulta odontologica", "data do ultimo atendimento odontologico"],
+  latestHomeVisitDate: ["ultimas visitas domiciliares", "data da ultima visita domiciliar"],
+  bloodPressureValue: ["ultima medicao de pressao arterial"],
 } as const;
 
 export abstract class BaseConditionParser {
-  abstract readonly condition: Condition;
+  abstract readonly condition: ClinicalCondition;
 
   parse(rows: RawRecord[]): CareRecord[] {
     if (rows.length === 0) {
       throw new FileParsingError("O arquivo não possui linhas válidas para importar.");
     }
 
-    return rows.map((row) => this.toCareRecord(row));
+    return rows.map((row) => this.parseRow(row));
   }
 
   validateHeaders(headers: string[]): void {
@@ -74,7 +88,23 @@ export abstract class BaseConditionParser {
 
   protected abstract getConditionSpecificMonths(row: RawRecord): number | null;
 
-  private toCareRecord(row: RawRecord): CareRecord {
+  getCapabilities(records: CareRecord[]): ParsedFileCapabilities {
+    return {
+      supportsMedicalTimeline: records.some((record) => record.medicalAppointmentDate !== null),
+      supportsNursingTimeline: records.some((record) => record.nursingAppointmentDate !== null),
+      supportsDentalTimeline: records.some((record) => record.dentalAppointmentDate !== null),
+      supportsHomeVisitTimeline: records.some((record) => record.homeVisitDate !== null),
+      supportsBmiClassification: records.some((record) => record.bmiClassification !== null),
+      supportsBloodPressureClassification: records.some(
+        (record) => record.bloodPressureClassification !== null,
+      ),
+      supportsHbA1cClassification: records.some((record) => record.hba1cClassification !== null),
+    };
+  }
+
+  parseRow(row: RawRecord): CareRecord {
+    const bloodPressure = this.readBloodPressureValue(row);
+
     return CareRecord.create({
       condition: this.condition,
       age: this.readIntegerValue(row, COMMON_FIELD_ALIASES.age),
@@ -90,12 +120,27 @@ export abstract class BaseConditionParser {
         row,
         COMMON_FIELD_ALIASES.monthsSinceNursingAppointment,
       ),
+      monthsSinceDentalAppointment: this.readIntegerValue(
+        row,
+        COMMON_FIELD_ALIASES.monthsSinceDentalAppointment,
+      ),
       monthsSinceHomeVisit: this.readIntegerValue(
         row,
         COMMON_FIELD_ALIASES.monthsSinceHomeVisit,
       ),
       monthsSinceBloodPressureCheck: this.readMonthsSinceBloodPressureCheck(row),
       monthsSinceHbA1c: this.getConditionSpecificMonths(row),
+      medicalAppointmentDate: this.readDateValue(row, COMMON_FIELD_ALIASES.medicalAppointmentDate),
+      nursingAppointmentDate: this.readDateValue(row, COMMON_FIELD_ALIASES.nursingAppointmentDate),
+      dentalAppointmentDate: this.readDateValue(row, COMMON_FIELD_ALIASES.dentalAppointmentDate),
+      homeVisitDate: this.readDateValue(row, COMMON_FIELD_ALIASES.latestHomeVisitDate),
+      bloodPressureCheckDate: this.readDateValue(row, COMMON_FIELD_ALIASES.bloodPressureCheckDate),
+      hba1cDate: this.getConditionSpecificDate(row),
+      weightInKilograms: this.readDecimalValue(row, COMMON_FIELD_ALIASES.weight),
+      heightInMeters: this.readDecimalValue(row, COMMON_FIELD_ALIASES.height),
+      bloodPressureSystolic: bloodPressure?.systolic ?? null,
+      bloodPressureDiastolic: bloodPressure?.diastolic ?? null,
+      hba1cPercentage: this.getConditionSpecificMeasurement(row),
     });
   }
 
@@ -120,6 +165,19 @@ export abstract class BaseConditionParser {
     return Number.isNaN(numericValue) ? null : numericValue;
   }
 
+  protected readDecimalValue(row: RawRecord, aliases: readonly string[]): number | null {
+    const rawValue = this.readOptionalValue(row, aliases);
+
+    if (rawValue === null) {
+      return null;
+    }
+
+    const normalized = rawValue.replace(",", ".").replace(/[^\d.]/g, "");
+    const numericValue = Number.parseFloat(normalized);
+
+    return Number.isNaN(numericValue) ? null : numericValue;
+  }
+
   protected readMonthsFromDateValue(row: RawRecord, aliases: readonly string[]): number | null {
     const rawValue = this.readOptionalValue(row, aliases);
 
@@ -134,6 +192,16 @@ export abstract class BaseConditionParser {
     }
 
     return this.calculateMonthDifference(date, new Date());
+  }
+
+  protected readDateValue(row: RawRecord, aliases: readonly string[]): Date | null {
+    const rawValue = this.readOptionalValue(row, aliases);
+
+    if (rawValue === null) {
+      return null;
+    }
+
+    return this.parseBrazilianDate(rawValue);
   }
 
   protected readBooleanValue(row: RawRecord, aliases: readonly string[]): boolean | null {
@@ -165,6 +233,37 @@ export abstract class BaseConditionParser {
 
     const normalized = row[value]?.trim() ?? "";
     return EMPTY_TOKENS.has(this.normalizeValue(normalized)) ? null : normalized;
+  }
+
+  protected readBloodPressureValue(
+    row: RawRecord,
+  ): { systolic: number; diastolic: number } | null {
+    const rawValue = this.readOptionalValue(row, COMMON_FIELD_ALIASES.bloodPressureValue);
+
+    if (rawValue === null) {
+      return null;
+    }
+
+    const match = rawValue.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+
+    if (!match) {
+      return null;
+    }
+
+    return {
+      systolic: Number.parseInt(match[1], 10),
+      diastolic: Number.parseInt(match[2], 10),
+    };
+  }
+
+  protected getConditionSpecificDate(row: RawRecord): Date | null {
+    void row;
+    return null;
+  }
+
+  protected getConditionSpecificMeasurement(row: RawRecord): number | null {
+    void row;
+    return null;
   }
 
   private findHeaderValue(headers: readonly string[], aliases: readonly string[]): string | null {

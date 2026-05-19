@@ -1,8 +1,8 @@
-import { type Condition } from "@/domain/value-objects/Condition";
+import { type ClinicalCondition } from "@/domain/value-objects/Condition";
 import { BaseConditionParser } from "@/infrastructure/parsers/BaseConditionParser";
 
 export class HypertensionParser extends BaseConditionParser {
-  readonly condition: Condition = "HYPERTENSION";
+  readonly condition: ClinicalCondition = "HYPERTENSION";
 
   protected getConditionSpecificMonths(): number | null {
     return null;

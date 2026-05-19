@@ -4,9 +4,7 @@ import { CareRecord, type CareRecordProps } from "@/domain/entities/CareRecord";
 import { DomainError } from "@/domain/errors/DomainError";
 import { DashboardAggregationService } from "@/domain/services/DashboardAggregationService";
 
-function makeRecord(
-  overrides: Partial<CareRecordProps> = {},
-): CareRecord {
+function makeRecord(overrides: Partial<CareRecordProps> = {}): CareRecord {
   return CareRecord.create({
     condition: "DIABETES",
     age: 58,
@@ -16,9 +14,21 @@ function makeRecord(
     neighborhood: "Centro",
     monthsSinceMedicalAppointment: 8,
     monthsSinceNursingAppointment: 2,
+    monthsSinceDentalAppointment: 3,
     monthsSinceHomeVisit: 4,
     monthsSinceBloodPressureCheck: null,
     monthsSinceHbA1c: 15,
+    medicalAppointmentDate: new Date("2026-05-01T00:00:00Z"),
+    nursingAppointmentDate: null,
+    dentalAppointmentDate: null,
+    homeVisitDate: new Date("2026-05-02T00:00:00Z"),
+    bloodPressureCheckDate: null,
+    hba1cDate: new Date("2026-05-03T00:00:00Z"),
+    weightInKilograms: 79,
+    heightInMeters: 1.69,
+    bloodPressureSystolic: 152,
+    bloodPressureDiastolic: 94,
+    hba1cPercentage: 9.1,
     ...overrides,
   });
 }
@@ -41,18 +51,29 @@ describe("CareRecord", () => {
 
     expect(record.needsMedicalCare).toBe(true);
     expect(record.needsNursingCare).toBe(false);
+    expect(record.needsDentalCare).toBe(false);
     expect(record.needsHomeVisit).toBe(true);
     expect(record.hasStaleBloodPressureMeasurement).toBe(true);
     expect(record.hasStaleHbA1c).toBe(true);
+  });
+
+  it("classifies clinical measurements for bmi and hba1c", () => {
+    const record = makeRecord();
+
+    expect(record.bmiClassification).toBe("OVERWEIGHT");
+    expect(record.hba1cClassification).toBe("CRITICAL");
   });
 
   it("ignores HbA1c freshness for hypertension records", () => {
     const record = makeRecord({
       condition: "HYPERTENSION",
       monthsSinceHbA1c: 30,
+      hba1cPercentage: 10.2,
     });
 
     expect(record.hasStaleHbA1c).toBe(false);
+    expect(record.hba1cClassification).toBe(null);
+    expect(record.bloodPressureClassification).toBe("GRADE_1");
   });
 });
 

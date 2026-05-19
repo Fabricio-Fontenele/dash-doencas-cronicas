@@ -71,6 +71,38 @@ describe("SheetJSFileParser", () => {
     expect(result.records[0]?.hasStaleBloodPressureMeasurement).toBeDefined();
   });
 
+  it("aceita arquivo misto e identifica a condicao por linha", async () => {
+    const parser = new SheetJSFileParser();
+    const csv = [
+      "Relatorio de acompanhamento - Diabetes e Hipertensao",
+      "Condição;Idade;Sexo;Raça/cor;Beneficiário Programa Bolsa Família;Bairro;Meses desde o último atendimento médico;Meses desde o último atendimento de enfermagem;Meses desde o último atendimento odontológico;Meses desde a última visita domiciliar;Última medição de peso;Última medição de altura;Última medição de pressão arterial;Data da última medição de pressão arterial;Hemoglobina glicada;Data da última avaliação de hemoglobina glicada",
+      "Diabetes;51;Feminino;Parda;Sim;Centro;2;1;4;1;82 kg;1.62 m;124/80 mmHg;03/05/2026;7.8%;10/05/2026",
+      "Hipertensão;66;Masculino;Branca;Não;Bela Vista;4;2;7;3;79 kg;1.70 m;168/102 mmHg;08/05/2026;;",
+    ].join("\n");
+
+    const result = await parser.parse(Buffer.from(csv, "utf-8"), "misto.csv");
+
+    expect(result.condition).toBe("MIXED");
+    expect(result.records).toHaveLength(2);
+    expect(result.records[0]?.condition).toBe("DIABETES");
+    expect(result.records[1]?.condition).toBe("HYPERTENSION");
+    expect(result.records[0]?.hba1cClassification).toBe("ELEVATED");
+    expect(result.records[1]?.bloodPressureClassification).toBe("GRADE_2");
+  });
+
+  it("falha em arquivo misto quando a linha nao informa condicao nem marcador clinico", async () => {
+    const parser = new SheetJSFileParser();
+    const csv = [
+      "Relatorio de acompanhamento - Diabetes e Hipertensao",
+      "Condição;Idade;Sexo;Raça/cor;Beneficiário Programa Bolsa Família;Bairro;Meses desde o último atendimento médico;Meses desde o último atendimento de enfermagem;Meses desde o último atendimento odontológico;Meses desde a última visita domiciliar;Última medição de peso;Última medição de altura;Última medição de pressão arterial;Data da última medição de pressão arterial;Hemoglobina glicada;Data da última avaliação de hemoglobina glicada",
+      ";51;Feminino;Parda;Sim;Centro;2;1;4;1;82 kg;1.62 m;124/80 mmHg;03/05/2026;;",
+    ].join("\n");
+
+    await expect(parser.parse(Buffer.from(csv, "utf-8"), "misto-invalido.csv")).rejects.toThrow(
+      FileParsingError,
+    );
+  });
+
   it("falha quando o cabecalho obrigatorio nao existe", async () => {
     const parser = new SheetJSFileParser();
     const csv = ["Relatorio de acompanhamento - Diabetes", "Paciente;Idade", "Maria;40"].join("\n");

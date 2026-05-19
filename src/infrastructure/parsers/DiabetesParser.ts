@@ -1,4 +1,4 @@
-import { type Condition } from "@/domain/value-objects/Condition";
+import { type ClinicalCondition } from "@/domain/value-objects/Condition";
 import { BaseConditionParser } from "@/infrastructure/parsers/BaseConditionParser";
 
 const HBA1C_ALIASES = [
@@ -14,12 +14,23 @@ const HBA1C_DATE_ALIASES = [
 ] as const;
 
 export class DiabetesParser extends BaseConditionParser {
-  readonly condition: Condition = "DIABETES";
+  readonly condition: ClinicalCondition = "DIABETES";
 
   protected getConditionSpecificMonths(row: Record<string, string>): number | null {
     return (
       this.readIntegerValue(row, HBA1C_ALIASES) ??
       this.readMonthsFromDateValue(row, HBA1C_DATE_ALIASES)
     );
+  }
+
+  protected getConditionSpecificDate(row: Record<string, string>): Date | null {
+    return (
+      this.readDateValue(row, [HBA1C_DATE_ALIASES[0]]) ??
+      this.readDateValue(row, [HBA1C_DATE_ALIASES[1]])
+    );
+  }
+
+  protected getConditionSpecificMeasurement(row: Record<string, string>): number | null {
+    return this.readDecimalValue(row, ["hemoglobina glicada"]);
   }
 }
