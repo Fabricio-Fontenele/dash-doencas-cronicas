@@ -2,7 +2,7 @@ import { type DashboardCoverageItemDTO, type DashboardViewDTO } from "@/applicat
 import { type UploadHistoryDTO } from "@/application/dtos/UploadHistoryDTO";
 import { type DashboardFiltersDTO } from "@/application/dtos/DashboardFiltersDTO";
 
-import { CARE_GAP_OPTIONS } from "@/presentation/dashboard/constants";
+import { CARE_GAP_OPTIONS, TIME_PRESET_OPTIONS } from "@/presentation/dashboard/constants";
 
 export interface DashboardActiveFilterChip {
   key: keyof DashboardFiltersDTO;
@@ -28,6 +28,16 @@ export interface DashboardSexChartItem {
   value: number;
 }
 
+export interface DashboardAnalyticSupportViewModel {
+  supportsMedicalTimeline: boolean;
+  supportsNursingTimeline: boolean;
+  supportsDentalTimeline: boolean;
+  supportsHomeVisitTimeline: boolean;
+  supportsBmiClassification: boolean;
+  supportsBloodPressureClassification: boolean;
+  supportsHbA1cClassification: boolean;
+}
+
 export interface DashboardPageViewModel {
   hasDiabetes: boolean;
   hasHypertension: boolean;
@@ -40,7 +50,18 @@ export interface DashboardPageViewModel {
   visibleCoverageItems: DashboardCoverageItemDTO[];
   sexChartItems: DashboardSexChartItem[];
   narrative: DashboardNarrativeViewModel;
+  support: DashboardAnalyticSupportViewModel;
 }
+
+const EMPTY_SUPPORT: DashboardAnalyticSupportViewModel = {
+  supportsMedicalTimeline: false,
+  supportsNursingTimeline: false,
+  supportsDentalTimeline: false,
+  supportsHomeVisitTimeline: false,
+  supportsBmiClassification: false,
+  supportsBloodPressureClassification: false,
+  supportsHbA1cClassification: false,
+};
 
 export function buildDashboardPageViewModel(
   view: DashboardViewDTO,
@@ -53,9 +74,9 @@ export function buildDashboardPageViewModel(
     conditionContextLabel: getConditionContextLabel(conditionPresence),
     snapshotTitle: latestUpload ? latestUpload.fileName : "Sem upload processado",
     snapshotDescription: latestUpload
-      ? `Condição de origem: ${formatConditionLabel(latestUpload.condition)} • ${latestUpload.totalRecords} registros • ${formatUploadDate(latestUpload.createdAt)}`
+      ? `Condição de origem: ${formatConditionLabel(latestUpload.condition)} • ${latestUpload.totalRecords} registros • ${formatUploadDate(latestUpload.createdAt)} • janela analítica: ${view.periodLabel}`
       : "Carregue um arquivo para gerar a leitura quantitativa do território.",
-    summaryCards: getSummaryCards(view, conditionPresence),
+    summaryCards: getSummaryCards(view),
     activeFilterChips: getActiveFilterChips(view.appliedFilters),
     visibleCoverageItems: getVisibleCoverageItems(view, conditionPresence.hasDiabetes),
     sexChartItems: view.sexDistribution.map((item) => {
@@ -67,7 +88,18 @@ export function buildDashboardPageViewModel(
         color: getSexColor(normalizedLabel),
       };
     }),
-    narrative: getNarrativeViewModel(conditionPresence),
+    narrative: getNarrativeViewModel(conditionPresence, view.periodLabel),
+    support: latestUpload
+      ? {
+          supportsMedicalTimeline: latestUpload.supportsMedicalTimeline,
+          supportsNursingTimeline: latestUpload.supportsNursingTimeline,
+          supportsDentalTimeline: latestUpload.supportsDentalTimeline,
+          supportsHomeVisitTimeline: latestUpload.supportsHomeVisitTimeline,
+          supportsBmiClassification: latestUpload.supportsBmiClassification,
+          supportsBloodPressureClassification: latestUpload.supportsBloodPressureClassification,
+          supportsHbA1cClassification: latestUpload.supportsHbA1cClassification,
+        }
+      : EMPTY_SUPPORT,
   };
 }
 
@@ -89,117 +121,15 @@ function getConditionContextLabel(conditionPresence: {
   hasHypertension: boolean;
   hasMixedConditions: boolean;
 }): string {
-  if (conditionPresence.hasMixedConditions) {
-    return "diabetes e hipertensão";
-  }
-
-  if (conditionPresence.hasDiabetes) {
-    return "diabetes";
-  }
-
-  if (conditionPresence.hasHypertension) {
-    return "hipertensão";
-  }
+  if (conditionPresence.hasMixedConditions) return "diabetes e hipertensão";
+  if (conditionPresence.hasDiabetes) return "diabetes";
+  if (conditionPresence.hasHypertension) return "hipertensão";
 
   return "condições crônicas";
 }
 
-function getSummaryCards(
-  view: DashboardViewDTO,
-  conditionPresence: {
-    hasDiabetes: boolean;
-    hasHypertension: boolean;
-    hasMixedConditions: boolean;
-  },
-): DashboardSummaryCardViewModel[] {
+function getSummaryCards(view: DashboardViewDTO): DashboardSummaryCardViewModel[] {
   const summary = view.summary;
-
-  if (conditionPresence.hasMixedConditions) {
-    return [
-      {
-        eyebrow: "Universo",
-        value: summary.totalRecords,
-        label: "Pessoas no recorte atual",
-        accent: "bg-accent-strong",
-      },
-      {
-        eyebrow: "Atenção",
-        value: summary.withoutMedicalCare,
-        label: "Sem atendimento médico recente",
-        accent: "bg-highlight",
-      },
-      {
-        eyebrow: "Cobertura",
-        value: summary.withoutHomeVisit,
-        label: "Sem visita domiciliar recente",
-        accent: "bg-accent",
-      },
-      {
-        eyebrow: "Monitoramento",
-        value: summary.withoutRecentBloodPressureCheck + summary.withoutRecentHbA1c,
-        label: "Pendências de exames e aferições",
-        accent: "bg-[var(--chart-4)]",
-      },
-    ];
-  }
-
-  if (conditionPresence.hasDiabetes) {
-    return [
-      {
-        eyebrow: "Diabetes",
-        value: summary.totalRecords,
-        label: "Pessoas acompanhadas neste recorte",
-        accent: "bg-accent-strong",
-      },
-      {
-        eyebrow: "Consulta",
-        value: summary.withoutMedicalCare,
-        label: "Sem atendimento médico recente",
-        accent: "bg-highlight",
-      },
-      {
-        eyebrow: "Território",
-        value: summary.withoutHomeVisit,
-        label: "Sem visita domiciliar recente",
-        accent: "bg-accent",
-      },
-      {
-        eyebrow: "HbA1c",
-        value: summary.withoutRecentHbA1c,
-        label: "Sem hemoglobina glicada recente",
-        accent: "bg-[var(--chart-4)]",
-      },
-    ];
-  }
-
-  if (conditionPresence.hasHypertension) {
-    return [
-      {
-        eyebrow: "Hipertensão",
-        value: summary.totalRecords,
-        label: "Pessoas acompanhadas neste recorte",
-        accent: "bg-accent-strong",
-      },
-      {
-        eyebrow: "Consulta",
-        value: summary.withoutMedicalCare,
-        label: "Sem atendimento médico recente",
-        accent: "bg-highlight",
-      },
-      {
-        eyebrow: "Território",
-        value: summary.withoutHomeVisit,
-        label: "Sem visita domiciliar recente",
-        accent: "bg-accent",
-      },
-      {
-        eyebrow: "Pressão arterial",
-        value: summary.withoutRecentBloodPressureCheck,
-        label: "Sem aferição recente de PA",
-        accent: "bg-[var(--chart-4)]",
-      },
-    ];
-  }
 
   return [
     {
@@ -209,21 +139,21 @@ function getSummaryCards(
       accent: "bg-accent-strong",
     },
     {
-      eyebrow: "Atenção",
+      eyebrow: "Médico",
       value: summary.withoutMedicalCare,
       label: "Sem atendimento médico recente",
       accent: "bg-highlight",
     },
     {
-      eyebrow: "Cobertura",
-      value: summary.withoutHomeVisit,
-      label: "Sem visita domiciliar recente",
+      eyebrow: "Enfermagem/Odonto",
+      value: summary.withoutNursingCare + summary.withoutDentalCare,
+      label: "Pendências combinadas de enfermagem e odontologia",
       accent: "bg-accent",
     },
     {
       eyebrow: "Monitoramento",
-      value: summary.withoutRecentBloodPressureCheck,
-      label: "Pendências de exames e aferições",
+      value: summary.withoutRecentBloodPressureCheck + summary.withoutRecentHbA1c,
+      label: "Pendências de PA e hemoglobina glicada",
       accent: "bg-[var(--chart-4)]",
     },
   ];
@@ -231,21 +161,14 @@ function getSummaryCards(
 
 function getActiveFilterChips(filters: DashboardFiltersDTO): DashboardActiveFilterChip[] {
   return [
-    ...filters.sexes.map((value) => ({
-      key: "sexes" as const,
+    ...filters.sexes.map((value) => ({ key: "sexes" as const, value, label: value })),
+    ...filters.raceColors.map((value) => ({ key: "raceColors" as const, value, label: value })),
+    ...filters.ibgeRaceColors.map((value) => ({
+      key: "ibgeRaceColors" as const,
       value,
-      label: value,
+      label: `IBGE: ${value}`,
     })),
-    ...filters.raceColors.map((value) => ({
-      key: "raceColors" as const,
-      value,
-      label: value,
-    })),
-    ...filters.ageGroups.map((value) => ({
-      key: "ageGroups" as const,
-      value,
-      label: value,
-    })),
+    ...filters.ageGroups.map((value) => ({ key: "ageGroups" as const, value, label: value })),
     ...filters.neighborhoods.map((value) => ({
       key: "neighborhoods" as const,
       value,
@@ -266,6 +189,24 @@ function getActiveFilterChips(filters: DashboardFiltersDTO): DashboardActiveFilt
       value,
       label: CARE_GAP_OPTIONS.find((option) => option.value === value)?.label ?? value,
     })),
+    ...filters.professions.map((value) => ({
+      key: "professions" as const,
+      value,
+      label: getProfessionLabel(value),
+    })),
+    {
+      key: "timePreset" as const,
+      value: filters.timePreset,
+      label:
+        TIME_PRESET_OPTIONS.find((option) => option.value === filters.timePreset)?.label ??
+        filters.timePreset,
+    },
+    ...(filters.startDate
+      ? [{ key: "startDate" as const, value: filters.startDate, label: `Início: ${filters.startDate}` }]
+      : []),
+    ...(filters.endDate
+      ? [{ key: "endDate" as const, value: filters.endDate, label: `Fim: ${filters.endDate}` }]
+      : []),
   ];
 }
 
@@ -276,32 +217,34 @@ function getVisibleCoverageItems(
   return view.careCoverage.filter((item) => hasDiabetes || item.label !== "HbA1c recente");
 }
 
-function getNarrativeViewModel(conditionPresence: {
-  hasDiabetes: boolean;
-  hasHypertension: boolean;
-  hasMixedConditions: boolean;
-}): DashboardNarrativeViewModel {
+function getNarrativeViewModel(
+  conditionPresence: {
+    hasDiabetes: boolean;
+    hasHypertension: boolean;
+    hasMixedConditions: boolean;
+  },
+  periodLabel: string,
+): DashboardNarrativeViewModel {
   if (conditionPresence.hasMixedConditions) {
     return {
-      title: "Panorama integrado das duas linhas de cuidado",
-      description:
-        "O recorte atual combina pessoas com diabetes e hipertensão. Por isso, a dashboard destaca comparações entre condições e mantém todos os indicadores compartilhados e específicos.",
+      title: "Panorama integrado das linhas de cuidado",
+      description: `A leitura atual combina produção assistencial, perfil populacional e estratificação clínica em ${periodLabel}, permitindo navegar entre demografia, cuidado e gravidade sem sair da dashboard principal.`,
     };
   }
 
   if (conditionPresence.hasDiabetes) {
     return {
-      title: "Panorama específico da linha de cuidado em diabetes",
+      title: "Painel analítico focado em diabetes",
       description:
-        "Como o recorte atual traz apenas diabetes, a dashboard prioriza distribuições demográficas, bairros com maior volume e indicadores clínicos relevantes para essa linha, incluindo HbA1c.",
+        "O recorte atual privilegia HbA1c, IMC, cobertura assistencial e composição demográfica da linha de diabetes.",
     };
   }
 
   if (conditionPresence.hasHypertension) {
     return {
-      title: "Panorama específico da linha de cuidado em hipertensão",
+      title: "Painel analítico focado em hipertensão",
       description:
-        "Como o recorte atual traz apenas hipertensão, a dashboard remove comparações desnecessárias entre condições e concentra a leitura em pressão arterial, acompanhamento e distribuições do território.",
+        "O recorte atual privilegia pressão arterial, IMC, cobertura assistencial e composição demográfica da linha de hipertensão.",
     };
   }
 
@@ -345,6 +288,15 @@ function normalizeSexLabel(label: string): string {
   return label;
 }
 
+function getProfessionLabel(value: string): string {
+  if (value === "MEDICAL") return "Médico";
+  if (value === "NURSING") return "Enfermagem";
+  if (value === "DENTAL") return "Odontologia";
+  if (value === "HOME_VISIT") return "Visita domiciliar";
+
+  return value;
+}
+
 function formatUploadDate(date: Date): string {
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "short",
@@ -352,6 +304,9 @@ function formatUploadDate(date: Date): string {
   }).format(date);
 }
 
-function formatConditionLabel(condition: "DIABETES" | "HYPERTENSION"): string {
-  return condition === "DIABETES" ? "Diabetes" : "Hipertensão";
+function formatConditionLabel(condition: "DIABETES" | "HYPERTENSION" | "MIXED"): string {
+  if (condition === "DIABETES") return "Diabetes";
+  if (condition === "HYPERTENSION") return "Hipertensão";
+
+  return "Diabetes + Hipertensão";
 }

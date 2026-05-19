@@ -20,14 +20,22 @@ model User {
 }
 
 model Upload {
-  id             String    @id
-  fileName       String
-  condition      Condition
-  totalRecords   Int
-  createdAt      DateTime
-  userId         String
-  user           User      @relation(fields: [userId], references: [id])
-  aggregateBuckets AggregateBucket[]
+  id                               String            @id
+  fileName                         String
+  condition                        Condition
+  totalRecords                     Int
+  supportsMedicalTimeline          Boolean           @default(false)
+  supportsNursingTimeline          Boolean           @default(false)
+  supportsDentalTimeline           Boolean           @default(false)
+  supportsHomeVisitTimeline        Boolean           @default(false)
+  supportsBmiClassification        Boolean           @default(false)
+  supportsBloodPressureClassification Boolean        @default(false)
+  supportsHbA1cClassification      Boolean           @default(false)
+  createdAt                        DateTime
+  userId                           String
+  user                             User              @relation(fields: [userId], references: [id])
+  aggregateBuckets                 AggregateBucket[]
+  careEventBuckets                 CareEventBucket[]
 
   @@index([createdAt])
   @@index([userId])
@@ -39,13 +47,18 @@ model AggregateBucket {
   ageGroup                          String?
   sex                               String?
   raceColor                         String?
+  ibgeRaceColor                     String?
   familyAllowance                   Boolean?
   neighborhood                      String?
   needsMedicalCare                  Boolean
   needsNursingCare                  Boolean
+  needsDentalCare                   Boolean   @default(false)
   needsHomeVisit                    Boolean
   hasStaleBloodPressureMeasurement  Boolean
   hasStaleHbA1c                     Boolean
+  bmiClassification                 String?
+  bloodPressureClassification       String?
+  hba1cClassification               String?
   count                             Int
   uploadId                          String
   upload                            Upload    @relation(fields: [uploadId], references: [id], onDelete: Cascade)
@@ -53,6 +66,26 @@ model AggregateBucket {
   @@index([uploadId])
   @@index([condition])
   @@index([neighborhood])
+}
+
+model CareEventBucket {
+  id              String    @id @default(cuid())
+  condition       Condition
+  profession      String
+  eventDate       DateTime
+  ageGroup        String?
+  sex             String?
+  raceColor       String?
+  ibgeRaceColor   String?
+  familyAllowance Boolean?
+  neighborhood    String?
+  count           Int
+  uploadId        String
+  upload          Upload    @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+
+  @@index([uploadId])
+  @@index([profession])
+  @@index([eventDate])
 }
 
 enum Perfil {
@@ -65,4 +98,5 @@ enum Perfil {
 enum Condition {
   DIABETES
   HYPERTENSION
+  MIXED
 }

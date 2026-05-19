@@ -3,33 +3,36 @@ import { describe, expect, it } from "vitest";
 import { GenerateDashboardViewUseCase } from "@/application/use-cases/dashboard/GenerateDashboardViewUseCase";
 import { ListRecentUploadsUseCase } from "@/application/use-cases/upload/ListRecentUploadsUseCase";
 import { AggregateBucket, type AggregateBucketProps } from "@/domain/entities/AggregateBucket";
+import { CareEventBucket } from "@/domain/entities/CareEventBucket";
+import { type ICareEventBucketRepository } from "@/domain/repositories/ICareEventBucketRepository";
 import { type IAggregateBucketRepository } from "@/domain/repositories/IAggregateBucketRepository";
 import { type IUploadRepository } from "@/domain/repositories/IUploadRepository";
 
-function makeBucket(
-  overrides: Partial<AggregateBucketProps> = {},
-): AggregateBucket {
+function makeBucket(overrides: Partial<AggregateBucketProps> = {}): AggregateBucket {
   return AggregateBucket.create({
     uploadId: "upload-1",
     condition: "DIABETES",
     ageGroup: "60-79",
     sex: "F",
     raceColor: "Parda",
+    ibgeRaceColor: "PARDA",
     familyAllowance: false,
     neighborhood: "Centro",
     needsMedicalCare: true,
     needsNursingCare: false,
+    needsDentalCare: false,
     needsHomeVisit: true,
     hasStaleBloodPressureMeasurement: true,
     hasStaleHbA1c: true,
+    bmiClassification: "OVERWEIGHT",
+    bloodPressureClassification: null,
+    hba1cClassification: "ELEVATED",
     count: 1,
     ...overrides,
   });
 }
 
-function makeAggregateBucketRepository(
-  buckets: AggregateBucket[],
-): IAggregateBucketRepository {
+function makeAggregateBucketRepository(buckets: AggregateBucket[]): IAggregateBucketRepository {
   return {
     async createMany() {},
     async findByLatestUpload() {
@@ -37,6 +40,49 @@ function makeAggregateBucketRepository(
     },
   };
 }
+
+function makeCareEventBucketRepository(
+  buckets: CareEventBucket[] = [],
+): ICareEventBucketRepository {
+  return {
+    async createMany() {},
+    async findByLatestUpload() {
+      return buckets;
+    },
+  };
+}
+
+function makeEventBucket(overrides: Partial<ConstructorParameters<typeof CareEventBucket.create>[0]> = {}) {
+  return CareEventBucket.create({
+    uploadId: "upload-1",
+    condition: "DIABETES",
+    profession: "MEDICAL",
+    eventDate: new Date("2026-05-10T00:00:00Z"),
+    ageGroup: "60-79",
+    sex: "F",
+    raceColor: "Parda",
+    ibgeRaceColor: "PARDA",
+    familyAllowance: false,
+    neighborhood: "Centro",
+    count: 1,
+    ...overrides,
+  });
+}
+
+const defaultFilters = {
+  conditions: [],
+  sexes: [],
+  raceColors: [],
+  ibgeRaceColors: [],
+  neighborhoods: [],
+  familyAllowances: [],
+  ageGroups: [],
+  careGaps: [],
+  professions: [],
+  timePreset: "LAST_6_MONTHS" as const,
+  startDate: null,
+  endDate: null,
+};
 
 describe("Dashboard application use cases", () => {
   it("builds a quantitative dashboard view from aggregate buckets", async () => {
@@ -51,24 +97,21 @@ describe("Dashboard application use cases", () => {
         needsHomeVisit: false,
         hasStaleBloodPressureMeasurement: false,
         hasStaleHbA1c: false,
+        hba1cClassification: null,
         count: 2,
       }),
     ]);
 
-    const result = await new GenerateDashboardViewUseCase(repository).execute({
-      conditions: [],
-      sexes: [],
-      raceColors: [],
-      neighborhoods: [],
-      familyAllowances: [],
-      ageGroups: [],
-      careGaps: [],
-    });
+    const result = await new GenerateDashboardViewUseCase(
+      repository,
+      makeCareEventBucketRepository(),
+    ).execute(defaultFilters);
 
     expect(result.summary).toEqual({
       totalRecords: 5,
       withoutMedicalCare: 3,
       withoutNursingCare: 2,
+      withoutDentalCare: 0,
       withoutHomeVisit: 3,
       withoutRecentBloodPressureCheck: 3,
       withoutRecentHbA1c: 3,
@@ -83,6 +126,8 @@ describe("Dashboard application use cases", () => {
       neighborhoods: ["Bela Vista", "Centro"],
       sexes: ["F", "M"],
       raceColors: ["Parda"],
+      ibgeRaceColors: ["Parda"],
+      professions: ["MEDICAL", "NURSING", "DENTAL", "HOME_VISIT"],
     });
   });
 
@@ -93,14 +138,14 @@ describe("Dashboard application use cases", () => {
       makeBucket({ count: 1, sex: "Outro", neighborhood: "Mocambinho" }),
     ]);
 
-    const result = await new GenerateDashboardViewUseCase(repository).execute({
+    const result = await new GenerateDashboardViewUseCase(
+      repository,
+      makeCareEventBucketRepository(),
+    ).execute({
+      ...defaultFilters,
       conditions: ["DIABETES"],
       sexes: ["F", "M"],
-      raceColors: [],
       neighborhoods: ["Centro", "Bela Vista"],
-      familyAllowances: [],
-      ageGroups: [],
-      careGaps: [],
     });
 
     expect(result.filteredRecordCount).toBe(5);
@@ -122,6 +167,13 @@ describe("Dashboard application use cases", () => {
             fileName: "diabetes.csv",
             condition: "DIABETES",
             totalRecords: 100,
+            supportsMedicalTimeline: true,
+            supportsNursingTimeline: false,
+            supportsDentalTimeline: false,
+            supportsHomeVisitTimeline: true,
+            supportsBmiClassification: true,
+            supportsBloodPressureClassification: true,
+            supportsHbA1cClassification: true,
             createdAt: new Date("2026-05-05T10:00:00Z"),
             uploadedBy: "Equipe UBS",
           },
@@ -137,9 +189,52 @@ describe("Dashboard application use cases", () => {
         fileName: "diabetes.csv",
         condition: "DIABETES",
         totalRecords: 100,
+        supportsMedicalTimeline: true,
+        supportsNursingTimeline: false,
+        supportsDentalTimeline: false,
+        supportsHomeVisitTimeline: true,
+        supportsBmiClassification: true,
+        supportsBloodPressureClassification: true,
+        supportsHbA1cClassification: true,
         createdAt: new Date("2026-05-05T10:00:00Z"),
         uploadedBy: "Equipe UBS",
       },
     ]);
+  });
+
+  it("emite aviso temporal quando ha eventos fora da janela, mas nenhum dentro dela", async () => {
+    const repository = makeAggregateBucketRepository([makeBucket({ count: 2 })]);
+    const eventsRepository = makeCareEventBucketRepository([
+      makeEventBucket({ eventDate: new Date("2026-01-10T00:00:00Z") }),
+    ]);
+
+    const result = await new GenerateDashboardViewUseCase(repository, eventsRepository).execute({
+      ...defaultFilters,
+      timePreset: "CUSTOM",
+      startDate: "2026-05-01",
+      endDate: "2026-05-31",
+    });
+
+    expect(result.warnings).toContainEqual({
+      id: "empty-timeline",
+      title: "Sem eventos no período selecionado",
+      description: "Não há datas clínicas agregadas no período 2026-05-01 a 2026-05-31 para o recorte atual.",
+    });
+  });
+
+  it("normaliza intervalo customizado invertido antes de montar o rótulo do período", async () => {
+    const repository = makeAggregateBucketRepository([makeBucket({ count: 1 })]);
+
+    const result = await new GenerateDashboardViewUseCase(
+      repository,
+      makeCareEventBucketRepository(),
+    ).execute({
+      ...defaultFilters,
+      timePreset: "CUSTOM",
+      startDate: "2026-05-31",
+      endDate: "2026-05-01",
+    });
+
+    expect(result.periodLabel).toBe("2026-05-01 a 2026-05-31");
   });
 });

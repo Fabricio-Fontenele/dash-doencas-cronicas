@@ -11,10 +11,15 @@ describe("Dashboard filter helpers", () => {
     const filters = parseDashboardFilters({
       sex: ["F", "M"],
       raceColor: "Parda",
+      ibgeRaceColor: "Parda",
       neighborhood: ["Centro", "Bela Vista"],
       familyAllowance: ["YES", "UNKNOWN"],
       ageGroup: ["60-79", "80+", "invalid"],
-      careGap: ["medical", "hba1c", "bad-value"],
+      careGap: ["medical", "hba1c", "dental", "bad-value"],
+      profession: ["MEDICAL", "HOME_VISIT", "OTHER"],
+      timePreset: "CUSTOM",
+      startDate: "2026-01-01",
+      endDate: "2026-05-01",
       condition: ["DIABETES", "HYPERTENSION", "OTHER"],
     });
 
@@ -22,10 +27,15 @@ describe("Dashboard filter helpers", () => {
       conditions: ["DIABETES", "HYPERTENSION"],
       sexes: ["F", "M"],
       raceColors: ["Parda"],
+      ibgeRaceColors: ["Parda"],
       neighborhoods: ["Centro", "Bela Vista"],
       familyAllowances: ["YES", "UNKNOWN"],
       ageGroups: ["60-79", "80+"],
-      careGaps: ["medical", "hba1c"],
+      careGaps: ["medical", "hba1c", "dental"],
+      professions: ["MEDICAL", "HOME_VISIT"],
+      timePreset: "CUSTOM",
+      startDate: "2026-01-01",
+      endDate: "2026-05-01",
     });
   });
 
@@ -34,14 +44,19 @@ describe("Dashboard filter helpers", () => {
       conditions: ["DIABETES"],
       sexes: ["F"],
       raceColors: ["Parda"],
+      ibgeRaceColors: ["Parda"],
       neighborhoods: ["Centro"],
       familyAllowances: ["NO"],
       ageGroups: ["60-79"],
       careGaps: ["medical"],
+      professions: ["MEDICAL"],
+      timePreset: "LAST_6_MONTHS",
+      startDate: null,
+      endDate: null,
     });
 
     expect(query).toBe(
-      "/?condition=DIABETES&sex=F&raceColor=Parda&neighborhood=Centro&familyAllowance=NO&ageGroup=60-79&careGap=medical",
+      "/?condition=DIABETES&sex=F&raceColor=Parda&ibgeRaceColor=Parda&neighborhood=Centro&familyAllowance=NO&ageGroup=60-79&careGap=medical&profession=MEDICAL&timePreset=LAST_6_MONTHS",
     );
   });
 
@@ -51,10 +66,15 @@ describe("Dashboard filter helpers", () => {
         conditions: [],
         sexes: ["F", "M"],
         raceColors: [],
+        ibgeRaceColors: [],
         neighborhoods: ["Centro"],
         familyAllowances: [],
         ageGroups: ["60-79"],
         careGaps: ["medical"],
+        professions: [],
+        timePreset: "LAST_6_MONTHS",
+        startDate: null,
+        endDate: null,
       },
       "sexes",
       "F",
@@ -64,10 +84,15 @@ describe("Dashboard filter helpers", () => {
       conditions: [],
       sexes: ["M"],
       raceColors: [],
+      ibgeRaceColors: [],
       neighborhoods: ["Centro"],
       familyAllowances: [],
       ageGroups: ["60-79"],
       careGaps: ["medical"],
+      professions: [],
+      timePreset: "LAST_6_MONTHS",
+      startDate: null,
+      endDate: null,
     });
   });
 });
