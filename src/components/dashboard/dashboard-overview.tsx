@@ -1,5 +1,6 @@
-import { type DashboardInsightDTO } from "@/application/dtos/DashboardViewDTO";
+import { type DashboardInsightDTO, type DashboardWarningDTO } from "@/application/dtos/DashboardViewDTO";
 import {
+  type DashboardAnalyticSupportViewModel,
   type DashboardNarrativeViewModel,
   type DashboardSummaryCardViewModel,
 } from "@/presentation/dashboard/view-model";
@@ -91,6 +92,60 @@ export function DashboardNarrativeSection({
       </p>
       <h2 className="mt-2 text-2xl font-semibold text-accent-strong">{narrative.title}</h2>
       <p className="mt-3 max-w-4xl text-sm leading-7 text-muted">{narrative.description}</p>
+    </section>
+  );
+}
+
+export function DashboardWarningsSection({
+  support,
+  warnings,
+}: {
+  support: DashboardAnalyticSupportViewModel;
+  warnings: DashboardWarningDTO[];
+}) {
+  const supportWarnings = [
+    !support.supportsMedicalTimeline && "O arquivo atual não traz data exata suficiente para série temporal de atendimentos médicos.",
+    !support.supportsNursingTimeline && "O arquivo atual não traz data exata suficiente para série temporal de enfermagem.",
+    !support.supportsDentalTimeline && "O arquivo atual não traz data exata suficiente para série temporal de odontologia.",
+    !support.supportsHomeVisitTimeline && "O arquivo atual não traz data exata suficiente para série temporal de visitas domiciliares.",
+    !support.supportsBmiClassification && "Não há peso e altura suficientes para classificar IMC no snapshot atual.",
+    !support.supportsBloodPressureClassification && "Não há valores de pressão arterial suficientes para classificar PA no snapshot atual.",
+    !support.supportsHbA1cClassification && "Não há valores suficientes de hemoglobina glicada no snapshot atual.",
+  ].filter(Boolean) as string[];
+
+  if (warnings.length === 0 && supportWarnings.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className={SECTION_CLASS_NAME}>
+      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
+        Cobertura de dados
+      </p>
+      <h2 className="mt-2 text-2xl font-semibold text-accent-strong">
+        O que o arquivo consegue sustentar com exatidão
+      </h2>
+
+      <div className="mt-5 grid gap-3">
+        {warnings.map((warning) => (
+          <article
+            key={warning.id}
+            className="rounded-[1.25rem] border border-highlight/30 bg-highlight-soft px-4 py-3"
+          >
+            <p className="text-sm font-semibold text-accent-strong">{warning.title}</p>
+            <p className="mt-1 text-sm text-muted">{warning.description}</p>
+          </article>
+        ))}
+
+        {supportWarnings.map((warning) => (
+          <article
+            key={warning}
+            className="rounded-[1.25rem] border border-border/70 bg-white/80 px-4 py-3"
+          >
+            <p className="text-sm text-muted">{warning}</p>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }

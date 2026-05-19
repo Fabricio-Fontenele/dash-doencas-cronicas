@@ -6,8 +6,8 @@ import {
 } from "@/components/dashboard/dashboard-hero";
 import {
   DashboardInsightsSection,
-  DashboardNarrativeSection,
   DashboardSummaryGrid,
+  DashboardWarningsSection,
 } from "@/components/dashboard/dashboard-overview";
 import {
   type DashboardSearchParams,
@@ -46,7 +46,7 @@ export default async function Home({ searchParams }: HomePageProps) {
             <DashboardFiltersPanel view={pageData.view} />
           </aside>
 
-          <div className="space-y-6">
+          <div className="min-w-0 space-y-6">
             <DashboardSnapshotPanel
               activeFilters={pageData.view.appliedFilters}
               pageView={pageView}
@@ -54,18 +54,26 @@ export default async function Home({ searchParams }: HomePageProps) {
 
             <DashboardSummaryGrid items={pageView.summaryCards} />
             <DashboardInsightsSection items={pageData.view.insights} />
+            <DashboardWarningsSection
+              support={pageView.support}
+              warnings={pageData.view.warnings}
+            />
 
             <DashboardDistributionSections
               ageGroupDistribution={pageData.view.ageGroupDistribution}
+              bmiDistribution={pageData.view.bmiDistribution}
+              bloodPressureDistribution={pageData.view.bloodPressureDistribution}
+              careByProfessional={pageData.view.careByProfessional}
               conditionDistribution={pageData.view.conditionDistribution}
-              hasMixedConditions={pageView.hasMixedConditions}
+              hba1cDistribution={pageData.view.hba1cDistribution}
+              homeVisitTimeline={pageData.view.homeVisitTimeline}
+              ibgeRaceColorDistribution={pageData.view.ibgeRaceColorDistribution}
               raceColorDistribution={pageData.view.raceColorDistribution}
               sexChartItems={pageView.sexChartItems}
+              support={pageView.support}
               topNeighborhoods={pageData.view.topNeighborhoods}
               visibleCoverageItems={pageView.visibleCoverageItems}
             />
-
-            <DashboardNarrativeSection narrative={pageView.narrative} />
           </div>
         </div>
       </section>

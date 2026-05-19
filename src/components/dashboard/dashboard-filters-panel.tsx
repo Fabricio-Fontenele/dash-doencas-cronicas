@@ -1,14 +1,15 @@
 import Link from "next/link";
 
+import { type DashboardViewDTO } from "@/application/dtos/DashboardViewDTO";
 import { AGE_GROUPS } from "@/domain/value-objects/AgeGroup";
 import {
   CARE_GAP_OPTIONS,
   DEFAULT_FILTERS,
   FAMILY_ALLOWANCE_OPTIONS,
   PANEL_CLASS_NAME,
+  TIME_PRESET_OPTIONS,
 } from "@/presentation/dashboard/constants";
 import { createDashboardQueryString } from "@/presentation/dashboard/filters";
-import { type DashboardViewDTO } from "@/application/dtos/DashboardViewDTO";
 
 function FilterGroup({
   title,
@@ -89,14 +90,10 @@ export function DashboardFiltersPanel({ view }: { view: DashboardViewDTO }) {
     <section className={`${PANEL_CLASS_NAME} sticky top-6 p-5`}>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
-            Filtros
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-accent-strong">
-            Monte o recorte
-          </h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">Filtros</p>
+          <h2 className="mt-2 text-2xl font-semibold text-accent-strong">Monte o recorte</h2>
           <p className="mt-2 text-sm leading-6 text-muted">
-            Cada grupo aceita múltiplas escolhas. Dentro do grupo, a lógica é de união.
+            Os filtros demográficos afetam população, séries temporais e estratificações clínicas.
           </p>
         </div>
         <div className="rounded-full bg-surface-strong px-3 py-1 text-xs font-semibold text-muted">
@@ -104,26 +101,66 @@ export function DashboardFiltersPanel({ view }: { view: DashboardViewDTO }) {
         </div>
       </div>
 
-      <form className="mt-6 space-y-4">
+      <form method="get" className="mt-6 space-y-4">
+        <div className="rounded-[1.5rem] border border-border/70 bg-white/80 p-4">
+          <label className="block text-sm font-semibold text-accent-strong" htmlFor="timePreset">
+            Janela temporal
+          </label>
+          <select
+            id="timePreset"
+            name="timePreset"
+            defaultValue={view.appliedFilters.timePreset}
+            className="mt-3 h-11 w-full rounded-2xl border border-border/70 bg-white px-3 text-sm text-accent-strong"
+          >
+            {TIME_PRESET_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <label className="text-sm text-muted">
+              <span className="mb-1 block font-medium text-accent-strong">Início customizado</span>
+              <input
+                type="date"
+                name="startDate"
+                defaultValue={view.appliedFilters.startDate ?? ""}
+                className="h-11 w-full rounded-2xl border border-border/70 bg-white px-3 text-sm text-accent-strong"
+              />
+            </label>
+            <label className="text-sm text-muted">
+              <span className="mb-1 block font-medium text-accent-strong">Fim customizado</span>
+              <input
+                type="date"
+                name="endDate"
+                defaultValue={view.appliedFilters.endDate ?? ""}
+                className="h-11 w-full rounded-2xl border border-border/70 bg-white px-3 text-sm text-accent-strong"
+              />
+            </label>
+          </div>
+        </div>
+
         <FilterGroup
           title="Sexo"
           name="sex"
           compact
           selectedValues={view.appliedFilters.sexes}
-          options={view.filterOptions.sexes.map((value) => ({
-            value,
-            label: value,
-          }))}
+          options={view.filterOptions.sexes.map((value) => ({ value, label: value }))}
         />
 
         <FilterGroup
           title="Raça/cor"
           name="raceColor"
           selectedValues={view.appliedFilters.raceColors}
-          options={view.filterOptions.raceColors.map((value) => ({
-            value,
-            label: value,
-          }))}
+          options={view.filterOptions.raceColors.map((value) => ({ value, label: value }))}
+        />
+
+        <FilterGroup
+          title="Raça/cor IBGE"
+          name="ibgeRaceColor"
+          selectedValues={view.appliedFilters.ibgeRaceColors}
+          options={view.filterOptions.ibgeRaceColors.map((value) => ({ value, label: value }))}
         />
 
         <FilterGroup
@@ -131,10 +168,7 @@ export function DashboardFiltersPanel({ view }: { view: DashboardViewDTO }) {
           name="ageGroup"
           compact
           selectedValues={view.appliedFilters.ageGroups}
-          options={AGE_GROUPS.map((value) => ({
-            value,
-            label: value,
-          }))}
+          options={AGE_GROUPS.map((value) => ({ value, label: value }))}
         />
 
         <FilterGroup
@@ -159,13 +193,28 @@ export function DashboardFiltersPanel({ view }: { view: DashboardViewDTO }) {
         />
 
         <FilterGroup
+          title="Profissional / evento"
+          name="profession"
+          compact
+          selectedValues={view.appliedFilters.professions}
+          options={view.filterOptions.professions.map((value) => ({
+            value,
+            label:
+              value === "MEDICAL"
+                ? "Médico"
+                : value === "NURSING"
+                  ? "Enfermagem"
+                  : value === "DENTAL"
+                    ? "Odontologia"
+                    : "Visita domiciliar",
+          }))}
+        />
+
+        <FilterGroup
           title="Bairro"
           name="neighborhood"
           selectedValues={view.appliedFilters.neighborhoods}
-          options={view.filterOptions.neighborhoods.map((value) => ({
-            value,
-            label: value,
-          }))}
+          options={view.filterOptions.neighborhoods.map((value) => ({ value, label: value }))}
         />
 
         <div className="flex flex-wrap gap-3 pt-2">

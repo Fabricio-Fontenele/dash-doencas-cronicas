@@ -1,4 +1,5 @@
 import { type CareGapFilter, type DashboardFiltersDTO } from "@/application/dtos/DashboardFiltersDTO";
+import { type TimeRangePreset } from "@/domain/value-objects/TimeRangePreset";
 
 export const PANEL_CLASS_NAME = [
   "rounded-[2rem] border border-border/70 bg-surface/95",
@@ -14,15 +15,21 @@ export const DEFAULT_FILTERS: DashboardFiltersDTO = {
   conditions: [],
   sexes: [],
   raceColors: [],
+  ibgeRaceColors: [],
   neighborhoods: [],
   familyAllowances: [],
   ageGroups: [],
   careGaps: [],
+  professions: [],
+  timePreset: "LAST_6_MONTHS",
+  startDate: null,
+  endDate: null,
 };
 
 export const CARE_GAP_OPTIONS: Array<{ value: CareGapFilter; label: string }> = [
   { value: "medical", label: "Sem atendimento médico > 6 meses" },
   { value: "nursing", label: "Sem enfermagem > 6 meses" },
+  { value: "dental", label: "Sem odontologia > 6 meses" },
   { value: "home-visit", label: "Sem visita domiciliar > 3 meses" },
   { value: "blood-pressure", label: "Sem PA recente" },
   { value: "hba1c", label: "Sem HbA1c recente" },
@@ -33,3 +40,13 @@ export const FAMILY_ALLOWANCE_OPTIONS = [
   { value: "NO", label: "Não" },
   { value: "UNKNOWN", label: "Não informado" },
 ] as const;
+
+export const TIME_PRESET_OPTIONS: Array<{ value: TimeRangePreset; label: string }> = [
+  { value: "DAY", label: "Dia" },
+  { value: "WEEK", label: "Semana" },
+  { value: "MONTH", label: "Mês" },
+  { value: "LAST_3_MONTHS", label: "Últimos 3 meses" },
+  { value: "LAST_6_MONTHS", label: "Últimos 6 meses" },
+  { value: "YEAR", label: "Ano" },
+  { value: "CUSTOM", label: "Período definido" },
+];
