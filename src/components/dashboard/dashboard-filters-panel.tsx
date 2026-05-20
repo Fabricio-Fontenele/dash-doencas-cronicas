@@ -87,7 +87,9 @@ function FilterGroup({
 
 export function DashboardFiltersPanel({ view }: { view: DashboardViewDTO }) {
   return (
-    <section className={`${PANEL_CLASS_NAME} sticky top-6 p-5`}>
+    <section
+      className={`${PANEL_CLASS_NAME} sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto p-5`}
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">Filtros</p>
