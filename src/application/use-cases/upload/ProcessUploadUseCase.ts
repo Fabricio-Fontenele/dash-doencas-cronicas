@@ -1,8 +1,8 @@
 import { type UploadResultDTO } from "@/application/dtos/UploadResultDTO";
 import { type IFileParser } from "@/application/ports/IFileParser";
 import { Upload } from "@/domain/entities/Upload";
-import { type ICareEventBucketRepository } from "@/domain/repositories/ICareEventBucketRepository";
 import { type IAggregateBucketRepository } from "@/domain/repositories/IAggregateBucketRepository";
+import { type ICareEventBucketRepository } from "@/domain/repositories/ICareEventBucketRepository";
 import { type IUploadRepository } from "@/domain/repositories/IUploadRepository";
 import { DashboardAggregationService } from "@/domain/services/DashboardAggregationService";
 

@@ -1,7 +1,7 @@
 import { DomainError } from "@/domain/errors/DomainError";
+import { AgeGroupCalculator, type AgeGroup } from "@/domain/value-objects/AgeGroup";
 import { BloodPressureClassifier, type BloodPressureClassification } from "@/domain/value-objects/BloodPressureClassification";
 import { BmiClassifier, type BmiClassification } from "@/domain/value-objects/BmiClassification";
-import { AgeGroupCalculator, type AgeGroup } from "@/domain/value-objects/AgeGroup";
 import { type ClinicalCondition } from "@/domain/value-objects/Condition";
 import { HbA1cClassifier, type HbA1cClassification } from "@/domain/value-objects/HbA1cClassification";
 import { IbgeRaceColorNormalizer, type IbgeRaceColor } from "@/domain/value-objects/IbgeRaceColor";

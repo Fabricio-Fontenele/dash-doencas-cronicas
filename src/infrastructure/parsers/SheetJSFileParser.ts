@@ -1,11 +1,11 @@
 import { extname } from "node:path";
+import * as XLSX from "xlsx";
 
 import { type IFileParser, type ParsedFileResult } from "@/application/ports/IFileParser";
 import { type ClinicalCondition } from "@/domain/value-objects/Condition";
-import { FileParsingError } from "@/infrastructure/parsers/errors/FileParsingError";
 import { DiabetesParser } from "@/infrastructure/parsers/DiabetesParser";
+import { FileParsingError } from "@/infrastructure/parsers/errors/FileParsingError";
 import { HypertensionParser } from "@/infrastructure/parsers/HypertensionParser";
-import * as XLSX from "xlsx";
 
 type MatrixRow = string[];
 type RawRecord = Record<string, string>;
@@ -100,7 +100,7 @@ export class SheetJSFileParser implements IFileParser {
       blankrows: false,
     });
 
-    return rows.map((row) => row.map((cell) => String(cell).trim()));
+    return rows.map((row) => row.map((cell) => cell.trim()));
   }
 
   private decodeCsvBuffer(buffer: Buffer): string {
@@ -159,7 +159,7 @@ export class SheetJSFileParser implements IFileParser {
       return null;
     }
 
-    const rawValue = row[conditionHeader]?.trim();
+    const rawValue = row[conditionHeader].trim();
 
     if (!rawValue) {
       return null;

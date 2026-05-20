@@ -1,7 +1,6 @@
+import { type DashboardFiltersDTO } from "@/application/dtos/DashboardFiltersDTO";
 import { type DashboardCoverageItemDTO, type DashboardViewDTO } from "@/application/dtos/DashboardViewDTO";
 import { type UploadHistoryDTO } from "@/application/dtos/UploadHistoryDTO";
-import { type DashboardFiltersDTO } from "@/application/dtos/DashboardFiltersDTO";
-
 import { CARE_GAP_OPTIONS, TIME_PRESET_OPTIONS } from "@/presentation/dashboard/constants";
 
 export interface DashboardActiveFilterChip {
@@ -121,9 +120,9 @@ function getConditionContextLabel(conditionPresence: {
   hasHypertension: boolean;
   hasMixedConditions: boolean;
 }): string {
-  if (conditionPresence.hasMixedConditions) return "diabetes e hipertensão";
-  if (conditionPresence.hasDiabetes) return "diabetes";
-  if (conditionPresence.hasHypertension) return "hipertensão";
+  if (conditionPresence.hasMixedConditions) {return "diabetes e hipertensão";}
+  if (conditionPresence.hasDiabetes) {return "diabetes";}
+  if (conditionPresence.hasHypertension) {return "hipertensão";}
 
   return "condições crônicas";
 }
@@ -258,12 +257,12 @@ function getNarrativeViewModel(
 export function getRaceColor(label: string): string {
   const normalized = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-  if (normalized.includes("branca")) return "#d6e7f4";
-  if (normalized.includes("parda")) return "#459cd7";
-  if (normalized.includes("preta")) return "#143a60";
-  if (normalized.includes("amarela")) return "#e8531e";
-  if (normalized.includes("indigena")) return "#7a94ad";
-  if (normalized.includes("nao inform")) return "#a6b9ca";
+  if (normalized.includes("branca")) {return "#d6e7f4";}
+  if (normalized.includes("parda")) {return "#459cd7";}
+  if (normalized.includes("preta")) {return "#143a60";}
+  if (normalized.includes("amarela")) {return "#e8531e";}
+  if (normalized.includes("indigena")) {return "#7a94ad";}
+  if (normalized.includes("nao inform")) {return "#a6b9ca";}
 
   return "#74818d";
 }
@@ -271,9 +270,9 @@ export function getRaceColor(label: string): string {
 function getSexColor(label: string): string {
   const normalized = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-  if (normalized.includes("femin")) return "#e8531e";
-  if (normalized.includes("mascul")) return "#143a60";
-  if (normalized.includes("nao inform")) return "#a6b9ca";
+  if (normalized.includes("femin")) {return "#e8531e";}
+  if (normalized.includes("mascul")) {return "#143a60";}
+  if (normalized.includes("nao inform")) {return "#a6b9ca";}
 
   return "#459cd7";
 }
@@ -281,18 +280,18 @@ function getSexColor(label: string): string {
 function normalizeSexLabel(label: string): string {
   const normalized = label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-  if (normalized === "m" || normalized.includes("mascul")) return "Masculino";
-  if (normalized === "f" || normalized.includes("femin")) return "Feminino";
-  if (normalized.includes("nao inform")) return "Não informado";
+  if (normalized === "m" || normalized.includes("mascul")) {return "Masculino";}
+  if (normalized === "f" || normalized.includes("femin")) {return "Feminino";}
+  if (normalized.includes("nao inform")) {return "Não informado";}
 
   return label;
 }
 
 function getProfessionLabel(value: string): string {
-  if (value === "MEDICAL") return "Médico";
-  if (value === "NURSING") return "Enfermagem";
-  if (value === "DENTAL") return "Odontologia";
-  if (value === "HOME_VISIT") return "Visita domiciliar";
+  if (value === "MEDICAL") {return "Médico";}
+  if (value === "NURSING") {return "Enfermagem";}
+  if (value === "DENTAL") {return "Odontologia";}
+  if (value === "HOME_VISIT") {return "Visita domiciliar";}
 
   return value;
 }
@@ -305,8 +304,8 @@ function formatUploadDate(date: Date): string {
 }
 
 function formatConditionLabel(condition: "DIABETES" | "HYPERTENSION" | "MIXED"): string {
-  if (condition === "DIABETES") return "Diabetes";
-  if (condition === "HYPERTENSION") return "Hipertensão";
+  if (condition === "DIABETES") {return "Diabetes";}
+  if (condition === "HYPERTENSION") {return "Hipertensão";}
 
   return "Diabetes + Hipertensão";
 }

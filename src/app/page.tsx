@@ -1,4 +1,4 @@
-import { DashboardDistributionSections } from "@/components/dashboard/dashboard-distribution-sections";
+import { DashboardDistributionSectionsInner as DashboardDistributionSections } from "@/components/dashboard/dashboard-distribution-sections-inner";
 import { DashboardFiltersPanel } from "@/components/dashboard/dashboard-filters-panel";
 import {
   DashboardHero,

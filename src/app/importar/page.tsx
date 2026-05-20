@@ -5,8 +5,8 @@ import { UploadForm } from "@/components/upload/upload-form";
 export const dynamic = "force-dynamic";
 
 function formatConditionLabel(condition: "DIABETES" | "HYPERTENSION" | "MIXED"): string {
-  if (condition === "DIABETES") return "Diabetes";
-  if (condition === "HYPERTENSION") return "Hipertensão";
+  if (condition === "DIABETES") {return "Diabetes";}
+  if (condition === "HYPERTENSION") {return "Hipertensão";}
 
   return "Diabetes + Hipertensão";
 }

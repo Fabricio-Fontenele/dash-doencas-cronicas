@@ -1,4 +1,9 @@
 import {
+  type CareGapFilter,
+  type DashboardFiltersDTO,
+} from "@/application/dtos/DashboardFiltersDTO";
+import { type DashboardSummaryDTO } from "@/application/dtos/DashboardSummaryDTO";
+import {
   type DashboardBarChartItemDTO,
   type DashboardCoverageItemDTO,
   type DashboardFilterOptionsDTO,
@@ -8,15 +13,10 @@ import {
   type DashboardViewDTO,
   type DashboardWarningDTO,
 } from "@/application/dtos/DashboardViewDTO";
-import {
-  type CareGapFilter,
-  type DashboardFiltersDTO,
-} from "@/application/dtos/DashboardFiltersDTO";
-import { type DashboardSummaryDTO } from "@/application/dtos/DashboardSummaryDTO";
-import { AggregateBucket } from "@/domain/entities/AggregateBucket";
-import { CareEventBucket } from "@/domain/entities/CareEventBucket";
-import { type ICareEventBucketRepository } from "@/domain/repositories/ICareEventBucketRepository";
+import { type AggregateBucket } from "@/domain/entities/AggregateBucket";
+import { type CareEventBucket } from "@/domain/entities/CareEventBucket";
 import { type IAggregateBucketRepository } from "@/domain/repositories/IAggregateBucketRepository";
+import { type ICareEventBucketRepository } from "@/domain/repositories/ICareEventBucketRepository";
 import { TIMELINE_PROFESSIONS, type TimelineProfession } from "@/domain/value-objects/Profession";
 
 interface DateRange {
@@ -31,10 +31,13 @@ export class GenerateDashboardViewUseCase {
     private readonly careEventBucketRepository: ICareEventBucketRepository,
   ) {}
 
-  async execute(filters: DashboardFiltersDTO): Promise<DashboardViewDTO> {
+  async execute(
+    filters: DashboardFiltersDTO,
+    ownerUserId: string,
+  ): Promise<DashboardViewDTO> {
     const [buckets, eventBuckets] = await Promise.all([
-      this.aggregateBucketRepository.findByLatestUpload(),
-      this.careEventBucketRepository.findByLatestUpload(),
+      this.aggregateBucketRepository.findByLatestUpload(ownerUserId),
+      this.careEventBucketRepository.findByLatestUpload(ownerUserId),
     ]);
     const filteredBuckets = this.applyPopulationFilters(buckets, filters);
     const filteredEventBuckets = this.applyEventFilters(eventBuckets, filters);
@@ -95,10 +98,10 @@ export class GenerateDashboardViewUseCase {
     const ibgeRaceColors = new Set<string>();
 
     for (const bucket of buckets) {
-      if (bucket.neighborhood) neighborhoods.add(bucket.neighborhood);
-      if (bucket.sex) sexes.add(bucket.sex);
-      if (bucket.raceColor) raceColors.add(bucket.raceColor);
-      if (bucket.ibgeRaceColor) ibgeRaceColors.add(this.formatIbgeRaceColor(bucket.ibgeRaceColor));
+      if (bucket.neighborhood) {neighborhoods.add(bucket.neighborhood);}
+      if (bucket.sex) {sexes.add(bucket.sex);}
+      if (bucket.raceColor) {raceColors.add(bucket.raceColor);}
+      if (bucket.ibgeRaceColor) {ibgeRaceColors.add(this.formatIbgeRaceColor(bucket.ibgeRaceColor));}
     }
 
     return {
@@ -148,7 +151,7 @@ export class GenerateDashboardViewUseCase {
         return false;
       }
 
-      if (filters.ageGroups.length > 0 && !filters.ageGroups.includes(bucket.ageGroup!)) {
+      if (!this.matchesAgeGroupFilters(filters.ageGroups, bucket.ageGroup)) {
         return false;
       }
 
@@ -202,12 +205,23 @@ export class GenerateDashboardViewUseCase {
         return false;
       }
 
-      if (filters.ageGroups.length > 0 && !filters.ageGroups.includes(bucket.ageGroup!)) {
+      if (!this.matchesAgeGroupFilters(filters.ageGroups, bucket.ageGroup)) {
         return false;
       }
 
       return true;
     });
+  }
+
+  private matchesAgeGroupFilters(
+    selectedAgeGroups: DashboardFiltersDTO["ageGroups"],
+    ageGroup: AggregateBucket["ageGroup"]  ,
+  ): boolean {
+    if (selectedAgeGroups.length === 0) {
+      return true;
+    }
+
+    return ageGroup !== null && selectedAgeGroups.includes(ageGroup);
   }
 
   private matchesCareGapFilters(bucket: AggregateBucket, careGaps: CareGapFilter[]): boolean {
@@ -236,8 +250,8 @@ export class GenerateDashboardViewUseCase {
   private getFamilyAllowanceFilterValue(
     familyAllowance: boolean | null,
   ): "YES" | "NO" | "UNKNOWN" {
-    if (familyAllowance === true) return "YES";
-    if (familyAllowance === false) return "NO";
+    if (familyAllowance === true) {return "YES";}
+    if (familyAllowance === false) {return "NO";}
 
     return "UNKNOWN";
   }
@@ -631,7 +645,7 @@ export class GenerateDashboardViewUseCase {
     }
   }
 
-  private formatIbgeRaceColor(value: AggregateBucket["ibgeRaceColor"] | CareEventBucket["ibgeRaceColor"]): string {
+  private formatIbgeRaceColor(value: AggregateBucket["ibgeRaceColor"]): string {
     switch (value) {
       case "BRANCA":
         return "Branca";
@@ -644,6 +658,8 @@ export class GenerateDashboardViewUseCase {
       case "INDIGENA":
         return "Indígena";
       case "NAO_INFORMADA":
+        return "Não informada";
+      case null:
         return "Não informada";
       default:
         return "Não informada";
@@ -664,6 +680,8 @@ export class GenerateDashboardViewUseCase {
         return "Obesidade II";
       case "OBESITY_III":
         return "Obesidade III";
+      case null:
+        return "Não classificado";
       default:
         return "Não classificado";
     }
@@ -679,6 +697,8 @@ export class GenerateDashboardViewUseCase {
         return "Hipertensão grau 2";
       case "GRADE_3":
         return "Hipertensão grau 3";
+      case null:
+        return "Sem classificação";
       default:
         return "Sem classificação";
     }
@@ -692,6 +712,8 @@ export class GenerateDashboardViewUseCase {
         return "HbA1c elevada";
       case "CRITICAL":
         return "HbA1c muito elevada";
+      case null:
+        return "Sem classificação";
       default:
         return "Sem classificação";
     }

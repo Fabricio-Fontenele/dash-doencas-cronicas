@@ -1,4 +1,4 @@
-import { Upload } from "@/domain/entities/Upload";
+import { type Upload } from "@/domain/entities/Upload";
 import { type Condition } from "@/domain/value-objects/Condition";
 
 export interface UploadHistoryItem {
@@ -19,5 +19,5 @@ export interface UploadHistoryItem {
 
 export interface IUploadRepository {
   save(upload: Upload): Promise<Upload>;
-  listRecent(limit: number): Promise<UploadHistoryItem[]>;
+  listRecent(ownerUserId: string, limit: number): Promise<UploadHistoryItem[]>;
 }

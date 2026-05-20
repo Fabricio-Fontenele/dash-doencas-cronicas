@@ -1,4 +1,4 @@
-import { CareRecord } from "@/domain/entities/CareRecord";
+import { type CareRecord } from "@/domain/entities/CareRecord";
 import { type Condition } from "@/domain/value-objects/Condition";
 
 export interface ParsedFileCapabilities {

@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 import { GenerateDashboardViewUseCase } from "@/application/use-cases/dashboard/GenerateDashboardViewUseCase";
 import { ListRecentUploadsUseCase } from "@/application/use-cases/upload/ListRecentUploadsUseCase";
 import { AggregateBucket, type AggregateBucketProps } from "@/domain/entities/AggregateBucket";
-import { CareEventBucket } from "@/domain/entities/CareEventBucket";
-import { type ICareEventBucketRepository } from "@/domain/repositories/ICareEventBucketRepository";
+import { CareEventBucket, type CareEventBucketProps } from "@/domain/entities/CareEventBucket";
 import { type IAggregateBucketRepository } from "@/domain/repositories/IAggregateBucketRepository";
+import { type ICareEventBucketRepository } from "@/domain/repositories/ICareEventBucketRepository";
 import { type IUploadRepository } from "@/domain/repositories/IUploadRepository";
 
 function makeBucket(overrides: Partial<AggregateBucketProps> = {}): AggregateBucket {
@@ -52,7 +52,7 @@ function makeCareEventBucketRepository(
   };
 }
 
-function makeEventBucket(overrides: Partial<ConstructorParameters<typeof CareEventBucket.create>[0]> = {}) {
+function makeEventBucket(overrides: Partial<CareEventBucketProps> = {}): CareEventBucket {
   return CareEventBucket.create({
     uploadId: "upload-1",
     condition: "DIABETES",
@@ -105,7 +105,7 @@ describe("Dashboard application use cases", () => {
     const result = await new GenerateDashboardViewUseCase(
       repository,
       makeCareEventBucketRepository(),
-    ).execute(defaultFilters);
+    ).execute(defaultFilters, "owner-1");
 
     expect(result.summary).toEqual({
       totalRecords: 5,
@@ -141,12 +141,15 @@ describe("Dashboard application use cases", () => {
     const result = await new GenerateDashboardViewUseCase(
       repository,
       makeCareEventBucketRepository(),
-    ).execute({
-      ...defaultFilters,
-      conditions: ["DIABETES"],
-      sexes: ["F", "M"],
-      neighborhoods: ["Centro", "Bela Vista"],
-    });
+    ).execute(
+      {
+        ...defaultFilters,
+        conditions: ["DIABETES"],
+        sexes: ["F", "M"],
+        neighborhoods: ["Centro", "Bela Vista"],
+      },
+      "owner-1",
+    );
 
     expect(result.filteredRecordCount).toBe(5);
     expect(result.sexDistribution).toEqual([
@@ -181,7 +184,7 @@ describe("Dashboard application use cases", () => {
       },
     };
 
-    const result = await new ListRecentUploadsUseCase(uploadRepository).execute(1);
+    const result = await new ListRecentUploadsUseCase(uploadRepository).execute("owner-1", 1);
 
     expect(result).toEqual([
       {
@@ -208,12 +211,15 @@ describe("Dashboard application use cases", () => {
       makeEventBucket({ eventDate: new Date("2026-01-10T00:00:00Z") }),
     ]);
 
-    const result = await new GenerateDashboardViewUseCase(repository, eventsRepository).execute({
-      ...defaultFilters,
-      timePreset: "CUSTOM",
-      startDate: "2026-05-01",
-      endDate: "2026-05-31",
-    });
+    const result = await new GenerateDashboardViewUseCase(repository, eventsRepository).execute(
+      {
+        ...defaultFilters,
+        timePreset: "CUSTOM",
+        startDate: "2026-05-01",
+        endDate: "2026-05-31",
+      },
+      "owner-1",
+    );
 
     expect(result.warnings).toContainEqual({
       id: "empty-timeline",
@@ -228,12 +234,15 @@ describe("Dashboard application use cases", () => {
     const result = await new GenerateDashboardViewUseCase(
       repository,
       makeCareEventBucketRepository(),
-    ).execute({
-      ...defaultFilters,
-      timePreset: "CUSTOM",
-      startDate: "2026-05-31",
-      endDate: "2026-05-01",
-    });
+    ).execute(
+      {
+        ...defaultFilters,
+        timePreset: "CUSTOM",
+        startDate: "2026-05-31",
+        endDate: "2026-05-01",
+      },
+      "owner-1",
+    );
 
     expect(result.periodLabel).toBe("2026-05-01 a 2026-05-31");
   });

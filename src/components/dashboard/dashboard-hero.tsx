@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { type DashboardPageViewModel } from "@/presentation/dashboard/view-model";
+import { type DashboardFiltersDTO } from "@/application/dtos/DashboardFiltersDTO";
 import {
   DEFAULT_FILTERS,
   PANEL_CLASS_NAME,
@@ -9,7 +9,7 @@ import {
   createDashboardQueryString,
   removeDashboardFilterValue,
 } from "@/presentation/dashboard/filters";
-import { type DashboardFiltersDTO } from "@/application/dtos/DashboardFiltersDTO";
+import { type DashboardPageViewModel } from "@/presentation/dashboard/view-model";
 
 export function DashboardHero({
   pageView,

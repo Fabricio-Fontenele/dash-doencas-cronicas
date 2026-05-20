@@ -1,10 +1,10 @@
 import { type DashboardInsightDTO, type DashboardWarningDTO } from "@/application/dtos/DashboardViewDTO";
+import { SECTION_CLASS_NAME } from "@/presentation/dashboard/constants";
 import {
   type DashboardAnalyticSupportViewModel,
   type DashboardNarrativeViewModel,
   type DashboardSummaryCardViewModel,
 } from "@/presentation/dashboard/view-model";
-import { SECTION_CLASS_NAME } from "@/presentation/dashboard/constants";
 
 function StatCard({ eyebrow, value, label, accent }: DashboardSummaryCardViewModel) {
   return (

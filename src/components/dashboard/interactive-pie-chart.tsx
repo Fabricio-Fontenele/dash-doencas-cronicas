@@ -124,9 +124,9 @@ export function InteractivePieChart({
                     r={RADIUS}
                     fill={item.color}
                     className="cursor-pointer transition-opacity hover:opacity-85"
-                    onMouseEnter={(event) => updateHoveredPosition(event, item)}
-                    onMouseMove={(event) => updateHoveredPosition(event, item)}
-                    onMouseLeave={() => setHovered(null)}
+                    onMouseEnter={(event) => { updateHoveredPosition(event, item); }}
+                    onMouseMove={(event) => { updateHoveredPosition(event, item); }}
+                    onMouseLeave={() => { setHovered(null); }}
                   />
                 );
               }
@@ -139,9 +139,9 @@ export function InteractivePieChart({
                   d={path}
                   fill={item.color}
                   className="cursor-pointer transition-opacity hover:opacity-85"
-                  onMouseEnter={(event) => updateHoveredPosition(event, item)}
-                  onMouseMove={(event) => updateHoveredPosition(event, item)}
-                  onMouseLeave={() => setHovered(null)}
+                  onMouseEnter={(event) => { updateHoveredPosition(event, item); }}
+                  onMouseMove={(event) => { updateHoveredPosition(event, item); }}
+                  onMouseLeave={() => { setHovered(null); }}
                 />
               );
             })}

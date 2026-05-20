@@ -16,9 +16,9 @@ export class BloodPressureClassifier {
       return null;
     }
 
-    if (systolic >= 180 || diastolic >= 110) return "GRADE_3";
-    if (systolic >= 160 || diastolic >= 100) return "GRADE_2";
-    if (systolic >= 140 || diastolic >= 90) return "GRADE_1";
+    if (systolic >= 180 || diastolic >= 110) {return "GRADE_3";}
+    if (systolic >= 160 || diastolic >= 100) {return "GRADE_2";}
+    if (systolic >= 140 || diastolic >= 90) {return "GRADE_1";}
 
     return "CONTROLLED";
   }

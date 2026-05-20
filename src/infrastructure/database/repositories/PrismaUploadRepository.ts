@@ -1,4 +1,4 @@
-import { Upload } from "@/domain/entities/Upload";
+import { type Upload } from "@/domain/entities/Upload";
 import {
   type IUploadRepository,
   type UploadHistoryItem,
@@ -30,8 +30,11 @@ export class PrismaUploadRepository implements IUploadRepository {
     return upload;
   }
 
-  async listRecent(limit: number): Promise<UploadHistoryItem[]> {
+  async listRecent(ownerUserId: string, limit: number): Promise<UploadHistoryItem[]> {
     const uploads = await prisma.upload.findMany({
+      where: {
+        userId: ownerUserId,
+      },
       include: {
         user: {
           select: {

@@ -1,5 +1,5 @@
-import { CareRecord } from "@/domain/entities/CareRecord";
 import { type ParsedFileCapabilities } from "@/application/ports/IFileParser";
+import { CareRecord } from "@/domain/entities/CareRecord";
 import { type ClinicalCondition } from "@/domain/value-objects/Condition";
 import { FileParsingError } from "@/infrastructure/parsers/errors/FileParsingError";
 
@@ -231,7 +231,7 @@ export abstract class BaseConditionParser {
       return null;
     }
 
-    const normalized = row[value]?.trim() ?? "";
+    const normalized = row[value].trim();
     return EMPTY_TOKENS.has(this.normalizeValue(normalized)) ? null : normalized;
   }
 

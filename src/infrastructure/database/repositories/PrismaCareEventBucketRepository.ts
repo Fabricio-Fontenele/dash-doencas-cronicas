@@ -33,8 +33,11 @@ export class PrismaCareEventBucketRepository implements ICareEventBucketReposito
     });
   }
 
-  async findByLatestUpload(): Promise<CareEventBucket[]> {
+  async findByLatestUpload(ownerUserId: string): Promise<CareEventBucket[]> {
     const latestUpload = await prisma.upload.findFirst({
+      where: {
+        userId: ownerUserId,
+      },
       orderBy: {
         createdAt: "desc",
       },

@@ -21,12 +21,12 @@ export class IbgeRaceColorNormalizer {
       .toLowerCase()
       .trim();
 
-    if (normalized.includes("branc")) return "BRANCA";
-    if (normalized.includes("pret")) return "PRETA";
-    if (normalized.includes("pard")) return "PARDA";
-    if (normalized.includes("amarel")) return "AMARELA";
-    if (normalized.includes("indigen")) return "INDIGENA";
-    if (normalized.includes("nao inform")) return "NAO_INFORMADA";
+    if (normalized.includes("branc")) {return "BRANCA";}
+    if (normalized.includes("pret")) {return "PRETA";}
+    if (normalized.includes("pard")) {return "PARDA";}
+    if (normalized.includes("amarel")) {return "AMARELA";}
+    if (normalized.includes("indigen")) {return "INDIGENA";}
+    if (normalized.includes("nao inform")) {return "NAO_INFORMADA";}
 
     return "NAO_INFORMADA";
   }

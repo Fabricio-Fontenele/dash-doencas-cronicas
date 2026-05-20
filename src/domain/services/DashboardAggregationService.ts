@@ -1,7 +1,7 @@
 import { AggregateBucket } from "@/domain/entities/AggregateBucket";
 import { CareEventBucket } from "@/domain/entities/CareEventBucket";
-import { CareRecord } from "@/domain/entities/CareRecord";
-import { TimelineProfession } from "@/domain/value-objects/Profession";
+import { type CareRecord } from "@/domain/entities/CareRecord";
+import { type TimelineProfession } from "@/domain/value-objects/Profession";
 
 export class DashboardAggregationService {
   static buildBuckets(records: CareRecord[], uploadId: string): AggregateBucket[] {

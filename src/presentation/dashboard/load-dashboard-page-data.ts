@@ -1,9 +1,10 @@
+import { type DashboardFiltersDTO } from "@/application/dtos/DashboardFiltersDTO";
 import { type DashboardSummaryDTO } from "@/application/dtos/DashboardSummaryDTO";
 import { type DashboardViewDTO } from "@/application/dtos/DashboardViewDTO";
 import { type UploadHistoryDTO } from "@/application/dtos/UploadHistoryDTO";
-import { type DashboardFiltersDTO } from "@/application/dtos/DashboardFiltersDTO";
 import { GenerateDashboardViewUseCase } from "@/application/use-cases/dashboard/GenerateDashboardViewUseCase";
 import { ListRecentUploadsUseCase } from "@/application/use-cases/upload/ListRecentUploadsUseCase";
+import { getSessionOwnerId } from "@/infrastructure/auth/session";
 import { PrismaAggregateBucketRepository } from "@/infrastructure/database/repositories/PrismaAggregateBucketRepository";
 import { PrismaCareEventBucketRepository } from "@/infrastructure/database/repositories/PrismaCareEventBucketRepository";
 import { PrismaUploadRepository } from "@/infrastructure/database/repositories/PrismaUploadRepository";
@@ -31,6 +32,17 @@ export async function loadDashboardPageData(
   filters: DashboardFiltersDTO,
 ): Promise<DashboardPageData> {
   try {
+    const ownerUserId = await getSessionOwnerId();
+
+    if (!ownerUserId) {
+      return {
+        view: createEmptyDashboardView(filters),
+        latestUpload: null,
+        hasDatabaseConnection: true,
+        unavailableReason: null,
+      };
+    }
+
     const uploadRepository = new PrismaUploadRepository();
     const aggregateBucketRepository = new PrismaAggregateBucketRepository();
     const careEventBucketRepository = new PrismaCareEventBucketRepository();
@@ -39,8 +51,8 @@ export async function loadDashboardPageData(
       new GenerateDashboardViewUseCase(
         aggregateBucketRepository,
         careEventBucketRepository,
-      ).execute(filters),
-      new ListRecentUploadsUseCase(uploadRepository).execute(1),
+      ).execute(filters, ownerUserId),
+      new ListRecentUploadsUseCase(uploadRepository).execute(ownerUserId, 1),
     ]);
 
     return {

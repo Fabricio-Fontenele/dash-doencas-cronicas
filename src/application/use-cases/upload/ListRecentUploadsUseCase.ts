@@ -4,8 +4,8 @@ import { type IUploadRepository } from "@/domain/repositories/IUploadRepository"
 export class ListRecentUploadsUseCase {
   constructor(private readonly uploadRepository: IUploadRepository) {}
 
-  async execute(limit = 6): Promise<UploadHistoryDTO[]> {
-    const uploads = await this.uploadRepository.listRecent(limit);
+  async execute(ownerUserId: string, limit = 6): Promise<UploadHistoryDTO[]> {
+    const uploads = await this.uploadRepository.listRecent(ownerUserId, limit);
 
     return uploads.map((upload) => ({
       id: upload.id,

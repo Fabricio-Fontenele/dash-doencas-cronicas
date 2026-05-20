@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 
 import { ProcessUploadUseCase } from "@/application/use-cases/upload/ProcessUploadUseCase";
 import { CareRecord, type CareRecordProps } from "@/domain/entities/CareRecord";
-import { Upload } from "@/domain/entities/Upload";
-import { type ICareEventBucketRepository } from "@/domain/repositories/ICareEventBucketRepository";
+import { type Upload } from "@/domain/entities/Upload";
 import { type IAggregateBucketRepository } from "@/domain/repositories/IAggregateBucketRepository";
+import { type ICareEventBucketRepository } from "@/domain/repositories/ICareEventBucketRepository";
 import { type IUploadRepository } from "@/domain/repositories/IUploadRepository";
 
 function makeRecord(overrides: Partial<CareRecordProps> = {}) {

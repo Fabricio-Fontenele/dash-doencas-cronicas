@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { ProcessUploadUseCase } from "@/application/use-cases/upload/ProcessUploadUseCase";
-import { prisma } from "@/infrastructure/database/prisma/client";
+import { getOrCreateSessionOwnerId } from "@/infrastructure/auth/session";
 import { PrismaAggregateBucketRepository } from "@/infrastructure/database/repositories/PrismaAggregateBucketRepository";
 import { PrismaCareEventBucketRepository } from "@/infrastructure/database/repositories/PrismaCareEventBucketRepository";
 import { PrismaUploadRepository } from "@/infrastructure/database/repositories/PrismaUploadRepository";
@@ -47,7 +47,7 @@ export async function processUploadAction(
   }
 
   try {
-    const uploaderUserId = await ensureUploaderUser();
+    const uploaderUserId = await getOrCreateSessionOwnerId();
     const fileBuffer = Buffer.from(await parsedInput.data.file.arrayBuffer());
 
     const useCase = new ProcessUploadUseCase(
@@ -89,37 +89,8 @@ export async function processUploadAction(
 }
 
 function formatConditionLabel(condition: "DIABETES" | "HYPERTENSION" | "MIXED"): string {
-  if (condition === "DIABETES") return "diabetes";
-  if (condition === "HYPERTENSION") return "hipertensão";
+  if (condition === "DIABETES") {return "diabetes";}
+  if (condition === "HYPERTENSION") {return "hipertensão";}
 
   return "diabetes e hipertensão";
-}
-
-async function ensureUploaderUser(): Promise<string> {
-  const existingUser = await prisma.user.findFirst({
-    orderBy: {
-      createdAt: "asc",
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  if (existingUser) {
-    return existingUser.id;
-  }
-
-  const createdUser = await prisma.user.create({
-    data: {
-      name: "Enfermeiro Responsável",
-      email: "enfermeiro.local@dashboard-cronico.dev",
-      passwordHash: "auth-pending",
-      perfil: "ENFERMEIRO",
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  return createdUser.id;
 }

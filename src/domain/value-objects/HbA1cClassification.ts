@@ -8,8 +8,8 @@ export class HbA1cClassifier {
       return null;
     }
 
-    if (value < 7) return "TARGET";
-    if (value < 9) return "ELEVATED";
+    if (value < 7) {return "TARGET";}
+    if (value < 9) {return "ELEVATED";}
 
     return "CRITICAL";
   }

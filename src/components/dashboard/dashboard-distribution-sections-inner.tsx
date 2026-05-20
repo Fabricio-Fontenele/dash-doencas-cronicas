@@ -1,5 +1,6 @@
 "use client";
 
+import { cloneElement, useEffect, useRef, useState, type ReactElement } from "react";
 import {
   Area,
   AreaChart,
@@ -12,7 +13,6 @@ import {
   LineChart,
   Pie,
   PieChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -69,14 +69,45 @@ function ResponsiveChartFrame({
   children,
   heightClassName = "h-80",
 }: {
-  children: React.ReactNode;
+  children: ReactElement<{ width?: number; height?: number }>;
   heightClassName?: string;
 }) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [size, setSize] = useState<{ width: number; height: number } | null>(null);
+
+  useEffect(() => {
+    const element = containerRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      const nextWidth = Math.floor(entry.contentRect.width);
+      const nextHeight = Math.floor(entry.contentRect.height);
+
+      if (nextWidth > 0 && nextHeight > 0) {
+        setSize((previous) => {
+          if (previous && previous.width === nextWidth && previous.height === nextHeight) {
+            return previous;
+          }
+
+          return { width: nextWidth, height: nextHeight };
+        });
+      }
+    });
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
-    <div className={`min-w-0 w-full ${heightClassName}`}>
-      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-        {children}
-      </ResponsiveContainer>
+    <div ref={containerRef} className={`min-w-0 w-full ${heightClassName}`}>
+      {size ? cloneElement(children, { width: size.width, height: size.height }) : null}
     </div>
   );
 }

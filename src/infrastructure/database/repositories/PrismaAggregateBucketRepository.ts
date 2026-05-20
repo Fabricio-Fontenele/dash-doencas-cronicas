@@ -38,8 +38,11 @@ export class PrismaAggregateBucketRepository implements IAggregateBucketReposito
     });
   }
 
-  async findByLatestUpload(): Promise<AggregateBucket[]> {
+  async findByLatestUpload(ownerUserId: string): Promise<AggregateBucket[]> {
     const latestUpload = await prisma.upload.findFirst({
+      where: {
+        userId: ownerUserId,
+      },
       orderBy: {
         createdAt: "desc",
       },

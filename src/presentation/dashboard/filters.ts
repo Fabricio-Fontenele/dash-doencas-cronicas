@@ -74,9 +74,9 @@ export function parseDashboardFilters(
 export function createDashboardQueryString(filters: DashboardFiltersDTO): string {
   const params = new URLSearchParams();
 
-  for (const condition of filters.conditions) params.append("condition", condition);
-  for (const sex of filters.sexes) params.append("sex", sex);
-  for (const raceColor of filters.raceColors) params.append("raceColor", raceColor);
+  for (const condition of filters.conditions) {params.append("condition", condition);}
+  for (const sex of filters.sexes) {params.append("sex", sex);}
+  for (const raceColor of filters.raceColors) {params.append("raceColor", raceColor);}
   for (const ibgeRaceColor of filters.ibgeRaceColors) {
     params.append("ibgeRaceColor", ibgeRaceColor);
   }
@@ -86,12 +86,12 @@ export function createDashboardQueryString(filters: DashboardFiltersDTO): string
   for (const familyAllowance of filters.familyAllowances) {
     params.append("familyAllowance", familyAllowance);
   }
-  for (const ageGroup of filters.ageGroups) params.append("ageGroup", ageGroup);
-  for (const careGap of filters.careGaps) params.append("careGap", careGap);
-  for (const profession of filters.professions) params.append("profession", profession);
+  for (const ageGroup of filters.ageGroups) {params.append("ageGroup", ageGroup);}
+  for (const careGap of filters.careGaps) {params.append("careGap", careGap);}
+  for (const profession of filters.professions) {params.append("profession", profession);}
   params.set("timePreset", filters.timePreset);
-  if (filters.startDate) params.set("startDate", filters.startDate);
-  if (filters.endDate) params.set("endDate", filters.endDate);
+  if (filters.startDate) {params.set("startDate", filters.startDate);}
+  if (filters.endDate) {params.set("endDate", filters.endDate);}
 
   const query = params.toString();
   return query ? `/?${query}` : "/";
@@ -115,11 +115,11 @@ export function removeDashboardFilterValue(
     return {
       ...filters,
       [key]: null,
-    } as DashboardFiltersDTO;
+    };
   }
 
   return {
     ...filters,
     [key]: filters[key].filter((currentValue) => currentValue !== value),
-  } as DashboardFiltersDTO;
+  };
 }
