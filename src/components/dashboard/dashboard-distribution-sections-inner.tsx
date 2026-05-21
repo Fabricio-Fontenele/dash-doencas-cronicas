@@ -39,7 +39,6 @@ export interface DashboardDistributionSectionsProps {
   conditionDistribution: DashboardBarChartItemDTO[];
   hba1cDistribution: DashboardBarChartItemDTO[];
   homeVisitTimeline: DashboardTimelinePointDTO[];
-  ibgeRaceColorDistribution: DashboardBarChartItemDTO[];
   raceColorDistribution: DashboardBarChartItemDTO[];
   sexChartItems: DashboardSexChartItem[];
   support: DashboardAnalyticSupportViewModel;
@@ -326,7 +325,6 @@ export function DashboardDistributionSectionsInner({
   conditionDistribution,
   hba1cDistribution,
   homeVisitTimeline,
-  ibgeRaceColorDistribution,
   raceColorDistribution,
   sexChartItems,
   support,
@@ -358,16 +356,22 @@ export function DashboardDistributionSectionsInner({
       </section>
 
       <section className="grid min-w-0 gap-4 2xl:grid-cols-[1fr_1fr]">
-        <ChartShell eyebrow="Raça/cor" title="Classificação oficial IBGE do recorte">
-          <SimpleBars
-            items={
-              ibgeRaceColorDistribution.length > 0
-                ? ibgeRaceColorDistribution
-                : raceColorDistribution
-            }
-            color="#459cd7"
-            emptyMessage="Sem dados de raça/cor para este recorte."
-          />
+        <ChartShell eyebrow="Raça/cor original" title="Leitura fiel do valor importado">
+          {raceColorDistribution.length === 0 ? (
+            <EmptyChart message="Sem dados originais de raça/cor para este recorte." />
+          ) : (
+            <ResponsiveChartFrame>
+              <PieChart>
+                <Pie data={raceColorDistribution} dataKey="value" nameKey="label" innerRadius={60} outerRadius={100}>
+                  {raceColorDistribution.map((item) => (
+                    <Cell key={item.label} fill={getRaceColor(item.label)} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveChartFrame>
+          )}
         </ChartShell>
         <ChartShell eyebrow="Território" title="Bairros com maior volume acompanhado">
           <SimpleBars
@@ -406,30 +410,13 @@ export function DashboardDistributionSectionsInner({
         </ChartShell>
       </section>
 
-      <section className="grid min-w-0 gap-4 2xl:grid-cols-[1fr_1fr]">
+      <section className="grid min-w-0 gap-4">
         <ChartShell eyebrow="Condição" title="Distribuição entre diabetes e hipertensão">
           <SimpleBars
             items={conditionDistribution}
             color="#7a94ad"
             emptyMessage="Sem dados de condição para este recorte."
           />
-        </ChartShell>
-        <ChartShell eyebrow="Raça/cor original" title="Leitura fiel do valor importado">
-          {raceColorDistribution.length === 0 ? (
-            <EmptyChart message="Sem dados originais de raça/cor para este recorte." />
-          ) : (
-            <ResponsiveChartFrame>
-              <PieChart>
-                <Pie data={raceColorDistribution} dataKey="value" nameKey="label" innerRadius={60} outerRadius={100}>
-                  {raceColorDistribution.map((item) => (
-                    <Cell key={item.label} fill={getRaceColor(item.label)} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveChartFrame>
-          )}
         </ChartShell>
       </section>
     </>

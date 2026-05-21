@@ -15,7 +15,6 @@ export const DEFAULT_FILTERS: DashboardFiltersDTO = {
   conditions: [],
   sexes: [],
   raceColors: [],
-  ibgeRaceColors: [],
   neighborhoods: [],
   familyAllowances: [],
   ageGroups: [],

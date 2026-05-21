@@ -62,10 +62,6 @@ export class GenerateDashboardViewUseCase {
         filteredBuckets,
         (bucket) => bucket.raceColor ?? "Não informada",
       ),
-      ibgeRaceColorDistribution: this.groupAndSort(
-        filteredBuckets,
-        (bucket) => this.formatIbgeRaceColor(bucket.ibgeRaceColor),
-      ),
       bmiDistribution: this.groupAndSort(
         filteredBuckets.filter((bucket) => bucket.bmiClassification !== null),
         (bucket) => this.formatBmiClassification(bucket.bmiClassification),
@@ -95,20 +91,17 @@ export class GenerateDashboardViewUseCase {
     const neighborhoods = new Set<string>();
     const sexes = new Set<string>();
     const raceColors = new Set<string>();
-    const ibgeRaceColors = new Set<string>();
 
     for (const bucket of buckets) {
       if (bucket.neighborhood) {neighborhoods.add(bucket.neighborhood);}
       if (bucket.sex) {sexes.add(bucket.sex);}
       if (bucket.raceColor) {raceColors.add(bucket.raceColor);}
-      if (bucket.ibgeRaceColor) {ibgeRaceColors.add(this.formatIbgeRaceColor(bucket.ibgeRaceColor));}
     }
 
     return {
       neighborhoods: Array.from(neighborhoods).sort((left, right) => left.localeCompare(right)),
       sexes: Array.from(sexes).sort((left, right) => left.localeCompare(right)),
       raceColors: Array.from(raceColors).sort((left, right) => left.localeCompare(right)),
-      ibgeRaceColors: Array.from(ibgeRaceColors),
       professions: Array.from(TIMELINE_PROFESSIONS),
     };
   }
@@ -127,13 +120,6 @@ export class GenerateDashboardViewUseCase {
       }
 
       if (filters.raceColors.length > 0 && !filters.raceColors.includes(bucket.raceColor ?? "")) {
-        return false;
-      }
-
-      if (
-        filters.ibgeRaceColors.length > 0 &&
-        !filters.ibgeRaceColors.includes(this.formatIbgeRaceColor(bucket.ibgeRaceColor))
-      ) {
         return false;
       }
 
@@ -181,13 +167,6 @@ export class GenerateDashboardViewUseCase {
       }
 
       if (filters.raceColors.length > 0 && !filters.raceColors.includes(bucket.raceColor ?? "")) {
-        return false;
-      }
-
-      if (
-        filters.ibgeRaceColors.length > 0 &&
-        !filters.ibgeRaceColors.includes(this.formatIbgeRaceColor(bucket.ibgeRaceColor))
-      ) {
         return false;
       }
 
@@ -642,27 +621,6 @@ export class GenerateDashboardViewUseCase {
         return "Odontologia";
       case "HOME_VISIT":
         return "Visita domiciliar";
-    }
-  }
-
-  private formatIbgeRaceColor(value: AggregateBucket["ibgeRaceColor"]): string {
-    switch (value) {
-      case "BRANCA":
-        return "Branca";
-      case "PRETA":
-        return "Preta";
-      case "PARDA":
-        return "Parda";
-      case "AMARELA":
-        return "Amarela";
-      case "INDIGENA":
-        return "Indígena";
-      case "NAO_INFORMADA":
-        return "Não informada";
-      case null:
-        return "Não informada";
-      default:
-        return "Não informada";
     }
   }
 

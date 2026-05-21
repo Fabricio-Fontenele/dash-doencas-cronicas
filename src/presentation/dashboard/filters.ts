@@ -58,7 +58,6 @@ export function parseDashboardFilters(
     conditions,
     sexes: parseMultiValue(searchParams.sex),
     raceColors: parseMultiValue(searchParams.raceColor),
-    ibgeRaceColors: parseMultiValue(searchParams.ibgeRaceColor),
     neighborhoods: parseMultiValue(searchParams.neighborhood),
     familyAllowances,
     ageGroups,
@@ -77,9 +76,6 @@ export function createDashboardQueryString(filters: DashboardFiltersDTO): string
   for (const condition of filters.conditions) {params.append("condition", condition);}
   for (const sex of filters.sexes) {params.append("sex", sex);}
   for (const raceColor of filters.raceColors) {params.append("raceColor", raceColor);}
-  for (const ibgeRaceColor of filters.ibgeRaceColors) {
-    params.append("ibgeRaceColor", ibgeRaceColor);
-  }
   for (const neighborhood of filters.neighborhoods) {
     params.append("neighborhood", neighborhood);
   }

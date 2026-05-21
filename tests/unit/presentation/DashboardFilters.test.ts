@@ -11,7 +11,6 @@ describe("Dashboard filter helpers", () => {
     const filters = parseDashboardFilters({
       sex: ["F", "M"],
       raceColor: "Parda",
-      ibgeRaceColor: "Parda",
       neighborhood: ["Centro", "Bela Vista"],
       familyAllowance: ["YES", "UNKNOWN"],
       ageGroup: ["60-79", "80+", "invalid"],
@@ -27,7 +26,6 @@ describe("Dashboard filter helpers", () => {
       conditions: ["DIABETES", "HYPERTENSION"],
       sexes: ["F", "M"],
       raceColors: ["Parda"],
-      ibgeRaceColors: ["Parda"],
       neighborhoods: ["Centro", "Bela Vista"],
       familyAllowances: ["YES", "UNKNOWN"],
       ageGroups: ["60-79", "80+"],
@@ -44,7 +42,6 @@ describe("Dashboard filter helpers", () => {
       conditions: ["DIABETES"],
       sexes: ["F"],
       raceColors: ["Parda"],
-      ibgeRaceColors: ["Parda"],
       neighborhoods: ["Centro"],
       familyAllowances: ["NO"],
       ageGroups: ["60-79"],
@@ -56,7 +53,7 @@ describe("Dashboard filter helpers", () => {
     });
 
     expect(query).toBe(
-      "/?condition=DIABETES&sex=F&raceColor=Parda&ibgeRaceColor=Parda&neighborhood=Centro&familyAllowance=NO&ageGroup=60-79&careGap=medical&profession=MEDICAL&timePreset=LAST_6_MONTHS",
+      "/?condition=DIABETES&sex=F&raceColor=Parda&neighborhood=Centro&familyAllowance=NO&ageGroup=60-79&careGap=medical&profession=MEDICAL&timePreset=LAST_6_MONTHS",
     );
   });
 
@@ -66,7 +63,6 @@ describe("Dashboard filter helpers", () => {
         conditions: [],
         sexes: ["F", "M"],
         raceColors: [],
-        ibgeRaceColors: [],
         neighborhoods: ["Centro"],
         familyAllowances: [],
         ageGroups: ["60-79"],
@@ -84,7 +80,6 @@ describe("Dashboard filter helpers", () => {
       conditions: [],
       sexes: ["M"],
       raceColors: [],
-      ibgeRaceColors: [],
       neighborhoods: ["Centro"],
       familyAllowances: [],
       ageGroups: ["60-79"],

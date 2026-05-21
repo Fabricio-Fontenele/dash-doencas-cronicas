@@ -73,7 +73,6 @@ const defaultFilters = {
   conditions: [],
   sexes: [],
   raceColors: [],
-  ibgeRaceColors: [],
   neighborhoods: [],
   familyAllowances: [],
   ageGroups: [],
@@ -126,7 +125,6 @@ describe("Dashboard application use cases", () => {
       neighborhoods: ["Bela Vista", "Centro"],
       sexes: ["F", "M"],
       raceColors: ["Parda"],
-      ibgeRaceColors: ["Parda"],
       professions: ["MEDICAL", "NURSING", "DENTAL", "HOME_VISIT"],
     });
   });

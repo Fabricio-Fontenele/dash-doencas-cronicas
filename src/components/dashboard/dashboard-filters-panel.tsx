@@ -159,13 +159,6 @@ export function DashboardFiltersPanel({ view }: { view: DashboardViewDTO }) {
         />
 
         <FilterGroup
-          title="Raça/cor IBGE"
-          name="ibgeRaceColor"
-          selectedValues={view.appliedFilters.ibgeRaceColors}
-          options={view.filterOptions.ibgeRaceColors.map((value) => ({ value, label: value }))}
-        />
-
-        <FilterGroup
           title="Faixa etária"
           name="ageGroup"
           compact

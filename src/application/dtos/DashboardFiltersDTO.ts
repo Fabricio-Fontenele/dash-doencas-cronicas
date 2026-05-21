@@ -15,7 +15,6 @@ export interface DashboardFiltersDTO {
   conditions: Condition[];
   sexes: string[];
   raceColors: string[];
-  ibgeRaceColors: string[];
   neighborhoods: string[];
   familyAllowances: Array<"YES" | "NO" | "UNKNOWN">;
   ageGroups: AgeGroup[];

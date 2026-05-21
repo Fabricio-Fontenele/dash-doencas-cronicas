@@ -44,7 +44,6 @@ export interface DashboardFilterOptionsDTO {
   neighborhoods: string[];
   sexes: string[];
   raceColors: string[];
-  ibgeRaceColors: string[];
   professions: TimelineProfession[];
 }
 
@@ -57,7 +56,6 @@ export interface DashboardViewDTO {
   ageGroupDistribution: DashboardBarChartItemDTO[];
   sexDistribution: DashboardBarChartItemDTO[];
   raceColorDistribution: DashboardBarChartItemDTO[];
-  ibgeRaceColorDistribution: DashboardBarChartItemDTO[];
   bmiDistribution: DashboardBarChartItemDTO[];
   bloodPressureDistribution: DashboardBarChartItemDTO[];
   hba1cDistribution: DashboardBarChartItemDTO[];

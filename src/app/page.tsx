@@ -67,7 +67,6 @@ export default async function Home({ searchParams }: HomePageProps) {
               conditionDistribution={pageData.view.conditionDistribution}
               hba1cDistribution={pageData.view.hba1cDistribution}
               homeVisitTimeline={pageData.view.homeVisitTimeline}
-              ibgeRaceColorDistribution={pageData.view.ibgeRaceColorDistribution}
               raceColorDistribution={pageData.view.raceColorDistribution}
               sexChartItems={pageView.sexChartItems}
               support={pageView.support}

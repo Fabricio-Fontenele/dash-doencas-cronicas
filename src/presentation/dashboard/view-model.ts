@@ -162,11 +162,6 @@ function getActiveFilterChips(filters: DashboardFiltersDTO): DashboardActiveFilt
   return [
     ...filters.sexes.map((value) => ({ key: "sexes" as const, value, label: value })),
     ...filters.raceColors.map((value) => ({ key: "raceColors" as const, value, label: value })),
-    ...filters.ibgeRaceColors.map((value) => ({
-      key: "ibgeRaceColors" as const,
-      value,
-      label: `IBGE: ${value}`,
-    })),
     ...filters.ageGroups.map((value) => ({ key: "ageGroups" as const, value, label: value })),
     ...filters.neighborhoods.map((value) => ({
       key: "neighborhoods" as const,
