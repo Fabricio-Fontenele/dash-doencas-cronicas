@@ -96,28 +96,41 @@ export function DashboardFiltersPanelContent({
   view: DashboardViewDTO;
   variant: "sidebar" | "drawer";
 }) {
+  const isDrawer = variant === "drawer";
+
   return (
     <section
       className={`${PANEL_CLASS_NAME} p-5 ${
-        variant === "sidebar"
-          ? "sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto"
-          : "h-full max-h-full overflow-y-auto rounded-[1.5rem] p-4 sm:p-5"
+        isDrawer
+          ? "h-full max-h-full overflow-y-auto rounded-[1.5rem] p-4 sm:p-5"
+          : "sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto"
       }`}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">Filtros</p>
-          <h2 className="mt-2 text-2xl font-semibold text-accent-strong">Monte o recorte</h2>
-          <p className="mt-2 text-sm leading-6 text-muted">
-            Os filtros demográficos afetam população, séries temporais e estratificações clínicas.
-          </p>
+      {!isDrawer ? (
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
+              Filtros
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold text-accent-strong">Monte o recorte</h2>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              Os filtros demográficos afetam população, séries temporais e estratificações
+              clínicas.
+            </p>
+          </div>
+          <div className="rounded-full bg-surface-strong px-3 py-1 text-xs font-semibold text-muted">
+            {view.filteredRecordCount} registros
+          </div>
         </div>
-        <div className="rounded-full bg-surface-strong px-3 py-1 text-xs font-semibold text-muted">
-          {view.filteredRecordCount} registros
+      ) : (
+        <div className="flex items-center justify-end">
+          <div className="rounded-full bg-surface-strong px-3 py-1 text-xs font-semibold text-muted">
+            {view.filteredRecordCount} registros
+          </div>
         </div>
-      </div>
+      )}
 
-      <form method="get" className="mt-5 space-y-4 sm:mt-6">
+      <form method="get" className="mt-4 space-y-4 pb-3 sm:mt-6">
         <div className="rounded-[1.5rem] border border-border/70 bg-white/80 p-4">
           <label className="block text-sm font-semibold text-accent-strong" htmlFor="timePreset">
             Janela temporal
