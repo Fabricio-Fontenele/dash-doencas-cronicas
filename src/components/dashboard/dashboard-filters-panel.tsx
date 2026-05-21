@@ -86,9 +86,23 @@ function FilterGroup({
 }
 
 export function DashboardFiltersPanel({ view }: { view: DashboardViewDTO }) {
+  return <DashboardFiltersPanelContent view={view} variant="sidebar" />;
+}
+
+export function DashboardFiltersPanelContent({
+  view,
+  variant,
+}: {
+  view: DashboardViewDTO;
+  variant: "sidebar" | "drawer";
+}) {
   return (
     <section
-      className={`${PANEL_CLASS_NAME} sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto p-5`}
+      className={`${PANEL_CLASS_NAME} p-5 ${
+        variant === "sidebar"
+          ? "sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto"
+          : "max-h-[calc(100vh-7rem)] overflow-y-auto"
+      }`}
     >
       <div className="flex items-start justify-between gap-4">
         <div>

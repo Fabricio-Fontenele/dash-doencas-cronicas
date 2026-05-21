@@ -1,5 +1,5 @@
 import { DashboardDistributionSectionsInner as DashboardDistributionSections } from "@/components/dashboard/dashboard-distribution-sections-inner";
-import { DashboardFiltersPanel } from "@/components/dashboard/dashboard-filters-panel";
+import { DashboardFiltersShell } from "@/components/dashboard/dashboard-filters-shell";
 import {
   DashboardHero,
   DashboardSnapshotPanel,
@@ -42,9 +42,7 @@ export default async function Home({ searchParams }: HomePageProps) {
         ) : null}
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[22rem_minmax(0,1fr)]">
-          <aside className="space-y-6">
-            <DashboardFiltersPanel view={pageData.view} />
-          </aside>
+          <DashboardFiltersShell view={pageData.view} />
 
           <div className="min-w-0 space-y-6">
             <DashboardSnapshotPanel
