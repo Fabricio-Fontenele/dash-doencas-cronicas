@@ -65,7 +65,7 @@ export async function loadDashboardPageData(
     const message =
       error instanceof Error
         ? error.message
-        : "Falha inesperada ao carregar o snapshot agregado.";
+        : "Falha inesperada ao carregar os dados agregados do recorte.";
 
     console.error("Falha ao carregar dados da dashboard:", error);
 

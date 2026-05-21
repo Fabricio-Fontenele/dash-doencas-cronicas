@@ -121,23 +121,23 @@ export function DashboardFiltersPanel({ view }: { view: DashboardViewDTO }) {
             ))}
           </select>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <label className="text-sm text-muted">
+          <div className="mt-4 grid gap-3">
+            <label className="min-w-0 text-sm text-muted">
               <span className="mb-1 block font-medium text-accent-strong">Início customizado</span>
               <input
                 type="date"
                 name="startDate"
                 defaultValue={view.appliedFilters.startDate ?? ""}
-                className="h-11 w-full rounded-2xl border border-border/70 bg-white px-3 text-sm text-accent-strong"
+                className="h-11 w-full min-w-0 rounded-2xl border border-border/70 bg-white px-3 text-sm text-accent-strong"
               />
             </label>
-            <label className="text-sm text-muted">
+            <label className="min-w-0 text-sm text-muted">
               <span className="mb-1 block font-medium text-accent-strong">Fim customizado</span>
               <input
                 type="date"
                 name="endDate"
                 defaultValue={view.appliedFilters.endDate ?? ""}
-                className="h-11 w-full rounded-2xl border border-border/70 bg-white px-3 text-sm text-accent-strong"
+                className="h-11 w-full min-w-0 rounded-2xl border border-border/70 bg-white px-3 text-sm text-accent-strong"
               />
             </label>
           </div>

@@ -17,6 +17,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { type NameType, type ValueType } from "recharts/types/component/DefaultTooltipContent";
 
 import {
   type DashboardBarChartItemDTO,
@@ -45,6 +46,22 @@ export interface DashboardDistributionSectionsProps {
   topNeighborhoods: DashboardBarChartItemDTO[];
   visibleCoverageItems: DashboardCoverageItemDTO[];
 }
+
+function formatTooltipValue(value: ValueType | undefined, label: string) {
+  if (Array.isArray(value)) {
+    return [value.join(" - "), label] satisfies [ValueType, NameType];
+  }
+
+  return [value ?? 0, label] satisfies [ValueType, NameType];
+}
+
+const PEOPLE_TOOLTIP_PROPS = {
+  formatter: (value: ValueType | undefined) => formatTooltipValue(value, "Pessoas"),
+} as const;
+
+const EVENTS_TOOLTIP_PROPS = {
+  formatter: (value: ValueType | undefined) => formatTooltipValue(value, "Eventos"),
+} as const;
 
 function ChartShell({
   eyebrow,
@@ -134,7 +151,7 @@ function SexPieChart({ items }: { items: DashboardSexChartItem[] }) {
             <Cell key={item.label} fill={item.color} />
           ))}
         </Pie>
-        <Tooltip />
+        <Tooltip {...PEOPLE_TOOLTIP_PROPS} />
         <Legend />
       </PieChart>
     </ResponsiveChartFrame>
@@ -166,7 +183,7 @@ function SimpleBars({
           stroke="#74818d"
           tick={{ fontSize: 12 }}
         />
-        <Tooltip />
+        <Tooltip {...PEOPLE_TOOLTIP_PROPS} />
         <Bar dataKey="value" radius={[0, 12, 12, 0]} fill={color} />
       </BarChart>
     </ResponsiveChartFrame>
@@ -253,7 +270,7 @@ function ProfessionalTimeline({
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(20,58,96,0.12)" />
           <XAxis dataKey="label" stroke="#74818d" />
           <YAxis stroke="#74818d" />
-          <Tooltip />
+          <Tooltip {...EVENTS_TOOLTIP_PROPS} />
           <Legend />
           <Line type="monotone" dataKey="Medico" name="Médico" stroke="#143a60" strokeWidth={3} dot={false} />
           <Line
@@ -303,7 +320,7 @@ function HomeVisitTimeline({
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(20,58,96,0.12)" />
           <XAxis dataKey="label" stroke="#74818d" />
           <YAxis stroke="#74818d" />
-          <Tooltip />
+          <Tooltip {...EVENTS_TOOLTIP_PROPS} />
           <Area
             type="monotone"
             dataKey="value"
@@ -356,9 +373,9 @@ export function DashboardDistributionSectionsInner({
       </section>
 
       <section className="grid min-w-0 gap-4 2xl:grid-cols-[1fr_1fr]">
-        <ChartShell eyebrow="Raça/cor original" title="Leitura fiel do valor importado">
+        <ChartShell eyebrow="Raça/cor" title="Distribuição da população por raça/cor">
           {raceColorDistribution.length === 0 ? (
-            <EmptyChart message="Sem dados originais de raça/cor para este recorte." />
+            <EmptyChart message="Sem dados de raça/cor para este recorte." />
           ) : (
             <ResponsiveChartFrame>
               <PieChart>
@@ -367,7 +384,7 @@ export function DashboardDistributionSectionsInner({
                     <Cell key={item.label} fill={getRaceColor(item.label)} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip {...PEOPLE_TOOLTIP_PROPS} />
                 <Legend />
               </PieChart>
             </ResponsiveChartFrame>

@@ -108,9 +108,9 @@ export function DashboardWarningsSection({
     !support.supportsNursingTimeline && "O arquivo atual não traz data exata suficiente para série temporal de enfermagem.",
     !support.supportsDentalTimeline && "O arquivo atual não traz data exata suficiente para série temporal de odontologia.",
     !support.supportsHomeVisitTimeline && "O arquivo atual não traz data exata suficiente para série temporal de visitas domiciliares.",
-    !support.supportsBmiClassification && "Não há peso e altura suficientes para classificar IMC no snapshot atual.",
-    !support.supportsBloodPressureClassification && "Não há valores de pressão arterial suficientes para classificar PA no snapshot atual.",
-    !support.supportsHbA1cClassification && "Não há valores suficientes de hemoglobina glicada no snapshot atual.",
+    !support.supportsBmiClassification && "Não há peso e altura suficientes para classificar IMC no recorte atual.",
+    !support.supportsBloodPressureClassification && "Não há valores de pressão arterial suficientes para classificar PA no recorte atual.",
+    !support.supportsHbA1cClassification && "Não há valores suficientes de hemoglobina glicada no recorte atual.",
   ].filter(Boolean) as string[];
 
   if (warnings.length === 0 && supportWarnings.length === 0) {

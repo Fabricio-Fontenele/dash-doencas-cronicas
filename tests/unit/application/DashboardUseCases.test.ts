@@ -244,4 +244,23 @@ describe("Dashboard application use cases", () => {
 
     expect(result.periodLabel).toBe("2026-05-01 a 2026-05-31");
   });
+
+  it("usa ano com quatro dígitos nos rótulos mensais da série temporal", async () => {
+    const repository = makeAggregateBucketRepository([makeBucket({ count: 1 })]);
+    const eventsRepository = makeCareEventBucketRepository([
+      makeEventBucket({ eventDate: new Date("2026-05-10T00:00:00Z") }),
+    ]);
+
+    const result = await new GenerateDashboardViewUseCase(repository, eventsRepository).execute(
+      {
+        ...defaultFilters,
+        timePreset: "LAST_6_MONTHS",
+      },
+      "owner-1",
+    );
+
+    expect(result.careByProfessional[0]?.points.some((point) => point.label.includes("/2026"))).toBe(
+      true,
+    );
+  });
 });

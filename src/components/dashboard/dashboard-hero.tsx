@@ -39,7 +39,7 @@ export function DashboardHero({
             href="/importar"
             className="inline-flex h-12 items-center justify-center rounded-full bg-accent-strong px-6 text-sm font-semibold text-white transition hover:bg-accent"
           >
-            Importar novo snapshot
+            Importar novo arquivo
           </Link>
           <Link
             href={createDashboardQueryString(DEFAULT_FILTERS)}
@@ -65,7 +65,7 @@ export function DashboardSnapshotPanel({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
-            Snapshot atual
+            Arquivo atual
           </p>
           <h2 className="mt-2 text-2xl font-semibold text-accent-strong">
             {pageView.snapshotTitle}

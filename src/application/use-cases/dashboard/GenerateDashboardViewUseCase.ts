@@ -351,7 +351,7 @@ export class GenerateDashboardViewUseCase {
       warnings.push({
         id: "empty-snapshot",
         title: "Recorte sem população",
-        description: "Os filtros atuais eliminaram todas as pessoas do snapshot importado.",
+        description: "Os filtros atuais eliminaram todas as pessoas do arquivo importado.",
       });
     }
 
@@ -426,7 +426,7 @@ export class GenerateDashboardViewUseCase {
       {
         title: "Faixa dominante",
         value: leadingAgeGroup.label,
-        description: `${leadingAgeGroup.value} pessoas estão na faixa etária mais representativa do snapshot filtrado.`,
+        description: `${leadingAgeGroup.value} pessoas estão na faixa etária mais representativa do recorte filtrado.`,
         tone: "highlight",
       },
       {
@@ -575,10 +575,7 @@ export class GenerateDashboardViewUseCase {
       const snapshot = new Date(current.getFullYear(), current.getMonth(), 1);
       items.push({
         key: `${snapshot.getFullYear()}-${String(snapshot.getMonth() + 1).padStart(2, "0")}`,
-        label: new Intl.DateTimeFormat("pt-BR", {
-          month: "short",
-          year: "2-digit",
-        }).format(snapshot),
+        label: `${new Intl.DateTimeFormat("pt-BR", { month: "short" }).format(snapshot)}/${snapshot.getFullYear()}`,
       });
     }
 
