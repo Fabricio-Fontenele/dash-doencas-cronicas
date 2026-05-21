@@ -55,44 +55,48 @@ export function DashboardFiltersShell({ view }: { view: DashboardViewDTO }) {
 
   return (
     <>
-      <div className="xl:hidden">
-        <button
-          type="button"
-          aria-expanded={isOpen}
-          aria-controls={drawerId}
-          onClick={() => {
-            setIsOpen(true);
-          }}
-          className="inline-flex w-full items-center justify-between rounded-[1.5rem] border border-border/70 bg-white/85 px-4 py-3 text-left shadow-[0_12px_40px_rgba(20,58,96,0.08)] backdrop-blur"
-        >
-          <span>
-            <span className="block text-xs font-semibold uppercase tracking-[0.22em] text-muted">
-              Filtros
-            </span>
-            <span className="mt-1 block text-base font-semibold text-accent-strong">
-              Ajustar recorte
-            </span>
-          </span>
-          <span className="inline-flex items-center gap-3">
-            <span className="rounded-full bg-surface-strong px-3 py-1 text-xs font-semibold text-muted">
-              {appliedFilterCount} ativos
-            </span>
+      <div className="sticky top-3 z-30 xl:hidden">
+        <div className="flex items-center justify-between gap-3 rounded-[1.4rem] border border-border/70 bg-white/88 px-3 py-2.5 shadow-[0_12px_36px_rgba(20,58,96,0.10)] backdrop-blur">
+          <div className="min-w-0">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-muted">
+              Navegação do recorte
+            </p>
+            <p className="mt-1 truncate text-sm font-semibold text-accent-strong">
+              {appliedFilterCount === 0
+                ? "Todos os dados visíveis"
+                : `${appliedFilterCount} filtros aplicados`}
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-expanded={isOpen}
+            aria-controls={drawerId}
+            aria-label="Abrir filtros"
+            onClick={() => {
+              setIsOpen(true);
+            }}
+            className="inline-flex h-11 shrink-0 items-center gap-3 rounded-full border border-border/70 bg-surface px-4 text-sm font-semibold text-accent-strong transition hover:border-accent/40"
+          >
             <svg
               aria-hidden="true"
               viewBox="0 0 20 20"
-              className="size-5 text-accent-strong"
+              className="size-5"
               fill="none"
             >
               <path
-                d="m7.5 5 5 5-5 5"
+                d="M3.5 5.5h13M3.5 10h13M3.5 14.5h13"
                 stroke="currentColor"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="1.8"
               />
             </svg>
-          </span>
-        </button>
+            <span>Filtros</span>
+            <span className="rounded-full bg-surface-strong px-2.5 py-1 text-[0.7rem] font-semibold text-muted">
+              {appliedFilterCount}
+            </span>
+          </button>
+        </div>
       </div>
 
       <aside className="hidden space-y-6 xl:block">
@@ -115,10 +119,10 @@ export function DashboardFiltersShell({ view }: { view: DashboardViewDTO }) {
             role="dialog"
             aria-modal="true"
             aria-label="Filtros da dashboard"
-            className="fixed inset-y-0 right-0 z-50 w-full max-w-[28rem] p-3 sm:p-4"
+            className="fixed inset-y-0 right-0 z-50 w-full max-w-[28rem] p-2 sm:p-4"
           >
-            <div className="flex h-full flex-col rounded-[2rem] bg-[linear-gradient(180deg,rgba(244,243,243,0.98),rgba(214,231,244,0.98))] shadow-[0_30px_80px_rgba(20,58,96,0.22)]">
-              <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
+            <div className="flex h-full flex-col rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(244,243,243,0.98),rgba(214,231,244,0.98))] shadow-[0_30px_80px_rgba(20,58,96,0.22)]">
+              <div className="flex items-center justify-between border-b border-border/60 px-4 py-4 sm:px-5">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted">
                     Filtros
@@ -147,7 +151,7 @@ export function DashboardFiltersShell({ view }: { view: DashboardViewDTO }) {
                 </button>
               </div>
 
-              <div className="min-h-0 flex-1 p-2">
+              <div className="min-h-0 flex-1 p-1.5 sm:p-2">
                 <DashboardFiltersPanelContent view={view} variant="drawer" />
               </div>
             </div>

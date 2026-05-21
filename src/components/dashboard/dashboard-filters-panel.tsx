@@ -101,7 +101,7 @@ export function DashboardFiltersPanelContent({
       className={`${PANEL_CLASS_NAME} p-5 ${
         variant === "sidebar"
           ? "sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto"
-          : "max-h-[calc(100vh-7rem)] overflow-y-auto"
+          : "h-full max-h-full overflow-y-auto rounded-[1.5rem] p-4 sm:p-5"
       }`}
     >
       <div className="flex items-start justify-between gap-4">
@@ -117,7 +117,7 @@ export function DashboardFiltersPanelContent({
         </div>
       </div>
 
-      <form method="get" className="mt-6 space-y-4">
+      <form method="get" className="mt-5 space-y-4 sm:mt-6">
         <div className="rounded-[1.5rem] border border-border/70 bg-white/80 p-4">
           <label className="block text-sm font-semibold text-accent-strong" htmlFor="timePreset">
             Janela temporal
@@ -226,16 +226,16 @@ export function DashboardFiltersPanelContent({
           options={view.filterOptions.neighborhoods.map((value) => ({ value, label: value }))}
         />
 
-        <div className="flex flex-wrap gap-3 pt-2">
+        <div className="sticky bottom-0 flex flex-col gap-3 border-t border-border/60 bg-[linear-gradient(180deg,rgba(244,243,243,0),rgba(244,243,243,0.96)_28%,rgba(244,243,243,0.99))] pt-4 sm:flex-row sm:flex-wrap">
           <button
             type="submit"
-            className="inline-flex h-11 items-center justify-center rounded-full bg-accent-strong px-5 text-sm font-semibold text-white transition hover:bg-accent"
+            className="inline-flex h-11 items-center justify-center rounded-full bg-accent-strong px-5 text-sm font-semibold text-white transition hover:bg-accent sm:min-w-[11rem]"
           >
             Aplicar recorte
           </button>
           <Link
             href={createDashboardQueryString(DEFAULT_FILTERS)}
-            className="inline-flex h-11 items-center justify-center rounded-full border border-border px-5 text-sm font-semibold text-accent-strong transition hover:bg-surface-strong"
+            className="inline-flex h-11 items-center justify-center rounded-full border border-border bg-white px-5 text-sm font-semibold text-accent-strong transition hover:bg-surface-strong sm:min-w-[10rem]"
           >
             Resetar
           </Link>
