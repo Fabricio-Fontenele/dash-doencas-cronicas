@@ -17,7 +17,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { type NameType, type ValueType } from "recharts/types/component/DefaultTooltipContent";
 
 import {
   type DashboardBarChartItemDTO,
@@ -47,21 +46,67 @@ export interface DashboardDistributionSectionsProps {
   visibleCoverageItems: DashboardCoverageItemDTO[];
 }
 
-function formatTooltipValue(value: ValueType | undefined, label: string) {
-  if (Array.isArray(value)) {
-    return [value.join(" - "), label] satisfies [ValueType, NameType];
-  }
-
-  return [value ?? 0, label] satisfies [ValueType, NameType];
+interface ChartTooltipEntry {
+  name?: string | number;
+  value?: number | string;
+  color?: string;
+  payload?: { label?: string; color?: string; fill?: string };
 }
 
-const PEOPLE_TOOLTIP_PROPS = {
-  formatter: (value: ValueType | undefined) => formatTooltipValue(value, "Pessoas"),
-} as const;
+function ChartTooltip({
+  active,
+  payload,
+  label,
+  unit,
+  total,
+}: {
+  active?: boolean;
+  payload?: ChartTooltipEntry[];
+  label?: string | number;
+  unit: string;
+  total?: number;
+}) {
+  if (!active || !payload || payload.length === 0) {
+    return null;
+  }
 
-const EVENTS_TOOLTIP_PROPS = {
-  formatter: (value: ValueType | undefined) => formatTooltipValue(value, "Eventos"),
-} as const;
+  const isSingleSeries = payload.length === 1;
+  const header = label ?? payload[0]?.payload?.label ?? payload[0]?.name;
+  const hasHeader = header !== undefined && header !== "";
+
+  return (
+    <div className="rounded-2xl border border-border bg-white px-3 py-2 text-xs shadow-[0_18px_40px_rgba(20,58,96,0.18)]">
+      {hasHeader ? <p className="font-semibold text-accent-strong">{header}</p> : null}
+      <div className={hasHeader ? "mt-1 space-y-1" : "space-y-1"}>
+        {payload.map((entry, index) => {
+          const numericValue =
+            typeof entry.value === "number" ? entry.value : Number(entry.value ?? 0);
+          const dotColor = entry.color ?? entry.payload?.color ?? entry.payload?.fill;
+          const percent =
+            total && total > 0 ? Math.round((numericValue / total) * 100) : null;
+
+          return (
+            <p key={index} className="flex items-center gap-2 text-muted">
+              {dotColor ? (
+                <span
+                  className="block size-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: dotColor }}
+                />
+              ) : null}
+              {!isSingleSeries && entry.name !== undefined ? (
+                <span className="font-medium text-accent-strong">{entry.name}</span>
+              ) : null}
+              <span className="text-accent-strong">
+                {numericValue.toLocaleString("pt-BR")} {unit}
+              </span>
+              {percent !== null ? <span>• {percent}%</span> : null}
+            </p>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function ChartShell({
   eyebrow,
@@ -151,7 +196,7 @@ function SexPieChart({ items }: { items: DashboardSexChartItem[] }) {
             <Cell key={item.label} fill={item.color} />
           ))}
         </Pie>
-        <Tooltip {...PEOPLE_TOOLTIP_PROPS} />
+        <Tooltip content={<ChartTooltip unit="pessoas" total={total} />} />
         <Legend />
       </PieChart>
     </ResponsiveChartFrame>
@@ -183,7 +228,10 @@ function SimpleBars({
           stroke="#74818d"
           tick={{ fontSize: 12 }}
         />
-        <Tooltip {...PEOPLE_TOOLTIP_PROPS} />
+        <Tooltip
+          cursor={{ fill: "rgba(20,58,96,0.06)" }}
+          content={<ChartTooltip unit="pessoas" />}
+        />
         <Bar dataKey="value" radius={[0, 12, 12, 0]} fill={color} />
       </BarChart>
     </ResponsiveChartFrame>
@@ -270,7 +318,7 @@ function ProfessionalTimeline({
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(20,58,96,0.12)" />
           <XAxis dataKey="label" stroke="#74818d" />
           <YAxis stroke="#74818d" />
-          <Tooltip {...EVENTS_TOOLTIP_PROPS} />
+          <Tooltip content={<ChartTooltip unit="eventos" />} />
           <Legend />
           <Line type="monotone" dataKey="Medico" name="Médico" stroke="#143a60" strokeWidth={3} dot={false} />
           <Line
@@ -320,7 +368,7 @@ function HomeVisitTimeline({
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(20,58,96,0.12)" />
           <XAxis dataKey="label" stroke="#74818d" />
           <YAxis stroke="#74818d" />
-          <Tooltip {...EVENTS_TOOLTIP_PROPS} />
+          <Tooltip content={<ChartTooltip unit="eventos" />} />
           <Area
             type="monotone"
             dataKey="value"
@@ -384,7 +432,14 @@ export function DashboardDistributionSectionsInner({
                     <Cell key={item.label} fill={getRaceColor(item.label)} />
                   ))}
                 </Pie>
-                <Tooltip {...PEOPLE_TOOLTIP_PROPS} />
+                <Tooltip
+                  content={
+                    <ChartTooltip
+                      unit="pessoas"
+                      total={raceColorDistribution.reduce((sum, item) => sum + item.value, 0)}
+                    />
+                  }
+                />
                 <Legend />
               </PieChart>
             </ResponsiveChartFrame>
