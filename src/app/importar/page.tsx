@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ClearDatasetButton } from "@/components/upload/clear-dataset-button";
 import { UploadForm } from "@/components/upload/upload-form";
 
 export const dynamic = "force-dynamic";
@@ -63,6 +64,22 @@ export default async function ImportarPage() {
               Dashboard agregada
             </p>
           </article>
+        </section>
+
+        <section className="flex flex-col gap-4 rounded-[1.75rem] border border-[var(--status-error-border)] bg-surface p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
+              Recomeçar
+            </p>
+            <h2 className="text-xl font-semibold text-accent-strong">
+              Limpar o dataset atual
+            </h2>
+            <p className="max-w-2xl text-sm leading-6 text-muted">
+              Remove todos os agregados importados nesta sessão e volta a dashboard ao estado inicial, como ao abrir o site pela primeira vez.
+            </p>
+          </div>
+
+          <ClearDatasetButton />
         </section>
       </div>
     </main>

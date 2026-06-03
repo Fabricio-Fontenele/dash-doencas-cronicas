@@ -161,6 +161,9 @@ describe("Dashboard application use cases", () => {
       async save(upload) {
         return upload;
       },
+      async deleteAllForOwner() {
+        return 0;
+      },
       async listRecent() {
         return [
           {
