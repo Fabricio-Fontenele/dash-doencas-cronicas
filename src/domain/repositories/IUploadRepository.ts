@@ -20,4 +20,5 @@ export interface UploadHistoryItem {
 export interface IUploadRepository {
   save(upload: Upload): Promise<Upload>;
   listRecent(ownerUserId: string, limit: number): Promise<UploadHistoryItem[]>;
+  deleteAllForOwner(ownerUserId: string): Promise<number>;
 }

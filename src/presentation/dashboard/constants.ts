@@ -25,6 +25,15 @@ export const DEFAULT_FILTERS: DashboardFiltersDTO = {
   endDate: null,
 };
 
+export const CONDITION_OPTIONS: Array<{
+  value: "DIABETES" | "HYPERTENSION";
+  label: string;
+  helper: string;
+}> = [
+  { value: "DIABETES", label: "Diabetes", helper: "Apenas a população diabética" },
+  { value: "HYPERTENSION", label: "Hipertensão", helper: "Apenas a população hipertensa" },
+];
+
 export const CARE_GAP_OPTIONS: Array<{ value: CareGapFilter; label: string }> = [
   { value: "medical", label: "Sem atendimento médico > 6 meses" },
   { value: "nursing", label: "Sem enfermagem > 6 meses" },

@@ -4,6 +4,7 @@ import { type DashboardViewDTO } from "@/application/dtos/DashboardViewDTO";
 import { AGE_GROUPS } from "@/domain/value-objects/AgeGroup";
 import {
   CARE_GAP_OPTIONS,
+  CONDITION_OPTIONS,
   DEFAULT_FILTERS,
   FAMILY_ALLOWANCE_OPTIONS,
   PANEL_CLASS_NAME,
@@ -17,37 +18,46 @@ function FilterGroup({
   options,
   selectedValues,
   compact = false,
+  defaultOpen = false,
 }: {
   title: string;
   name: string;
   options: Array<{ value: string; label: string; helper?: string }>;
   selectedValues: string[];
   compact?: boolean;
+  defaultOpen?: boolean;
 }) {
+  const selectedCount = selectedValues.length;
+
   return (
-    <details className="group rounded-[1.5rem] border border-border/70 bg-white/80 p-4">
+    <details
+      open={defaultOpen || selectedCount > 0}
+      className="group rounded-[1.5rem] border border-border/70 bg-white/80 p-4 open:border-accent/40"
+    >
       <summary className="cursor-pointer list-none text-sm font-semibold text-accent-strong">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <span>{title}</span>
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 20 20"
-              className="size-4 text-muted transition group-open:rotate-180"
-              fill="none"
-            >
-              <path
-                d="m5 7.5 5 5 5-5"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.8"
-              />
-            </svg>
+            {selectedCount > 0 ? (
+              <span className="rounded-full bg-accent-strong px-2 py-0.5 text-xs font-semibold text-white">
+                {selectedCount}
+              </span>
+            ) : null}
           </div>
-          <span className="rounded-full bg-surface-strong px-2 py-0.5 text-xs text-muted">
-            {selectedValues.length}
-          </span>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 20 20"
+            className="size-4 shrink-0 text-muted transition group-open:rotate-180"
+            fill="none"
+          >
+            <path
+              d="m5 7.5 5 5 5-5"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.8"
+            />
+          </svg>
         </div>
       </summary>
 
@@ -169,6 +179,19 @@ export function DashboardFiltersPanelContent({
             </label>
           </div>
         </div>
+
+        <FilterGroup
+          title="Condição"
+          name="condition"
+          compact
+          defaultOpen
+          selectedValues={view.appliedFilters.conditions}
+          options={CONDITION_OPTIONS.map((option) => ({
+            value: option.value,
+            label: option.label,
+            helper: option.helper,
+          }))}
+        />
 
         <FilterGroup
           title="Sexo"

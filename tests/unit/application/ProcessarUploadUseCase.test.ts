@@ -57,6 +57,7 @@ describe("ProcessUploadUseCase", () => {
     const uploadRepository: IUploadRepository = {
       save: vi.fn(async (upload: Upload) => upload),
       listRecent: vi.fn(),
+      deleteAllForOwner: vi.fn(),
     };
     const aggregateBucketRepository: IAggregateBucketRepository = {
       createMany: vi.fn().mockResolvedValue(undefined),

@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { ClearDatasetUseCase } from "@/application/use-cases/upload/ClearDatasetUseCase";
 import { ProcessUploadUseCase } from "@/application/use-cases/upload/ProcessUploadUseCase";
-import { getOrCreateSessionOwnerId } from "@/infrastructure/auth/session";
+import { getOrCreateSessionOwnerId, getSessionOwnerId } from "@/infrastructure/auth/session";
 import { PrismaAggregateBucketRepository } from "@/infrastructure/database/repositories/PrismaAggregateBucketRepository";
 import { PrismaCareEventBucketRepository } from "@/infrastructure/database/repositories/PrismaCareEventBucketRepository";
 import { PrismaUploadRepository } from "@/infrastructure/database/repositories/PrismaUploadRepository";
@@ -83,6 +84,44 @@ export async function processUploadAction(
     return {
       status: "error",
       message: "Falha inesperada ao processar o upload.",
+      uploadedFileName: null,
+    };
+  }
+}
+
+export async function clearDatasetAction(): Promise<UploadActionState> {
+  try {
+    const ownerUserId = await getSessionOwnerId();
+
+    if (!ownerUserId) {
+      return {
+        status: "success",
+        message: "Nenhum dataset para limpar. Tudo já está no estado inicial.",
+        uploadedFileName: null,
+      };
+    }
+
+    const useCase = new ClearDatasetUseCase(new PrismaUploadRepository());
+    const removedCount = await useCase.execute(ownerUserId);
+
+    revalidatePath("/");
+    revalidatePath("/importar");
+
+    return {
+      status: "success",
+      message:
+        removedCount > 0
+          ? `Dataset limpo. ${removedCount} importação(ões) removida(s); a dashboard voltou ao estado inicial.`
+          : "Nenhum dataset para limpar. Tudo já está no estado inicial.",
+      uploadedFileName: null,
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Falha inesperada ao limpar o dataset.",
       uploadedFileName: null,
     };
   }

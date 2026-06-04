@@ -64,4 +64,14 @@ export class PrismaUploadRepository implements IUploadRepository {
       uploadedBy: upload.user.name,
     }));
   }
+
+  async deleteAllForOwner(ownerUserId: string): Promise<number> {
+    const { count } = await prisma.upload.deleteMany({
+      where: {
+        userId: ownerUserId,
+      },
+    });
+
+    return count;
+  }
 }
