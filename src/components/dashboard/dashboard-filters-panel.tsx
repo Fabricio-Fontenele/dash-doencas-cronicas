@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { type DashboardViewDTO } from "@/application/dtos/DashboardViewDTO";
+import { TimeRangeFilter } from "@/components/dashboard/time-range-filter";
 import { AGE_GROUPS } from "@/domain/value-objects/AgeGroup";
 import {
   CARE_GAP_OPTIONS,
@@ -8,7 +9,6 @@ import {
   DEFAULT_FILTERS,
   FAMILY_ALLOWANCE_OPTIONS,
   PANEL_CLASS_NAME,
-  TIME_PRESET_OPTIONS,
 } from "@/presentation/dashboard/constants";
 import { createDashboardQueryString } from "@/presentation/dashboard/filters";
 
@@ -140,45 +140,16 @@ export function DashboardFiltersPanelContent({
         </div>
       )}
 
-      <form method="get" className="mt-4 space-y-4 pb-3 sm:mt-6">
-        <div className="rounded-[1.5rem] border border-border/70 bg-white/80 p-4">
-          <label className="block text-sm font-semibold text-accent-strong" htmlFor="timePreset">
-            Janela temporal
-          </label>
-          <select
-            id="timePreset"
-            name="timePreset"
-            defaultValue={view.appliedFilters.timePreset}
-            className="mt-3 h-11 w-full rounded-2xl border border-border/70 bg-white px-3 text-sm text-accent-strong"
-          >
-            {TIME_PRESET_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-
-          <div className="mt-4 grid gap-3">
-            <label className="min-w-0 text-sm text-muted">
-              <span className="mb-1 block font-medium text-accent-strong">Início customizado</span>
-              <input
-                type="date"
-                name="startDate"
-                defaultValue={view.appliedFilters.startDate ?? ""}
-                className="h-11 w-full min-w-0 rounded-2xl border border-border/70 bg-white px-3 text-sm text-accent-strong"
-              />
-            </label>
-            <label className="min-w-0 text-sm text-muted">
-              <span className="mb-1 block font-medium text-accent-strong">Fim customizado</span>
-              <input
-                type="date"
-                name="endDate"
-                defaultValue={view.appliedFilters.endDate ?? ""}
-                className="h-11 w-full min-w-0 rounded-2xl border border-border/70 bg-white px-3 text-sm text-accent-strong"
-              />
-            </label>
-          </div>
-        </div>
+      <form
+        key={createDashboardQueryString(view.appliedFilters)}
+        method="get"
+        className="mt-4 space-y-4 pb-3 sm:mt-6"
+      >
+        <TimeRangeFilter
+          defaultPreset={view.appliedFilters.timePreset}
+          defaultStartDate={view.appliedFilters.startDate}
+          defaultEndDate={view.appliedFilters.endDate}
+        />
 
         <FilterGroup
           title="Condição"
