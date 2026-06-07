@@ -56,5 +56,5 @@ export const TIME_PRESET_OPTIONS: Array<{ value: TimeRangePreset; label: string 
   { value: "LAST_3_MONTHS", label: "Últimos 3 meses" },
   { value: "LAST_6_MONTHS", label: "Últimos 6 meses" },
   { value: "YEAR", label: "Ano" },
-  { value: "CUSTOM", label: "Período definido" },
+  { value: "CUSTOM", label: "Período personalizado" },
 ];
