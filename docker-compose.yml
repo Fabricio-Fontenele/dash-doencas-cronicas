@@ -4,11 +4,11 @@ services:
     container_name: dashboard-cronico-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: dashboard_cronico
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-dashboard_cronico}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - dashboard_cronico_postgres_data:/var/lib/postgresql/data
     healthcheck:
